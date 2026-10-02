@@ -9,7 +9,7 @@ HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(HERE, "data")
 RECDIR = os.path.join(DATA, "records")
 IDXDIR = os.path.join(DATA, "index")
-CHUNK, N = 100, 500
+CHUNK, N, NB = 100, 500, 250
 GUARD = 800 * 1024 * 1024
 
 DRIVER = r"""
@@ -61,8 +61,10 @@ def main():
     manifest = json.load(open(os.path.join(DATA, "manifest.json")))
     songs = gen("song", state["song"], N)
     lib = gen("sound", state["sound"], N)
+    beats = gen("beat", state.get("beat", 1), NB)
     last_song_chunk = pack(songs, manifest)
     last_lib_chunk = pack(lib, manifest)
+    last_beat_chunk = pack(beats, manifest)
     json.dump(manifest, open(os.path.join(DATA, "manifest.json"), "w"))
     idx_path = os.path.join(IDXDIR, "index.json.gz")
     with gzip.open(idx_path, "at", encoding="utf-8") as fh:
@@ -70,14 +72,18 @@ def main():
             fh.write(json.dumps([r["id"], r["title"], "song", last_song_chunk], ensure_ascii=False) + "\n")
         for r in lib:
             fh.write(json.dumps([r["id"], r["name"], "sound", last_lib_chunk], ensure_ascii=False) + "\n")
+        for r in beats:
+            fh.write(json.dumps([r["id"], r["name"], "beat", last_beat_chunk], ensure_ascii=False) + "\n")
     state["song"] += N
     state["sound"] += N
+    state["beat"] = state.get("beat", 1) + NB
     json.dump(state, open(state_path, "w"))
     # rebuild sitemap + api counts
     subprocess.run(["python3", "code/build_site_files.py"], cwd=HERE, check=True)
     size = data_size()
-    print("drip: +%d songs (%s..%s), +%d library (%s..%s), total records %d, data %.1fMB" % (
-        N, songs[0]["id"], songs[-1]["id"], N, lib[0]["id"], lib[-1]["id"], manifest["count"], size / 1048576))
+    print("drip: +%d songs (%s..%s), +%d library (%s..%s), +%d beats (%s..%s), total records %d, data %.1fMB" % (
+        N, songs[0]["id"], songs[-1]["id"], N, lib[0]["id"], lib[-1]["id"], NB, beats[0]["id"], beats[-1]["id"],
+        manifest["count"], size / 1048576))
     if size > GUARD:
         print("GUARD TRIPPED: data dir exceeds 800MB — staged, NOT pushed"); sys.exit(2)
 

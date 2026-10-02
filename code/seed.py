@@ -11,7 +11,7 @@ DATA = os.path.join(HERE, "data")
 RECDIR = os.path.join(DATA, "records")
 IDXDIR = os.path.join(DATA, "index")
 CHUNK = 100
-KINDS = [("song", 700), ("sound", 450), ("gear", 350)]
+DEFAULT_KINDS = [("song", 700), ("sound", 450), ("gear", 350), ("beat", 500)]
 
 DRIVER = r"""
 const fs=require('fs'), vm=require('vm');
@@ -36,13 +36,16 @@ def gen_records(kind, start, count):
 def main():
     os.makedirs(RECDIR, exist_ok=True)
     os.makedirs(IDXDIR, exist_ok=True)
+    kinds = DEFAULT_KINDS
+    if len(sys.argv) == 3:  # python3 code/seed.py beat 500
+        kinds = [(sys.argv[1], int(sys.argv[2]))]
     state_path = os.path.join(DATA, "state.json")
-    state = {"song": 1, "sound": 1, "gear": 1}
+    state = {"song": 1, "sound": 1, "gear": 1, "beat": 1}
     if os.path.exists(state_path):
         state.update(json.load(open(state_path)))
     allrecs = []
-    for kind, count in KINDS:
-        start = state[kind]
+    for kind, count in kinds:
+        start = state.get(kind, 1)
         # only seed the *new* block for this run (drip continues counters)
         recs = gen_records(kind, start, count)
         ids = [r["id"] for r in recs]

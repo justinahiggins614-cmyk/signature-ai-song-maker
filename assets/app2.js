@@ -137,21 +137,60 @@
   };
 
   /* ---------- AI beat maker ---------- */
-  var beatBuf = null, beatPat = null;
+  var beatBuf = null, beatPat = null, beatPrompt = "", beatBars = 4;
+  /* ---------- genre selects (every maker gets one + "surprise me") ---------- */
+  function fillGenre(sel, styles) {
+    var o0 = document.createElement("option"); o0.value = ""; o0.textContent = "Any — surprise me"; sel.appendChild(o0);
+    styles.forEach(function (g) { var o = document.createElement("option"); o.value = g; o.textContent = g.replace(/-/g, " "); sel.appendChild(o); });
+  }
+  function resolveGenre(prompt, selValue, styles) {
+    if (selValue) return selValue;
+    var rng = S.rngFrom("surprise:" + String(prompt));
+    return styles[Math.floor(rng() * styles.length)];
+  }
+  window.__resolveGenre = resolveGenre;
   (function () {
-    var gsel = $("beatgenre"), ssel = $("songgenre"), msel = $("songmood");
-    S.GENRES.forEach(function (g) { var o = document.createElement("option"); o.value = g; o.textContent = g; gsel.appendChild(o); var o2 = o.cloneNode(true); ssel.appendChild(o2); });
+    var gsel = $("beatgenre"), ssel = $("songgenre"), msel = $("songmood"), vsel = $("vgenre");
+    fillGenre(gsel, D.BEAT_STYLES);
+    fillGenre(ssel, S.GENRES);
+    fillGenre(vsel, D.BEAT_STYLES);
     S.MOODS.forEach(function (m) { var o = document.createElement("option"); o.value = m; o.textContent = m; msel.appendChild(o); });
     $("beatmake").onclick = function () {
       var prompt = $("beatprompt").value || "untitled groove";
-      var genre = gsel.value, bpm = Math.max(60, Math.min(180, +$("beatbpm").value || 92)), bars = Math.max(1, Math.min(16, +$("beatbars").value || 4));
+      var genre = resolveGenre(prompt, gsel.value, D.BEAT_STYLES);
+      var bpm = Math.max(60, Math.min(180, +$("beatbpm").value || 92)), bars = Math.max(1, Math.min(16, +$("beatbars").value || 4));
       beatPat = S.patternFor(prompt, genre, bpm);
-      var secs = bars * 16 * (60 / bpm / 4);
-      $("beatinfo").textContent = "Rendering " + genre + " beat at " + bpm + " BPM (" + bars + " bars)…";
-      S.renderBuffer(secs + 0.3, function (c, dest, t0) { S.scheduleBeat(c, dest, t0, beatPat, bars, 1); })
-        .then(function (buf) { beatBuf = buf; drawWave($("beatwave"), buf); $("beatinfo").textContent = "Seeded beat ready — same request always makes this beat. Seed: " + beatPat.seed; S.playBuffer(buf, "beat"); })
-        .catch(function (e) { $("beatinfo").textContent = "Couldn't render: " + e.message; });
+      beatPrompt = prompt; beatBars = bars;
+      renderBeatBuf();
     };
+    function renderBeatBuf() {
+      if (!beatPat) return;
+      var secs = beatBars * 16 * (60 / beatPat.bpm / 4);
+      $("beatinfo").textContent = "Rendering " + beatPat.genre.replace(/-/g, " ") + " beat at " + beatPat.bpm + " BPM (" + beatBars + " bars)…";
+      S.renderBuffer(secs + 0.3, function (c, dest, t0) { S.scheduleBeat(c, dest, t0, beatPat, beatBars, 1); })
+        .then(function (buf) { beatBuf = buf; drawWave($("beatwave"), buf); drawPatternGrid(); $("beatinfo").textContent = "Seeded beat ready — same request always makes this beat. Seed: " + beatPat.seed; S.playBuffer(buf, "beat"); })
+        .catch(function (e) { $("beatinfo").textContent = "Couldn't render: " + e.message; });
+    }
+    var LANES = [["kick", "KICK"], ["snare", "SNARE"], ["hat", "HAT"], ["clap", "CLAP"], ["tom", "TOM"], ["shaker", "SHAKER"]];
+    function drawPatternGrid() {
+      if (!beatPat) return;
+      var h = '<table style="border-collapse:collapse;font-family:Arial;font-size:11px">', li, st;
+      for (li = 0; li < LANES.length; li++) {
+        h += '<tr><td style="padding:3px 8px;color:var(--mut)">' + LANES[li][1] + '</td>';
+        for (st = 0; st < 16; st++) {
+          var on = beatPat.steps[LANES[li][0]][st];
+          h += '<td data-lane="' + LANES[li][0] + '" data-step="' + st + '" style="width:22px;height:22px;border:1px solid var(--line);background:' + (on ? "var(--gold)" : "#1a1428") + ';cursor:pointer;border-radius:3px"></td>';
+        }
+        h += "</tr>";
+      }
+      $("patterngrid").innerHTML = h + "</table>";
+    }
+    $("patterngrid").addEventListener("click", function (e) {
+      var td = e.target.closest("[data-lane]"); if (!td || !beatPat) return;
+      var lane = td.getAttribute("data-lane"), st = +td.getAttribute("data-step");
+      beatPat.steps[lane][st] = beatPat.steps[lane][st] ? 0 : 1;
+      renderBeatBuf();
+    });
     $("beatplay").onclick = function () { if (beatBuf) S.playBuffer(beatBuf, "beat"); };
     $("beatstop").onclick = function () { S.stopLive("beat"); };
     $("beatwav").onclick = function () { if (beatBuf) dl(S.bufferToWav(beatBuf), "signature-beat.wav"); };
@@ -173,14 +212,15 @@
         '<p><button class="btn" id="swplay">▶ Play demo mix</button> <button class="btn teal" id="swwav">⬇ .wav</button> ' +
         '<button class="btn ghost" id="swtxt">Copy spec</button> <button class="btn ghost" id="swopen">Open record →</button></p></div>';
       $("songout").innerHTML = h;
-      $("swplay").onclick = function () { this.textContent = "Rendering…"; var b = this; S.renderSong(rec, 60).then(function (buf) { S.playBuffer(buf, "song"); b.textContent = "▶ Play demo mix"; }); };
-      $("swwav").onclick = function () { this.textContent = "Rendering…"; var b = this; S.renderSong(rec, 120).then(function (buf) { dl(S.bufferToWav(buf), rec.id + ".wav"); b.textContent = "⬇ .wav"; }); };
+      $("swplay").onclick = function () { this.textContent = "Rendering…"; var b = this; S.renderSong(rec, 60, window.__mixOf ? window.__mixOf() : null).then(function (buf) { S.playBuffer(buf, "song"); b.textContent = "▶ Play demo mix"; }); };
+      $("swwav").onclick = function () { this.textContent = "Rendering…"; var b = this; S.renderSong(rec, 120, window.__mixOf ? window.__mixOf() : null).then(function (buf) { dl(S.bufferToWav(buf), rec.id + ".wav"); b.textContent = "⬇ .wav"; }); };
       $("swtxt").onclick = function () { navigator.clipboard.writeText(JSON.stringify(rec, null, 2)); this.textContent = "Copied!"; };
       $("swopen").onclick = function () { location.search = "?song=" + rec.id; };
     }
     $("songwrite").onclick = function () {
       var theme = $("songtheme").value || "midnight highway";
-      showSong(window.__writeSong(theme, $("songgenre").value, $("songmood").value));
+      var genre = window.__resolveGenre(theme, $("songgenre").value, S.GENRES);
+      showSong(window.__writeSong(theme, genre, $("songmood").value || undefined));
     };
     $("songself").onclick = function () {
       var rec = D.genSong(1);

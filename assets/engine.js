@@ -166,3 +166,78 @@
   root.SigData.THEORY = THEORY;
   root.SigData.teach = teach;
 })(typeof window !== "undefined" ? window : (typeof self !== "undefined" ? self : this));
+
+/* Beat archive — separate IIFE extending SigData + SigSynth.
+   ALL beats are ORIGINAL Signature compositions. "Vintage-era" records are
+   original beats IN THE STYLE OF classic eras — never copies of any real,
+   copyrighted song, lyrics, or melody. Public-domain material only where it
+   genuinely applies (none is needed: everything here is generated fresh). */
+(function (root) {
+  "use strict";
+  var S = root.SigSynth, D = root.SigData;
+
+  var BEAT_ERAS = [
+    { key: "50s-rocknroll", name: "50s rock-and-roll style", bpm: [150, 180], note: "driving backbeat shuffle feel of the 1950s rock-and-roll era" },
+    { key: "60s-soul", name: "60s soul style", bpm: [90, 112], note: "warm pocket groove of the 1960s soul era" },
+    { key: "70s-funk", name: "70s funk style", bpm: [95, 115], note: "syncopated party groove of the 1970s funk era" },
+    { key: "80s-synthpop", name: "80s synth-pop style", bpm: [110, 130], note: "four-on-the-floor machine groove of the 1980s synth-pop era" },
+    { key: "90s-boombap", name: "90s boom-bap style", bpm: [85, 96], note: "dusty head-nod groove of the 1990s boom-bap era" },
+    { key: "00s-crunk", name: "00s crunk style", bpm: [65, 76], note: "rowdy call-and-response energy of the 2000s crunk era" }
+  ];
+  var BEAT_ADJ = ["Neon", "Velvet", "Copper", "Midnight", "Amber", "Silver", "Crimson", "Golden", "Electric", "Quiet", "Paper", "Static", "Hollow", "Bright", "Distant", "Wild", "Slow", "Restless", "Patient", "Bold", "Smoky", "Chrome"];
+  function pad7(n) { n = String(n); while (n.length < 7) n = "0" + n; return n; }
+  var beatId = function (n) { return "JAH-BEAT-" + pad7(n); };
+
+  function genBeat(n) {
+    var rng = S.rngFrom("beatrec:" + n), id = beatId(n);
+    var useEra = rng() < 0.45, style, bpm, eraNote = "";
+    if (useEra) {
+      var era = BEAT_ERAS[Math.floor(rng() * BEAT_ERAS.length)];
+      style = era.key; eraNote = era.note;
+      bpm = era.bpm[0] + Math.floor(rng() * (era.bpm[1] - era.bpm[0]));
+    } else {
+      style = S.GENRES[Math.floor(rng() * S.GENRES.length)];
+      bpm = 70 + Math.floor(rng() * 70);
+    }
+    var name = "Signature " + S.pick(rng, BEAT_ADJ) + " " + style.replace(/-/g, " ") + " Beat " + ["I", "II", "III", "IV", "V"][Math.floor(rng() * 5)];
+    var desc = "An ORIGINAL Signature beat in the " + (useEra ? eraNote : style + " genre") +
+      ", " + bpm + " BPM. Same request always makes this beat. Not a copy of any real song — every note generated fresh by the Signature engine.";
+    return { id: id, kind: "beat", n: n, name: name, style: style, bpm: bpm, era: useEra, desc: desc };
+  }
+
+  /* era patterns hook into the shared pattern builder */
+  var _origPatternFor = S.patternFor;
+  function eraSteps(pat, era, rng) {
+    var i, on = function (arr, steps) { var s; for (s = 0; s < steps.length; s++) arr[steps[s] % 16] = 1; };
+    for (i = 0; i < 16; i++) { pat.kick[i] = 0; pat.snare[i] = 0; pat.hat[i] = 0; pat.clap[i] = 0; pat.tom[i] = 0; pat.shaker[i] = 0; }
+    switch (era) {
+      case "50s-rocknroll": on(pat.kick, [0, 8]); on(pat.snare, [4, 12]); for (i = 0; i < 16; i += 2) pat.hat[i] = 1; on(pat.shaker, [2, 6, 10, 14]); break;
+      case "60s-soul": on(pat.kick, [0, 7, 10]); on(pat.snare, [4, 12]); for (i = 0; i < 16; i += 2) pat.hat[i] = 1; on(pat.clap, [12]); break;
+      case "70s-funk": on(pat.kick, [0, 3, 8]); on(pat.snare, [4, 12, 15]); for (i = 0; i < 16; i++) pat.hat[i] = 1; on(pat.clap, [12]); break;
+      case "80s-synthpop": on(pat.kick, [0, 4, 8, 12]); on(pat.snare, [4, 12]); for (i = 0; i < 16; i++) pat.hat[i] = 1; on(pat.clap, [4, 12]); on(pat.tom, [14]); break;
+      case "90s-boombap": on(pat.kick, [0, 7, 10]); on(pat.snare, [4, 12]); for (i = 0; i < 16; i += 2) pat.hat[i] = (rng() < 0.8 ? 1 : 0); break;
+      case "00s-crunk": on(pat.kick, [0, 6, 10]); on(pat.snare, [8]); for (i = 0; i < 16; i++) pat.hat[i] = 1; on(pat.clap, [8]); break;
+      default: return false;
+    }
+    return true;
+  }
+  S.patternFor = function (prompt, genre, bpm) {
+    var eraKeys = {}, i;
+    for (i = 0; i < BEAT_ERAS.length; i++) eraKeys[BEAT_ERAS[i].key] = 1;
+    if (eraKeys[genre]) {
+      var rng = S.rngFrom(String(prompt || "untitled") + "|" + genre + "|" + bpm);
+      var pat = { kick: [], snare: [], hat: [], clap: [], tom: [], shaker: [] };
+      eraSteps(pat, genre, rng);
+      return { genre: genre, bpm: bpm, steps: pat, seed: String(prompt) + "|" + genre + "|" + bpm };
+    }
+    return _origPatternFor(prompt, genre, bpm);
+  };
+
+  D.BEAT_ERAS = BEAT_ERAS;
+  D.beatId = beatId;
+  D.genBeat = genBeat;
+  D.BEAT_STYLES = S.GENRES.concat(BEAT_ERAS.map(function (e) { return e.key; }));
+  /* patch the main dispatcher (defined in the earlier IIFE) to route beats */
+  var _origGen = D.gen;
+  D.gen = function (kind, n) { return kind === "beat" ? genBeat(n) : _origGen(kind, n); };
+})(typeof window !== "undefined" ? window : (typeof self !== "undefined" ? self : this));

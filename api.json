@@ -5,22 +5,25 @@
   "url": "https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/",
   "tagline": "Make music on your own, via AI, or in collaboration with AI.",
   "counts": {
-    "records_total": 2500,
+    "records_total": 3000,
     "songs": 1200,
     "library": 950,
     "equipment": 350,
+    "beats": 500,
     "songs_goal": 1000000,
     "library_goal": 1000000
   },
   "ids": {
     "song": "JAH-SONG-0000001..",
     "library": "JAH-SOUND-0000001..",
-    "equipment": "JAH-GEAR-0000001.."
+    "equipment": "JAH-GEAR-0000001..",
+    "beat": "JAH-BEAT-0000001.."
   },
   "deep_links": {
     "song": "?song=JAH-SONG-0000001",
     "library": "?sound=JAH-SOUND-0000001",
-    "equipment": "?gear=JAH-GEAR-0000001"
+    "equipment": "?gear=JAH-GEAR-0000001",
+    "beat": "?beat=JAH-BEAT-0000001"
   },
   "audio": "All audio is synthesized client-side with the Web Audio API. Voices are synthesized, never human singers.",
   "network": "THE JAH NETWORK \u2014 25 sites"

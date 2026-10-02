@@ -18,10 +18,10 @@ def main():
     if os.path.exists(idx_path):
         with gzip.open(idx_path, "rt", encoding="utf-8") as fh:
             rows = [json.loads(l) for l in fh if l.strip()]
-    counts = {"song": 0, "sound": 0, "gear": 0}
+    counts = {"song": 0, "sound": 0, "gear": 0, "beat": 0}
     for r in rows:
         counts[r[2]] = counts.get(r[2], 0) + 1
-    param = {"song": "song", "sound": "sound", "gear": "gear"}
+    param = {"song": "song", "sound": "sound", "gear": "gear", "beat": "beat"}
     urls = [BASE, BASE + "#studio", BASE + "#beatmaker", BASE + "#songwriter",
             BASE + "#vocalstudio", BASE + "#backups", BASE + "#cleanup", BASE + "#cdmaker", BASE + "#teacher"]
     for r in rows:
@@ -43,11 +43,12 @@ def main():
             "songs": counts.get("song", 0),
             "library": counts.get("sound", 0),
             "equipment": counts.get("gear", 0),
+            "beats": counts.get("beat", 0),
             "songs_goal": 1000000,
             "library_goal": 1000000,
         },
-        "ids": {"song": "JAH-SONG-0000001..", "library": "JAH-SOUND-0000001..", "equipment": "JAH-GEAR-0000001.."},
-        "deep_links": {"song": "?song=JAH-SONG-0000001", "library": "?sound=JAH-SOUND-0000001", "equipment": "?gear=JAH-GEAR-0000001"},
+        "ids": {"song": "JAH-SONG-0000001..", "library": "JAH-SOUND-0000001..", "equipment": "JAH-GEAR-0000001..", "beat": "JAH-BEAT-0000001.."},
+        "deep_links": {"song": "?song=JAH-SONG-0000001", "library": "?sound=JAH-SOUND-0000001", "equipment": "?gear=JAH-GEAR-0000001", "beat": "?beat=JAH-BEAT-0000001"},
         "audio": "All audio is synthesized client-side with the Web Audio API. Voices are synthesized, never human singers.",
         "network": "THE JAH NETWORK — 25 sites",
     }

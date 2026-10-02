@@ -41,10 +41,11 @@
   }
   function wavToBytes(blob) { return blob.arrayBuffer().then(function (ab) { return new Uint8Array(ab); }); }
 
-  /* ---------- melody from lyrics ---------- */
-  function melodyFromLyrics(lines) {
+  /* ---------- melody from lyrics (scale follows genre) ---------- */
+  function melodyFromLyrics(lines, genre) {
     var rng = S.rngFrom("lyr:" + lines.join("|")), mel = [], li, ni;
-    var penta = [0, 2, 4, 7, 9], base = 60 + Math.floor(rng() * 5), deg = 2;
+    var minorish = /hip-hop|trap|00s-crunk|90s-boombap|dark|gritty/i.test(genre || "");
+    var penta = minorish ? [0, 3, 5, 7, 10] : [0, 2, 4, 7, 9], base = 60 + Math.floor(rng() * 5), deg = 2;
     for (li = 0; li < lines.length; li++) {
       var words = lines[li].trim().split(/\s+/).filter(Boolean).length || 4;
       var count = Math.max(2, Math.min(8, words));
@@ -88,11 +89,13 @@
     $("vsing").onclick = function () {
       var lines = $("vlyrics").value.split("\n").map(function (l) { return l.trim(); }).filter(Boolean);
       if (!lines.length) { $("vinfo").textContent = "Type some lyrics first."; return; }
-      var mel = melodyFromLyrics(lines), voice = $("vvoice").value, backs = selBackups(), b = this;
+      var genre = window.__resolveGenre(lines.join(" "), $("vgenre").value, D.BEAT_STYLES);
+      var mel = melodyFromLyrics(lines, genre), voice = $("vvoice").value, backs = selBackups(), b = this;
       b.textContent = "Rendering…";
-      $("vinfo").textContent = voice === "own" ? "Resynthesizing your voice onto the melody…" : "Synthesizing vocal (" + voice + ")…";
-      var p = voice === "own" && ownSample ? S.renderOwnVoice(mel, ownSample, 90) : S.renderVocal(mel, voice === "own" ? "nova" : voice, backs, 90);
-      if (voice === "own" && !ownSample) { $("vinfo").textContent = "Record or upload your voice first — using Nova meanwhile."; p = S.renderVocal(mel, "nova", backs, 90); }
+      var mix = window.__mixOf ? window.__mixOf() : null;
+      $("vinfo").textContent = voice === "own" ? "Resynthesizing your voice onto the melody…" : "Synthesizing vocal (" + voice + ", " + genre.replace(/-/g, " ") + " melody)…";
+      var p = voice === "own" && ownSample ? S.renderOwnVoice(mel, ownSample, 90) : S.renderVocal(mel, voice === "own" ? "nova" : voice, backs, 90, mix);
+      if (voice === "own" && !ownSample) { $("vinfo").textContent = "Record or upload your voice first — using Nova meanwhile."; p = S.renderVocal(mel, "nova", backs, 90, mix); }
       p.then(function (buf) { vocalBuf = buf; S.playBuffer(buf, "vocal"); b.textContent = "🎤 Sing it"; $("vinfo").textContent = "Done — synthesized vocal" + (backs.length ? " with " + backs.join(", ") : "") + ". Labeled synthesized, always."; })
        .catch(function (e) { b.textContent = "🎤 Sing it"; $("vinfo").textContent = "Couldn't render: " + e.message; });
     };
@@ -180,7 +183,7 @@
         chain = chain.then(function () {
           return window.__findRecord(id).then(function (rec) {
             if (rec.kind !== "song") throw new Error(id + " is not a song");
-            return S.renderSong(rec, 150).then(function (buf) {
+            return S.renderSong(rec, 150, window.__mixOf ? window.__mixOf() : null).then(function (buf) {
               tracks.push({ title: rec.title, buf: buf, start: start });
               start += buf.duration + 2; // 2s gap
             });
@@ -213,6 +216,6 @@
   /* ---------- init browsers after data loads (called by app.js) ---------- */
   window.__initAll = function (idx) {
     if (window.__initAll.done) return; window.__initAll.done = true;
-    window.__initLibrary(idx); window.__initGear(idx); window.__initSongs(idx);
+    window.__initLibrary(idx); window.__initGear(idx); window.__initSongs(idx); window.__initBeats(idx);
   };
 })();

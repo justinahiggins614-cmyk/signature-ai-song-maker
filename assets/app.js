@@ -91,7 +91,8 @@
       var songs = IDX.filter(function (r) { return r[2] === "song"; }).length;
       var lib = IDX.filter(function (r) { return r[2] === "sound"; }).length;
       var gear = IDX.filter(function (r) { return r[2] === "gear"; }).length;
-      $("counters").innerHTML = "📀 <b>" + songs.toLocaleString() + "</b> / 1,000,000 songs &nbsp;·&nbsp; 🎛️ <b>" + lib.toLocaleString() + "</b> / 1,000,000 instruments, sets &amp; packs &nbsp;·&nbsp; 🎚️ <b>" + gear.toLocaleString() + "</b> equipment records";
+      var beats = IDX.filter(function (r) { return r[2] === "beat"; }).length;
+      $("counters").innerHTML = "📀 <b>" + songs.toLocaleString() + "</b> / 1,000,000 songs &nbsp;·&nbsp; 🎛️ <b>" + lib.toLocaleString() + "</b> / 1,000,000 instruments, sets &amp; packs &nbsp;·&nbsp; 🥁 <b>" + beats.toLocaleString() + "</b> beats &nbsp;·&nbsp; 🎚️ <b>" + gear.toLocaleString() + "</b> equipment records";
       $("libcount").textContent = "(" + lib.toLocaleString() + " / 1,000,000)";
     }).catch(function () { $("counters").textContent = "Archive loading…"; });
   }
@@ -100,9 +101,9 @@
     for (i = 0; i < IDX.length; i++) if (IDX[i][0] === id) row = IDX[i];
     if (!row) {
       // deterministic fallback: generate directly from the ID number
-      var m = /^JAH-(SONG|SOUND|GEAR)-(\d+)$/.exec(id);
+      var m = /^JAH-(SONG|SOUND|GEAR|BEAT)-(\d+)$/.exec(id);
       if (!m) return Promise.reject(new Error("bad id"));
-      var kind = m[1] === "SONG" ? "song" : m[1] === "SOUND" ? "sound" : "gear";
+      var kind = m[1] === "SONG" ? "song" : m[1] === "SOUND" ? "sound" : m[1] === "BEAT" ? "beat" : "gear";
       return Promise.resolve(D.gen(kind, parseInt(m[2], 10)));
     }
     return gunzip("data/records/" + row[3]).then(function (t) {
@@ -125,7 +126,7 @@
     var h = "";
     if (!scored.length) h = '<div class="hit">No matches yet — try "beat", "mic", "love song", "piano", "choir".</div>';
     scored.forEach(function (x) {
-      var r = x[1], param = r[2] === "song" ? "song" : r[2] === "sound" ? "sound" : "gear";
+      var r = x[1], param = r[2] === "song" ? "song" : r[2] === "sound" ? "sound" : r[2] === "beat" ? "beat" : "gear";
       h += '<div class="hit"><b>' + esc(r[1]) + '</b> <span class="id">' + esc(r[0]) + '</span><br><span class="seqlab">' + esc(r[2]) + '</span><button class="go" data-p="' + param + '" data-id="' + esc(r[0]) + '">Take me there →</button></div>';
     });
     $("finderhits").innerHTML = h;
@@ -150,6 +151,8 @@
   function recordQA(rec) {
     var facts = rec.kind === "song"
       ? [["title", rec.title], ["genre", rec.genre], ["mood", rec.mood], ["tempo", rec.tempo + " BPM"], ["key", rec.key], ["chords", rec.chords], ["structure", rec.structure]]
+      : rec.kind === "beat"
+      ? [["name", rec.name], ["style", rec.style.replace(/-/g, " ")], ["tempo", rec.bpm + " BPM"], ["original", "yes — an original Signature composition, never a copy of any real song"]]
       : rec.kind === "sound"
       ? [["name", rec.name], ["type", rec.subtype], ["family", rec.cat], ["voice", rec.voice]]
       : [["name", rec.name], ["category", rec.cat], ["patch guide", rec.patch]];
@@ -177,6 +180,17 @@
         '<button class="btn ghost" data-act="txt">Copy .txt</button>' +
         '<button class="btn ghost" data-act="json">Copy .json</button></p>' +
         '<div class="row"><div><label>Ask about this song</label><input type="text" data-qa placeholder="e.g. what is the tempo?"></div></div><div class="ans" data-qaout style="display:none"></div></div>';
+    } else if (rec.kind === "beat") {
+      h = '<div class="rec"><h2>' + esc(rec.name) + ' <span class="id">' + esc(rec.id) + '</span></h2>' +
+        '<p class="meta">' + esc(rec.style.replace(/-/g, " ")) + " · " + rec.bpm + ' BPM' + (rec.era ? ' · vintage-era style' : '') + '</p>' +
+        '<p>' + esc(rec.desc) + '</p>' +
+        '<div class="honest">Original Signature composition — in the style of the era, never a copy of any real song.</div>' +
+        '<p><button class="btn" data-act="bplay">▶ Play beat</button>' +
+        '<button class="btn teal" data-act="bwav">⬇ .wav</button>' +
+        '<button class="btn ghost" data-act="read">🔊 Read aloud</button>' +
+        '<button class="btn ghost" data-act="txt">Copy .txt</button>' +
+        '<button class="btn ghost" data-act="json">Copy .json</button></p>' +
+        '<div class="row"><div><label>Ask about this beat</label><input type="text" data-qa placeholder="e.g. what is the tempo?"></div></div><div class="ans" data-qaout style="display:none"></div></div>';
     } else {
       h = '<div class="rec"><h2>' + esc(rec.name) + ' <span class="id">' + esc(rec.id) + '</span></h2>' +
         '<p class="meta">' + esc(rec.kind === "sound" ? (rec.subtype + " · " + rec.cat + " family · " + rec.voice + " voice") : rec.cat) + '</p><p>' + esc(rec.desc) + '</p>' +
@@ -201,15 +215,22 @@
       if (act === "read") readAloud((rec.title || rec.name) + ". " + rec.desc + (rec.lyrics ? " Lyrics: " + rec.lyrics : ""), rec.id);
       if (act === "txt") navigator.clipboard.writeText(JSON.stringify(rec, null, 2));
       if (act === "json") navigator.clipboard.writeText(JSON.stringify(rec));
-      if (act === "play") { b.textContent = "Rendering…"; S.renderSong(rec, 60).then(function (buf) { S.playBuffer(buf); b.textContent = "▶ Play demo mix"; dl(S.bufferToWav(buf), rec.id + ".wav"); }); }
-      if (act === "wav") { b.textContent = "Rendering…"; S.renderSong(rec, 120).then(function (buf) { dl(S.bufferToWav(buf), rec.id + ".wav"); b.textContent = "⬇ .wav"; }); }
+      if (act === "play") { b.textContent = "Rendering…"; S.renderSong(rec, 60, window.__mixOf ? window.__mixOf() : null).then(function (buf) { S.playBuffer(buf); b.textContent = "▶ Play demo mix"; dl(S.bufferToWav(buf), rec.id + ".wav"); }); }
+      if (act === "wav") { b.textContent = "Rendering…"; S.renderSong(rec, 120, window.__mixOf ? window.__mixOf() : null).then(function (buf) { dl(S.bufferToWav(buf), rec.id + ".wav"); b.textContent = "⬇ .wav"; }); }
       if (act === "preview") previewSound(rec);
       if (act === "swav") renderSoundWav(rec);
+      if (act === "bplay" && window.__playBeatRec) window.__playBeatRec(rec);
+      if (act === "bwav") {
+        b.textContent = "Rendering…";
+        var pat = S.patternFor(rec.name, rec.style, rec.bpm);
+        S.renderBuffer(16 * (60 / rec.bpm / 4) * 4 + 0.3, function (c, dest, t0) { S.scheduleBeat(c, dest, t0, pat, 4, 1); })
+          .then(function (buf) { dl(S.bufferToWav(buf), rec.id + ".wav"); b.textContent = "⬇ .wav"; });
+      }
     });
   };
   function route() {
     var q = new URLSearchParams(location.search);
-    var id = q.get("song") || q.get("sound") || q.get("gear");
+    var id = q.get("song") || q.get("sound") || q.get("gear") || q.get("beat");
     if (id) findRecord(id).then(window.__showRecord, function () { $("record").innerHTML = '<div class="hit">Record not found.</div>'; });
   }
   window.__findRecord = findRecord;

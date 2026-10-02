@@ -38,6 +38,22 @@
 
 <div id="record"></div>
 
+<section class="sec" id="console">
+<h2>🎚️ Studio Console</h2>
+<p>State-of-the-art working console. The VU meter rides the master bus <b>live</b> while anything plays; the channel faders shape every demo mix and vocal render.</p>
+<div class="row">
+<div style="flex:0 0 280px;min-width:260px"><label>Master VU — live</label><canvas class="wave" id="vumaster" width="280" height="90"></canvas><p class="seqlab">Needle follows the master bus in real time.</p></div>
+<div><label>Channel faders — applied to demo mixes &amp; vocal renders</label>
+<div class="checklist" id="faders">
+<div><label>🥁 Drums <span data-fv="drums">100</span>%</label><input type="range" min="0" max="150" value="100" data-bus="drums" style="width:100%"></div>
+<div><label>🎸 Bass <span data-fv="bass">100</span>%</label><input type="range" min="0" max="150" value="100" data-bus="bass" style="width:100%"></div>
+<div><label>🎹 Chords <span data-fv="chords">100</span>%</label><input type="range" min="0" max="150" value="100" data-bus="chords" style="width:100%"></div>
+<div><label>🎺 Melody <span data-fv="lead">100</span>%</label><input type="range" min="0" max="150" value="100" data-bus="lead" style="width:100%"></div>
+<div><label>🎤 Vocal <span data-fv="vocal">100</span>%</label><input type="range" min="0" max="150" value="100" data-bus="vocal" style="width:100%"></div>
+</div></div>
+</div>
+</section>
+
 <section class="sec" id="studio">
 <h2>🎛️ Sound Library</h2>
 <p>Every sound possible — drums, bass, keys, strings, brass, pads, leads, world instruments, FX — plus instruments, sound sets, and sound packs. All synthesized live. <span class="counter" id="libcount"></span></p>
@@ -70,6 +86,8 @@
 <button class="btn ghost" id="beatstop">⏹ Stop</button>
 <button class="btn teal" id="beatwav">⬇ Download .wav</button></p>
 <canvas class="wave" id="beatwave" width="900" height="90"></canvas>
+<div id="patterngrid" style="margin-top:10px"></div>
+<p class="seqlab">Track lanes — click any step to toggle it. The beat re-renders with your edit (still deterministic from the seed + your tweaks).</p>
 <p class="seqlab" id="beatinfo"></p>
 </section>
 
@@ -93,6 +111,7 @@
 <div><label>Lyrics (one line per phrase)</label><textarea id="vlyrics" placeholder="Type or paste lyrics, one phrase per line…"></textarea></div>
 <div class="row">
 <div><label>Voice</label><select id="vvoice"><option value="nova">Nova — bright airy (synth)</option><option value="ember">Ember — warm alto (synth)</option><option value="drift">Drift — soft breathy (synth)</option><option value="stone">Stone — deep resonant (synth)</option><option value="own">My own voice (record/upload)</option></select></div>
+<div><label>Genre (shapes the melody)</label><select id="vgenre"><option value="">Any — surprise me</option></select></div>
 <div><label>Backup singers</label><select id="vbackup" multiple size="3"><option value="soprano">Soprano section</option><option value="alto">Alto section</option><option value="tenor">Tenor section</option><option value="bass">Bass section</option><option value="choir">Choir stack</option><option value="adlibs">Ad-libs</option></select></div>
 </div>
 <p><button class="btn" id="vrec">🔴 Record my voice</button>
@@ -143,6 +162,14 @@
 <div class="az" id="songaz"></div>
 <div class="grid" id="songgrid"></div>
 </section>
+
+<section class="sec" id="beats">
+<h2>🥁 Beat Archive</h2>
+<p>A vast selection of beats — <b>every genre</b>, plus <b>vintage-era classics</b>. All beats are <b>original Signature compositions</b>: era records are original beats <i>in the style of</i> classic eras — never copies of any real song, lyrics, or melody.</p>
+<div class="row"><div><label>Style</label><select id="beatstyle"><option value="">All styles</option></select></div>
+<div><label>Search</label><input type="text" id="beatq" placeholder="Search beats…"></div></div>
+<div class="grid" id="beatgrid"></div>
+</section>
 </div>
 
 <footer><div class="wrap">
@@ -159,5 +186,6 @@
 <script src="assets/app.js"></script>
 <script src="assets/app2.js"></script>
 <script src="assets/app3.js"></script>
+<script src="assets/app4.js"></script>
 </body>
 </html>

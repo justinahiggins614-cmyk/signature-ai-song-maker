@@ -21,17 +21,40 @@
   function midiHz(m) { return 440 * Math.pow(2, (m - 69) / 12); }
 
   /* ---------- audio context (lazy) ---------- */
-  var _ctx = null, _master = null, _noiseBuf = null;
+  var _ctx = null, _master = null, _noiseBuf = null, _analyser = null;
   function ac() {
     if (!_ctx) {
       var AC = root.AudioContext || root.webkitAudioContext;
       if (!AC) throw new Error("Web Audio is not supported in this browser.");
       _ctx = new AC();
-      _master = _ctx.createGain(); _master.gain.value = 0.9; _master.connect(_ctx.destination);
+      _master = _ctx.createGain(); _master.gain.value = 0.9;
+      _analyser = _ctx.createAnalyser(); _analyser.fftSize = 512;
+      _master.connect(_analyser); _analyser.connect(_ctx.destination);
     }
     if (_ctx.state === "suspended") _ctx.resume();
     return _ctx;
   }
+  /* live VU level: 0..1 RMS off the master analyser */
+  var _vuBuf = null;
+  function meterLevel() {
+    if (!_analyser) return 0;
+    if (!_vuBuf || _vuBuf.length !== _analyser.fftSize) _vuBuf = new Uint8Array(_analyser.fftSize);
+    _analyser.getByteTimeDomainData(_vuBuf);
+    var s = 0, i;
+    for (i = 0; i < _vuBuf.length; i += 2) { var v = (_vuBuf[i] - 128) / 128; s += v * v; }
+    return Math.min(1, Math.sqrt(s / (_vuBuf.length / 2)) * 2.2);
+  }
+  /* per-render mixer buses: mx = {drums,bass,chords,lead,vocal} gain nodes */
+  function makeBuses(c, dest, mix) {
+    var mx = {}, names = ["drums", "bass", "chords", "lead", "vocal"], i;
+    for (i = 0; i < names.length; i++) {
+      var g = c.createGain();
+      g.gain.value = (mix && mix[names[i]] != null) ? mix[names[i]] : 1;
+      g.connect(dest); mx[names[i]] = g;
+    }
+    return mx;
+  }
+  function busDest(mx, dest, name) { return (mx && mx[name]) ? mx[name] : dest; }
   function noiseBuffer(c) {
     if (_noiseBuf && _noiseBuf.sampleRate === c.sampleRate) return _noiseBuf;
     var b = c.createBuffer(1, c.sampleRate * 2, c.sampleRate), d = b.getChannelData(0), i;
@@ -100,8 +123,9 @@
     marimba: { type: "sine",     cutoff: 2000, attack: 0.002, decay: 0.35, sustain: 0.1,  rel: 0.15, level: 0.44 },
     koto:    { type: "triangle", cutoff: 3600, attack: 0.002, decay: 0.5,  sustain: 0.15, rel: 0.3,  level: 0.4 }
   };
-  function tone(c, dest, t, midi, dur, voice, vel) {
+  function tone(c, dest, t, midi, dur, voice, vel, bus) {
     var P = VOICE_DEFAULTS[voice] || VOICE_DEFAULTS.keys, v = (vel == null ? 1 : vel);
+    var out = bus || dest;
     function one(det) {
       var o = c.createOscillator(), f = c.createBiquadFilter(), g = c.createGain();
       o.type = P.type; o.frequency.value = midiHz(midi); if (det) o.detune.value = det;
@@ -111,7 +135,7 @@
       g.gain.setTargetAtTime(peak * P.sustain, t + a, P.decay / 3);
       g.gain.setValueAtTime(peak * P.sustain, t + Math.max(a, dur - P.rel));
       g.gain.exponentialRampToValueAtTime(0.0001, t + dur + P.rel);
-      o.connect(f); f.connect(g); g.connect(dest); o.start(t); o.stop(t + dur + P.rel + 0.05);
+      o.connect(f); f.connect(g); g.connect(out); o.start(t); o.stop(t + dur + P.rel + 0.05);
       if (P.trem) { var l = c.createOscillator(), lg = c.createGain(); l.frequency.value = P.trem; lg.gain.value = peak * 0.18; l.connect(lg); lg.connect(g.gain); l.start(t); l.stop(t + dur + P.rel + 0.05); }
       if (P.vib) { var l2 = c.createOscillator(), lg2 = c.createGain(); l2.frequency.value = P.vib; lg2.gain.value = 6; l2.connect(lg2); lg2.connect(o.detune); l2.start(t); l2.stop(t + dur + P.rel + 0.05); }
     }
@@ -156,13 +180,14 @@
     for (k = 0; k < 4; k++) { var s = Math.floor(rng() * 16); if (rng() < 0.5) pat.hat[s] = pat.hat[s] ? 0 : 1; }
     return { genre: genre, bpm: bpm, steps: pat, seed: seed };
   }
-  function scheduleBeat(c, dest, t0, pattern, bars, vel) {
+  function scheduleBeat(c, dest, t0, pattern, bars, vel, mx) {
     var step = 60 / pattern.bpm / 4, b, i, t, v = (vel == null ? 1 : vel);
+    var dd = busDest(mx, dest, "drums");
     for (b = 0; b < bars; b++) for (i = 0; i < 16; i++) {
       t = t0 + (b * 16 + i) * step; var s = pattern.steps;
-      if (s.kick[i]) kick(c, dest, t, v); if (s.snare[i]) snare(c, dest, t, v);
-      if (s.hat[i]) hat(c, dest, t, v * 0.9, i % 4 === 3); if (s.clap[i]) clap(c, dest, t, v);
-      if (s.tom[i]) tom(c, dest, t, v, 50); if (s.shaker[i]) shaker(c, dest, t, v);
+      if (s.kick[i]) kick(c, dd, t, v); if (s.snare[i]) snare(c, dd, t, v);
+      if (s.hat[i]) hat(c, dd, t, v * 0.9, i % 4 === 3); if (s.clap[i]) clap(c, dd, t, v);
+      if (s.tom[i]) tom(c, dd, t, v, 50); if (s.shaker[i]) shaker(c, dd, t, v);
     }
     return t0 + bars * 16 * step;
   }
@@ -235,22 +260,23 @@
     (function () { var b; for (b = 0; b < totalBars; b++) { var ch = chords[b % chords.length]; bassline.push(ch[0] - 12, ch[0] - 12, ch[2] - 12, ch[0] - 12); } })();
     return { keyRoot: keyRoot, chords: chords, melody: melody, bassline: bassline, totalBars: totalBars, bpm: song.tempo, genre: song.genre, beat: patternFor(song.title, song.genre, song.tempo) };
   }
-  function renderSong(song, seconds) {
+  function renderSong(song, seconds, mix) {
     var plan = songPlan(song), beatLen = plan.totalBars * (60 / plan.bpm);
     var dur = seconds || Math.min(150, beatLen + 2);
     return renderBuffer(dur, function (c, dest, t0) {
-      scheduleBeat(c, dest, t0, plan.beat, plan.totalBars, 0.9);
+      var mx = makeBuses(c, dest, mix);
+      scheduleBeat(c, dest, t0, plan.beat, plan.totalBars, 0.9, mx);
       var step = 60 / plan.bpm, bi, ch;
       for (bi = 0; bi < plan.totalBars; bi++) {
         ch = plan.chords[bi % plan.chords.length];
-        tone(c, dest, t0 + bi * 4 * step, ch[0] - 12, 3.6 * step, "bass", 0.9);
-        tone(c, dest, t0 + bi * 4 * step, ch[1], 3.8 * step, "pad", 0.5);
-        tone(c, dest, t0 + bi * 4 * step, ch[2], 3.8 * step, "pad", 0.4);
+        tone(c, dest, t0 + bi * 4 * step, ch[0] - 12, 3.6 * step, "bass", 0.9, mx.bass);
+        tone(c, dest, t0 + bi * 4 * step, ch[1], 3.8 * step, "pad", 0.5, mx.chords);
+        tone(c, dest, t0 + bi * 4 * step, ch[2], 3.8 * step, "pad", 0.4, mx.chords);
       }
       var mi, mt = t0;
       for (mi = 0; mi < plan.melody.length && mt < t0 + dur - 1; mi++) {
         var n = plan.melody[mi];
-        if (n.midi > 0) tone(c, dest, mt, n.midi, n.len * step * 0.92, "lead", 0.75);
+        if (n.midi > 0) tone(c, dest, mt, n.midi, n.len * step * 0.92, "lead", 0.75, mx.lead);
         mt += n.len * step;
       }
     });
@@ -271,8 +297,9 @@
     { id: "choir",   name: "Choir stack",     shift: 0,  desc: "Full stacked choir, detuned unison + octaves" },
     { id: "adlibs",  name: "Ad-libs",         shift: 0,  desc: "Seeded improvised riffs between phrases" }
   ];
-  function singNote(c, dest, t, midi, dur, voice, vel) {
+  function singNote(c, dest, t, midi, dur, voice, vel, bus) {
     var v = (vel == null ? 1 : vel), P = voice, f = midiHz(midi);
+    var out = bus || dest;
     function layer(detune, gainScale, formantSet) {
       var o = c.createOscillator(), g = c.createGain(); o.type = "sawtooth"; o.frequency.value = f; o.detune.value = detune;
       var lfo = c.createOscillator(), lg = c.createGain(); lfo.frequency.value = P.vib; lg.gain.value = 7;
@@ -285,7 +312,7 @@
       var a = 0.06, peak = P.level * v * gainScale;
       g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a);
       g.gain.setValueAtTime(peak, t + Math.max(a, dur - 0.12)); g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.08);
-      last.connect(g); g.connect(dest); o.start(t); o.stop(t + dur + 0.15);
+      last.connect(g); g.connect(out); o.start(t); o.stop(t + dur + 0.15);
     }
     layer(0, 1, P.formants); layer(5, 0.5, P.formants); layer(-5, 0.5, P.formants);
   }
@@ -294,7 +321,7 @@
     for (i = 0; i < melody.length; i++) { var n = melody[i]; if (n.midi > 0) out.push({ t: t, midi: n.midi, dur: n.len * step * 0.92 }); t += n.len * step; }
     return out;
   }
-  function renderVocal(melody, voiceId, backupIds, seconds) {
+  function renderVocal(melody, voiceId, backupIds, seconds, mix) {
     var voice = null, i;
     for (i = 0; i < CREATED_VOICES.length; i++) if (CREATED_VOICES[i].id === voiceId) voice = CREATED_VOICES[i];
     voice = voice || CREATED_VOICES[0];
@@ -302,8 +329,9 @@
     var dur = seconds || (notes.length ? notes[notes.length - 1].t + 2 : 8);
     var rng = rngFrom("adlib:" + voiceId + notes.length);
     return renderBuffer(dur, function (c, dest, t0) {
+      var mx = makeBuses(c, dest, mix), vb = mx.vocal;
       var n;
-      for (n = 0; n < notes.length; n++) singNote(c, dest, t0 + notes[n].t, notes[n].midi, notes[n].dur, voice, 1);
+      for (n = 0; n < notes.length; n++) singNote(c, dest, t0 + notes[n].t, notes[n].midi, notes[n].dur, voice, 1, vb);
       var b;
       for (b = 0; b < (backupIds || []).length; b++) {
         var bt = null, k;
@@ -311,9 +339,9 @@
         if (!bt) continue;
         for (n = 0; n < notes.length; n++) {
           var m = notes[n].midi + bt.shift;
-          if (bt.id === "adlibs") { if (rng() < 0.3) singNote(c, dest, t0 + notes[n].t, m + 12, notes[n].dur * 0.7, voice, 0.5); }
-          else if (bt.id === "choir") { singNote(c, dest, t0 + notes[n].t, m, notes[n].dur, voice, 0.55); singNote(c, dest, t0 + notes[n].t, m + 12, notes[n].dur, voice, 0.35); }
-          else singNote(c, dest, t0 + notes[n].t, m, notes[n].dur, voice, 0.6);
+          if (bt.id === "adlibs") { if (rng() < 0.3) singNote(c, dest, t0 + notes[n].t, m + 12, notes[n].dur * 0.7, voice, 0.5, vb); }
+          else if (bt.id === "choir") { singNote(c, dest, t0 + notes[n].t, m, notes[n].dur, voice, 0.55, vb); singNote(c, dest, t0 + notes[n].t, m + 12, notes[n].dur, voice, 0.35, vb); }
+          else singNote(c, dest, t0 + notes[n].t, m, notes[n].dur, voice, 0.6, vb);
         }
       }
     });
@@ -388,6 +416,6 @@
     renderVocal: renderVocal, renderOwnVoice: renderOwnVoice,
     detectPitch: detectPitch, nearestMidi: nearestMidi, cleanupVocal: cleanupVocal,
     playBuffer: playBuffer, stopLive: stopLive, playTone: playTone, playDrum: playDrum,
-    ensureCtx: ac
+    ensureCtx: ac, meterLevel: meterLevel, makeBuses: makeBuses
   };
 })(typeof window !== "undefined" ? window : (typeof self !== "undefined" ? self : this));
