@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Signature Music Studio — Make Music On Your Own, Via AI, or Together</title>
+<meta name="description" content="Signature Music Studio: the full music-making studio. Sound library, studio equipment with real patch guides, AI beat maker, auto song writer, vocal studio, backup singers, vocal cleanup, and CD making. Make music on your own, via AI, or in collaboration with AI.">
+<link rel="canonical" href="https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/">
+<link rel="stylesheet" href="assets/style.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","name":"Signature Music Studio","url":"https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/","description":"Full music-making studio: sounds, equipment, beat maker, song writer, vocal studio, CD making."}
+</script>
+</head>
+<body>
+<nav class="jahnet" aria-label="THE JAH NETWORK"><div class="wrap" id="jahnet"></div></nav>
+
+<header class="hero"><div class="wrap">
+<h1>SIGNATURE MUSIC STUDIO</h1>
+<div><span class="official">OFFICIAL SIGNATURE SITE</span></div>
+<p class="sub">The full music-making studio. Every sound, every instrument, all the studio equipment with real patch guides — make your music <b>on your own</b>, <b>via AI</b>, or <b>in collaboration with AI</b>.</p>
+<p class="counter" id="counters">Loading the archive…</p>
+<div class="honest">Every sound on this site is synthesized live in your browser with the Web Audio API — no samples, no downloads needed to play. All voices are synthesized; there are no human singers here. What the AI makes, it makes from a deterministic seed: the same request always makes the same music.</div>
+</div></header>
+
+<div class="wrap">
+<div class="modes" role="group" aria-label="How to make music">
+<button data-mode="self" class="on">🎸 Make it yourself</button>
+<button data-mode="ai">🤖 Let the AI make it</button>
+<button data-mode="collab">🤝 Collaborate with AI</button>
+</div>
+<p class="seqlab" id="modeline" style="text-align:center">Mode: make it yourself — you set every control.</p>
+
+<div class="finder">
+<label for="finderq" style="color:var(--violet);font-size:16px">🔎 Finder AI — describe what you're looking for…</label>
+<input id="finderq" type="text" placeholder="e.g. a dark hip-hop beat, a warm condenser mic, a love song about the river…" aria-label="Describe what you're looking for">
+<div class="hits" id="finderhits"></div>
+</div>
+
+<div id="record"></div>
+
+<section class="sec" id="studio">
+<h2>🎛️ Sound Library</h2>
+<p>Every sound possible — drums, bass, keys, strings, brass, pads, leads, world instruments, FX — plus instruments, sound sets, and sound packs. All synthesized live. <span class="counter" id="libcount"></span></p>
+<div class="row"><div><label>Family</label><select id="libfam"><option value="">All families</option></select></div>
+<div><label>Type</label><select id="libtype"><option value="">All</option><option value="sound">Sounds</option><option value="instrument">Instruments</option><option value="set">Sound sets</option><option value="pack">Sound packs</option></select></div>
+<div><label>Search</label><input type="text" id="libq" placeholder="Search the library…"></div></div>
+<div class="az" id="libaz"></div>
+<div class="grid" id="libgrid"></div>
+</section>
+
+<section class="sec" id="equipment">
+<h2>🎚️ Studio Equipment</h2>
+<p>All the studio-making equipment — instruments, microphones, preamps, interfaces, monitors, patch bays — every item with <b>real instrument and mic patch lists</b>: exactly how to route it.</p>
+<div class="row"><div><label>Category</label><select id="gearcat"><option value="">All</option><option value="instrument">Instruments</option><option value="mic">Microphones</option><option value="preamp">Preamps</option><option value="interface">Interfaces</option><option value="monitor">Monitors</option><option value="patch">Patching</option><option value="processor">Processors</option></select></div>
+<div><label>Search</label><input type="text" id="gearq" placeholder="Search equipment…"></div></div>
+<div class="grid" id="geargird"></div>
+</section>
+
+<section class="sec" id="beatmaker">
+<h2>🥁 AI Beat Maker</h2>
+<p>Describe the beat you want — the AI arranges it from a deterministic seed. Same request, same beat, every time.</p>
+<div class="row">
+<div><label>Describe your beat</label><input type="text" id="beatprompt" placeholder="e.g. dark trap banger, smooth lofi groove…"></div>
+<div><label>Genre</label><select id="beatgenre"></select></div>
+<div><label>Tempo (BPM)</label><input type="number" id="beatbpm" value="92" min="60" max="180"></div>
+<div><label>Bars</label><input type="number" id="beatbars" value="4" min="1" max="16"></div>
+</div>
+<p><button class="btn" id="beatmake">🤖 AI: Make my beat</button>
+<button class="btn ghost" id="beatplay">▶ Play</button>
+<button class="btn ghost" id="beatstop">⏹ Stop</button>
+<button class="btn teal" id="beatwav">⬇ Download .wav</button></p>
+<canvas class="wave" id="beatwave" width="900" height="90"></canvas>
+<p class="seqlab" id="beatinfo"></p>
+</section>
+
+<section class="sec" id="songwriter">
+<h2>✍️ Auto Song Writer</h2>
+<p>The AI writes a full song <b>to spec</b> — stamped <span class="id">JAH-SONG-0000001…</span> with title, lyrics, chord chart, structure, tempo, and key — or renders it <b>to song sound</b>: a playable demo mix.</p>
+<div class="row">
+<div><label>Theme / idea</label><input type="text" id="songtheme" placeholder="e.g. a highway at dawn, neon city love…"></div>
+<div><label>Genre</label><select id="songgenre"></select></div>
+<div><label>Mood</label><select id="songmood"></select></div>
+</div>
+<p><button class="btn" id="songwrite">🤖 AI: Write my song</button>
+<button class="btn ghost" id="songself">🎸 I'll write it (template)</button></p>
+<div id="songout"></div>
+</section>
+
+<section class="sec" id="vocalstudio">
+<h2>🎤 Vocal Studio</h2>
+<p>Enter lyrics, pick a voice — a <b>created voice</b> or <b>your own voice</b>. The vocal synth sings it. Plainly: these are synthesized voices, not human singers.</p>
+<div class="honest">Created voices (Nova, Ember, Drift, Stone) are formant-synthesis voices built on this page. "Your own voice" records or uploads your sample and pitch-maps it onto the melody — a resynthesis of your recording.</div>
+<div><label>Lyrics (one line per phrase)</label><textarea id="vlyrics" placeholder="Type or paste lyrics, one phrase per line…"></textarea></div>
+<div class="row">
+<div><label>Voice</label><select id="vvoice"><option value="nova">Nova — bright airy (synth)</option><option value="ember">Ember — warm alto (synth)</option><option value="drift">Drift — soft breathy (synth)</option><option value="stone">Stone — deep resonant (synth)</option><option value="own">My own voice (record/upload)</option></select></div>
+<div><label>Backup singers</label><select id="vbackup" multiple size="3"><option value="soprano">Soprano section</option><option value="alto">Alto section</option><option value="tenor">Tenor section</option><option value="bass">Bass section</option><option value="choir">Choir stack</option><option value="adlibs">Ad-libs</option></select></div>
+</div>
+<p><button class="btn" id="vrec">🔴 Record my voice</button>
+<button class="btn ghost" id="vupload">⬆ Upload sample</button><input type="file" id="vfile" accept="audio/*" style="display:none">
+<button class="btn violet" id="vsing">🎤 Sing it</button>
+<button class="btn ghost" id="vplay">▶ Play</button>
+<button class="btn teal" id="vwav">⬇ Download .wav</button></p>
+<p class="seqlab" id="vinfo"></p>
+</section>
+
+<section class="sec" id="backups">
+<h2>🎶 Backup Singers</h2>
+<p>All types, selectable <b>to spec</b> — they join the song's spec record and its mix.</p>
+<div class="grid" id="backupgrid"></div>
+</section>
+
+<section class="sec" id="cleanup">
+<h2>✨ Vocal Cleanup</h2>
+<p>Upload your vocals — the AI cleans them up: de-rumble, de-hiss, compression, leveling. <b>Re-sing clean</b> detects your melody and has the vocal synth sing it back alike, cleaned up.</p>
+<div class="honest">Honest limits: cleanup cannot fix hard clipping or heavy distortion. Record with peaks near −12&nbsp;dB for best results.</div>
+<p><button class="btn ghost" id="cup">⬆ Upload vocals</button><input type="file" id="cufile" accept="audio/*" style="display:none">
+<button class="btn" id="cuclean">✨ AI: Clean it up</button>
+<button class="btn violet" id="curesing">🎤 AI: Re-sing it clean</button>
+<button class="btn ghost" id="cuplay">▶ Play result</button>
+<button class="btn teal" id="cuwav">⬇ Download .wav</button></p>
+<p class="seqlab" id="cuinfo"></p>
+</section>
+
+<section class="sec" id="cdmaker">
+<h2>💿 Make a CD</h2>
+<p>Pick songs from the archive — the site renders each to CD-quality audio, builds a cue sheet, and packages a <b>disc image download</b> with step-by-step burning instructions.</p>
+<div class="honest">Browsers cannot drive a CD burner directly, so this page prepares the disc image; you burn it with your own burner software using the included guide. First: does your system have a CD burner? <select id="burnerq" style="width:auto;display:inline-block"><option value="">— choose —</option><option value="yes">Yes, it has a burner</option><option value="no">No burner</option><option value="dk">I don't know</option></select></div>
+<div><label>Add songs by ID (one per line, e.g. JAH-SONG-0000001)</label><textarea id="cdlist" placeholder="JAH-SONG-0000001&#10;JAH-SONG-0000042"></textarea></div>
+<p><button class="btn" id="cdrender">💿 Render my CD</button> <span class="seqlab" id="cdinfo"></span></p>
+<div id="cdout"></div>
+</section>
+
+<div class="teacher" id="teacher">
+<h2 style="color:var(--teal);margin-top:0">🎓 Music Teacher AI</h2>
+<p>Ask about music theory, instruments, production, or anything on this site. The teacher answers only from the studio's own data — and says plainly when something isn't covered.</p>
+<div class="row"><div><input type="text" id="teachq" placeholder="e.g. What is a chord progression? How do I patch a condenser mic?"></div><div style="flex:0"><label>&nbsp;</label><button class="btn teal" id="teachgo">Ask</button></div></div>
+<div class="ans" id="teachans" style="display:none"></div>
+</div>
+
+<section class="sec" id="songs">
+<h2>📀 Song Archive</h2>
+<p>Every song fully made — lyrics, chords, structure, tempo, key — and <b>ready to play</b>: one click renders the demo mix. Marching to one million.</p>
+<div class="az" id="songaz"></div>
+<div class="grid" id="songgrid"></div>
+</section>
+</div>
+
+<footer><div class="wrap">
+<nav class="jahnet" style="border:none;background:none"><div class="wrap" id="jahnet2" style="justify-content:center"></div></nav>
+<p><b style="color:var(--gold)">Signature Music Studio</b> — the official name. Make music on your own, via AI, or in collaboration with AI.<br>
+<span class="seqlab">All audio synthesized in your browser. All voices synthesized. All records original Signature content.</span></p>
+</div></footer>
+
+<div id="readbar"><span id="readlabel">Reading…</span>
+<button class="btn ghost" id="readplay">▶</button><button class="btn ghost" id="readstop">⏹</button><button class="btn ghost" id="readclose">✕</button></div>
+
+<script src="assets/synth.js"></script>
+<script src="assets/engine.js"></script>
+<script src="assets/app.js"></script>
+<script src="assets/app2.js"></script>
+<script src="assets/app3.js"></script>
+</body>
+</html>

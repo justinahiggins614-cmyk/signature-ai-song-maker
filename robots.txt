@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/sitemap.xml

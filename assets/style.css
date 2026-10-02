@@ -1,0 +1,74 @@
+/* Signature Music Studio — studio console theme */
+:root{--bg:#14101d;--bg2:#1e1830;--panel:#241d38;--gold:#f5c542;--violet:#9b7bff;--teal:#4fe3c1;--ink:#f2ecdf;--mut:#b9aec9;--line:#3a2f55;}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(1200px 600px at 50% -10%,#2b2145 0%,var(--bg) 60%);color:var(--ink);font-family:Georgia,'Times New Roman',serif;line-height:1.55}
+a{color:var(--gold)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+/* JAH network bar */
+.jahnet{background:#0d0a14;border-bottom:2px solid var(--gold);font-family:Arial,Helvetica,sans-serif;font-size:12px}
+.jahnet .wrap{display:flex;flex-wrap:wrap;gap:4px 10px;padding:8px 16px;align-items:center}
+.jahnet b{color:var(--gold);letter-spacing:1px}
+.jahnet a{color:#cfc4e8;text-decoration:none;padding:2px 4px;border-radius:4px}
+.jahnet a:hover{background:#2b2145;color:#fff}
+.jahnet .here{color:var(--gold);font-weight:bold;border:1px solid var(--gold);padding:2px 6px;border-radius:10px}
+/* hero */
+.hero{text-align:center;padding:44px 16px 26px}
+.hero h1{font-size:44px;margin:0;color:var(--gold);text-shadow:0 0 24px rgba(245,197,66,.35);letter-spacing:2px}
+.hero .sub{color:var(--mut);font-size:17px;max-width:720px;margin:10px auto}
+.official{display:inline-block;border:1px solid var(--teal);color:var(--teal);border-radius:12px;padding:3px 12px;font-size:13px;font-family:Arial;margin-top:8px}
+/* mode toggle */
+.modes{display:flex;gap:10px;justify-content:center;margin:18px 0;flex-wrap:wrap;font-family:Arial}
+.modes button{background:var(--panel);border:2px solid var(--line);color:var(--ink);border-radius:20px;padding:10px 20px;font-size:15px;cursor:pointer}
+.modes button.on{border-color:var(--gold);color:var(--gold);box-shadow:0 0 12px rgba(245,197,66,.35)}
+/* sections */
+.sec{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;margin:22px 0}
+.sec h2{color:var(--gold);margin-top:0;font-size:26px}
+.sec h3{color:var(--violet)}
+.honest{background:#1a1428;border-left:4px solid var(--teal);padding:10px 14px;border-radius:0 8px 8px 0;color:var(--mut);font-size:14px;margin:12px 0}
+/* finder */
+.finder{background:#0d0a14;border:2px solid var(--violet);border-radius:14px;padding:18px;margin:22px 0}
+.finder input{width:100%;padding:14px;font-size:17px;border-radius:10px;border:1px solid var(--line);background:#1e1830;color:var(--ink);font-family:Georgia,serif}
+.finder .hits{margin-top:12px;display:grid;gap:10px}
+.hit{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
+.hit b{color:var(--gold)}
+.hit .go{float:right;background:var(--gold);color:#14101d;border:none;border-radius:8px;padding:8px 14px;font-weight:bold;cursor:pointer}
+/* cards & grids */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.card{background:#1a1428;border:1px solid var(--line);border-radius:12px;padding:14px}
+.card h4{margin:0 0 6px;color:var(--gold);font-size:17px}
+.card p{margin:6px 0;color:var(--mut);font-size:14px}
+.card .id{font-family:Arial;font-size:12px;color:var(--violet)}
+.btn{background:var(--gold);color:#14101d;border:none;border-radius:8px;padding:10px 18px;font-weight:bold;cursor:pointer;font-size:15px;margin:4px 6px 4px 0}
+.btn.ghost{background:transparent;border:2px solid var(--gold);color:var(--gold)}
+.btn.teal{background:var(--teal)}
+.btn.violet{background:var(--violet);color:#14101d}
+/* forms */
+label{display:block;margin:10px 0 4px;color:var(--mut);font-family:Arial;font-size:14px}
+input[type=text],input[type=number],select,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid var(--line);background:#1e1830;color:var(--ink);font-family:Georgia,serif;font-size:15px}
+textarea{min-height:90px}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.row>div{flex:1;min-width:200px}
+/* record view */
+.rec{background:#1a1428;border:2px solid var(--gold);border-radius:14px;padding:22px;margin:22px 0}
+.rec h2{color:var(--gold);margin-top:0}
+.rec .meta{font-family:Arial;font-size:13px;color:var(--mut)}
+pre.lyrics{white-space:pre-wrap;background:#0d0a14;padding:14px;border-radius:8px;border:1px solid var(--line)}
+.chords{font-family:monospace;color:var(--teal);font-size:16px}
+/* teacher */
+.teacher{background:#0d0a14;border:2px solid var(--teal);border-radius:14px;padding:18px;margin:22px 0}
+.teacher .ans{background:var(--panel);border-radius:10px;padding:14px;margin-top:10px}
+/* floating read bar */
+#readbar{position:fixed;bottom:0;left:0;right:0;background:#0d0a14;border-top:2px solid var(--gold);padding:8px;text-align:center;font-family:Arial;display:none;z-index:50}
+#readbar button{margin:0 6px}
+/* A-Z */
+.az{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0;font-family:Arial}
+.az button{background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:6px;padding:6px 10px;cursor:pointer}
+.az button.on{background:var(--gold);color:#14101d;font-weight:bold}
+/* footer */
+footer{border-top:2px solid var(--gold);margin-top:40px;padding:24px 0 60px;color:var(--mut);font-size:14px;text-align:center}
+.counter{font-family:Arial;color:var(--gold);font-size:15px}
+.seqlab{font-family:Arial;font-size:12px;color:var(--mut)}
+canvas.wave{width:100%;height:90px;background:#0d0a14;border:1px solid var(--line);border-radius:8px}
+.checklist{font-family:Arial;font-size:14px}
+.checklist label{display:flex;gap:8px;align-items:center;margin:6px 0;color:var(--ink)}
+@media(max-width:640px){.hero h1{font-size:32px}}
