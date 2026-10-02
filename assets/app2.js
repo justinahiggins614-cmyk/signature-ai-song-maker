@@ -157,8 +157,20 @@
     S.MOODS.forEach(function (m) { var o = document.createElement("option"); o.value = m; o.textContent = m; msel.appendChild(o); });
     $("beatmake").onclick = function () {
       var prompt = $("beatprompt").value || "untitled groove";
-      var genre = resolveGenre(prompt, gsel.value, D.BEAT_STYLES);
-      var bpm = Math.max(60, Math.min(180, +$("beatbpm").value || 92)), bars = Math.max(1, Math.min(16, +$("beatbars").value || 4));
+      var styleRef = (D.parseStyleRequest) ? D.parseStyleRequest(prompt) : null;
+      var genre, bpm;
+      if (styleRef) {
+        genre = styleRef.genre;
+        var bpmIn = +$("beatbpm").value || 92;
+        if (bpmIn === 92) { var br = S.rngFrom("stylebpm:" + prompt.toLowerCase()); bpm = styleRef.bpm[0] + Math.floor(br() * (styleRef.bpm[1] - styleRef.bpm[0] + 1)); }
+        else bpm = Math.max(60, Math.min(180, bpmIn));
+        $("beatstyle").innerHTML = "🎯 <b>" + esc(styleRef.name) + " type beat</b> — an <b>original Signature composition</b> in the style of " + esc(styleRef.name) + " (" + esc(styleRef.note) + "). Not affiliated with or endorsed by " + esc(styleRef.name) + "; no melodies or lyrics reproduced. Same request always makes this beat.";
+      } else {
+        genre = resolveGenre(prompt, gsel.value, D.BEAT_STYLES);
+        bpm = Math.max(60, Math.min(180, +$("beatbpm").value || 92));
+        $("beatstyle").innerHTML = "";
+      }
+      var bars = Math.max(1, Math.min(16, +$("beatbars").value || 4));
       beatPat = S.patternFor(prompt, genre, bpm);
       beatPrompt = prompt; beatBars = bars;
       renderBeatBuf();

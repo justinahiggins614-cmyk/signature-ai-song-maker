@@ -76,7 +76,7 @@
 <h2>🥁 AI Beat Maker</h2>
 <p>Describe the beat you want — the AI arranges it from a deterministic seed. Same request, same beat, every time.</p>
 <div class="row">
-<div><label>Describe your beat</label><input type="text" id="beatprompt" placeholder="e.g. dark trap banger, smooth lofi groove…"></div>
+<div><label>Describe your beat</label><input type="text" id="beatprompt" placeholder="e.g. dark trap banger, Nas type beat, smooth lofi groove…"></div>
 <div><label>Genre</label><select id="beatgenre"></select></div>
 <div><label>Tempo (BPM)</label><input type="number" id="beatbpm" value="92" min="60" max="180"></div>
 <div><label>Bars</label><input type="number" id="beatbars" value="4" min="1" max="16"></div>
@@ -89,6 +89,7 @@
 <div id="patterngrid" style="margin-top:10px"></div>
 <p class="seqlab">Track lanes — click any step to toggle it. The beat re-renders with your edit (still deterministic from the seed + your tweaks).</p>
 <p class="seqlab" id="beatinfo"></p>
+<p class="seqlab" id="beatstyle"></p>
 </section>
 
 <section class="sec" id="songwriter">

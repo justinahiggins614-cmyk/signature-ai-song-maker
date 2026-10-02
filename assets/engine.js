@@ -184,7 +184,86 @@
     { key: "90s-boombap", name: "90s boom-bap style", bpm: [85, 96], note: "dusty head-nod groove of the 1990s boom-bap era" },
     { key: "00s-crunk", name: "00s crunk style", bpm: [65, 76], note: "rowdy call-and-response energy of the 2000s crunk era" }
   ];
-  var BEAT_ADJ = ["Neon", "Velvet", "Copper", "Midnight", "Amber", "Silver", "Crimson", "Golden", "Electric", "Quiet", "Paper", "Static", "Hollow", "Bright", "Distant", "Wild", "Slow", "Restless", "Patient", "Bold", "Smoky", "Chrome"];
+  /* ---------- "type beat" style references ----------
+     Original sonic profiles keyed by well-known style names. A profile
+     describes ONLY the sound: pattern genre, tempo range, mood, and a
+     short sonic note. Same request -> same beat, forever. Results are
+     always labeled original Signature compositions "in the style of" —
+     never affiliated with or endorsed by the artist, never reproducing
+     any copyrighted melody or lyrics. */
+  var STYLE_REFS = [
+    { name: "Nas", aka: ["nas"], genre: "90s-boombap", bpm: [85, 94], mood: "gritty", note: "dusty 90s New York boom-bap: hard head-nod drums, jazzy chop feel" },
+    { name: "Jay-Z", aka: ["jay-z", "jay z", "jigga"], genre: "90s-boombap", bpm: [88, 98], mood: "smooth", note: "polished 90s boom-bap: soulful chops, confident pocket" },
+    { name: "The Notorious B.I.G.", aka: ["notorious b.i.g.", "notorious big", "biggie", "biggie smalls"], genre: "90s-boombap", bpm: [88, 96], mood: "smooth", note: "mid-90s Bad-Boy-era bounce: plush drums, swagger pocket" },
+    { name: "Wu-Tang Clan", aka: ["wu-tang clan", "wu tang", "wu-tang"], genre: "90s-boombap", bpm: [85, 95], mood: "gritty", note: "raw Shaolin-era boom-bap: grimy drums, minor-key menace" },
+    { name: "A Tribe Called Quest", aka: ["a tribe called quest", "tribe called quest"], genre: "jazz", bpm: [90, 100], mood: "chill", note: "jazzy native-tongues bounce: warm electric-piano groove" },
+    { name: "Outkast", aka: ["outkast"], genre: "funk", bpm: [90, 100], mood: "driving", note: "southern-fried funk bounce: rubbery bass, party drums" },
+    { name: "Tupac", aka: ["tupac", "2pac"], genre: "90s-boombap", bpm: [90, 100], mood: "epic", note: "west-coast 90s bounce: anthemic drums, rolling groove" },
+    { name: "J. Cole", aka: ["j. cole", "j cole"], genre: "hip-hop", bpm: [85, 95], mood: "chill", note: "soulful conscious-rap bounce: warm keys, steady pocket" },
+    { name: "Kendrick Lamar", aka: ["kendrick lamar", "kendrick"], genre: "hip-hop", bpm: [88, 100], mood: "epic", note: "west-coast art-rap bounce: jazzy chords, hard drums" },
+    { name: "Kanye West", aka: ["kanye west", "kanye", "ye"], genre: "hip-hop", bpm: [88, 100], mood: "epic", note: "soul-sample chipmunk-era bounce: pitched vocal-style chops" },
+    { name: "Drake", aka: ["drake"], genre: "hip-hop", bpm: [90, 100], mood: "smooth", note: "late-night Toronto bounce: moody pads, minimal drums" },
+    { name: "Future", aka: ["future"], genre: "trap", bpm: [130, 150], mood: "dark", note: "astronaut-status trap: rolling hats, booming low end" },
+    { name: "Migos", aka: ["migos"], genre: "trap", bpm: [130, 150], mood: "driving", note: "triplet-flow trap: machine-gun hats, bouncing 808 feel" },
+    { name: "Metro Boomin", aka: ["metro boomin", "metro boomin'"], genre: "trap", bpm: [140, 150], mood: "dark", note: "cinematic super-producer trap: dark bells, trunk-rattling low end" },
+    { name: "Travis Scott", aka: ["travis scott", "travis"], genre: "trap", bpm: [130, 150], mood: "dreamy", note: "psychedelic rage-trap: hazy synths, rolling drums" },
+    { name: "21 Savage", aka: ["21 savage"], genre: "trap", bpm: [140, 150], mood: "dark", note: "menacing minimal trap: sparse piano-style stabs, heavy low end" },
+    { name: "Pop Smoke", aka: ["pop smoke"], genre: "drill", bpm: [140, 150], mood: "dark", note: "Brooklyn drill bounce: sliding low-end feel, sparse menace" },
+    { name: "Beyoncé", aka: ["beyonce", "beyoncé"], genre: "rnb", bpm: [90, 110], mood: "epic", note: "queen-tier R&B: thunderous drums, stacked harmony feel" },
+    { name: "The Weeknd", aka: ["the weeknd", "weeknd"], genre: "rnb", bpm: [95, 115], mood: "dark", note: "after-hours alt-R&B: moody synths, driving pulse" },
+    { name: "SZA", aka: ["sza"], genre: "rnb", bpm: [85, 100], mood: "dreamy", note: "ctrl-era alt-R&B: floaty groove, off-kilter swing" },
+    { name: "Usher", aka: ["usher"], genre: "rnb", bpm: [95, 110], mood: "smooth", note: "confessions-era smooth R&B: silky groove, crisp snaps" },
+    { name: "Alicia Keys", aka: ["alicia keys"], genre: "rnb", bpm: [85, 100], mood: "smooth", note: "piano-led soulful R&B: warm keys, gentle pocket" },
+    { name: "Frank Ocean", aka: ["frank ocean"], genre: "rnb", bpm: [85, 100], mood: "dreamy", note: "blonde-era art-R&B: hazy drift, minimal groove" },
+    { name: "Taylor Swift", aka: ["taylor swift"], genre: "pop", bpm: [95, 120], mood: "bright", note: "eras-era pop: sparkling drums, stadium-ready lift" },
+    { name: "Michael Jackson", aka: ["michael jackson"], genre: "pop", bpm: [100, 120], mood: "driving", note: "quincy-era pop-funk precision: razor drums, tight groove" },
+    { name: "Dua Lipa", aka: ["dua lipa"], genre: "pop", bpm: [110, 125], mood: "bright", note: "disco-pop shimmer: four-on-the-floor sparkle" },
+    { name: "Bruno Mars", aka: ["bruno mars"], genre: "funk", bpm: [100, 115], mood: "bright", note: "retro funk-pop showmanship: horn-stab energy, party drums" },
+    { name: "Doja Cat", aka: ["doja cat"], genre: "pop", bpm: [100, 120], mood: "bright", note: "playful planet-pop bounce: bouncy drums, candy synths" },
+    { name: "Billie Eilish", aka: ["billie eilish"], genre: "ambient", bpm: [70, 90], mood: "dark", note: "whisper-pop minimalism: sub-bass hush, skeletal groove" },
+    { name: "Queen", aka: ["queen"], genre: "rock", bpm: [100, 120], mood: "epic", note: "arena-rock stomp and pomp: thunder drums, operatic lift" },
+    { name: "Nirvana", aka: ["nirvana"], genre: "rock", bpm: [110, 130], mood: "gritty", note: "grunge quiet-loud dynamics: sludge verses, explosive choruses" },
+    { name: "Foo Fighters", aka: ["foo fighters"], genre: "rock", bpm: [120, 135], mood: "driving", note: "modern arena-rock drive: relentless drums, big guitars feel" },
+    { name: "The Rolling Stones", aka: ["rolling stones", "the rolling stones"], genre: "rock", bpm: [110, 130], mood: "driving", note: "blues-rock swagger: loose shuffle, barroom stomp" },
+    { name: "Calvin Harris", aka: ["calvin harris"], genre: "house", bpm: [122, 128], mood: "bright", note: "festival-house euphoria: piano-house lift, four-on-the-floor" },
+    { name: "Skrillex", aka: ["skrillex"], genre: "techno", bpm: [140, 150], mood: "epic", note: "aggressive festival-electro energy: sawtooth mayhem feel" },
+    { name: "Daft Punk", aka: ["daft punk"], genre: "house", bpm: [115, 125], mood: "driving", note: "french-house filtered disco loop: robot-rock groove" },
+    { name: "Deadmau5", aka: ["deadmau5"], genre: "techno", bpm: [125, 130], mood: "dark", note: "progressive electro pulse: hypnotic arps, driving four-floor" },
+    { name: "Miles Davis", aka: ["miles davis"], genre: "jazz", bpm: [90, 120], mood: "smooth", note: "cool-jazz modal drift: brushed swing, blue trumpet feel" },
+    { name: "John Coltrane", aka: ["john coltrane", "coltrane"], genre: "jazz", bpm: [110, 140], mood: "epic", note: "sheets-of-sound swing: urgent ride cymbal, spiritual lift" },
+    { name: "Kirk Franklin", aka: ["kirk franklin"], genre: "gospel", bpm: [95, 115], mood: "epic", note: "stomping choir-driven gospel: hand-clap thunder, testify energy" },
+    { name: "Aretha Franklin", aka: ["aretha franklin"], genre: "60s-soul", bpm: [90, 112], mood: "epic", note: "queen-of-soul testify groove: deep pocket, sanctified swing" },
+    { name: "Johnny Cash", aka: ["johnny cash"], genre: "country", bpm: [90, 110], mood: "driving", note: "boom-chicka-boom train rhythm: steady freight-train strum" },
+    { name: "Dolly Parton", aka: ["dolly parton"], genre: "country", bpm: [95, 115], mood: "bright", note: "nashville sunshine bounce: sparkling shuffle, storyteller swing" },
+    { name: "Burna Boy", aka: ["burna boy", "burna"], genre: "afrobeats", bpm: [100, 110], mood: "bright", note: "afro-fusion log-drum groove: rolling percussion, sunny bounce" },
+    { name: "Wizkid", aka: ["wizkid", "wiz kid"], genre: "afrobeats", bpm: [98, 108], mood: "smooth", note: "starboy afrobeats glide: silky shaker groove, mellow bounce" },
+    { name: "Fela Kuti", aka: ["fela kuti", "fela"], genre: "afrobeats", bpm: [100, 115], mood: "driving", note: "afrobeat horn-driven polyrhythm: hypnotic percussion storm" },
+    { name: "Daddy Yankee", aka: ["daddy yankee"], genre: "reggaeton", bpm: [95, 100], mood: "driving", note: "classic dembow riddim: the gasolina bounce" },
+    { name: "Bad Bunny", aka: ["bad bunny"], genre: "reggaeton", bpm: [90, 100], mood: "smooth", note: "perreo-pop dembow bounce: moody and melodic" },
+    { name: "Sean Paul", aka: ["sean paul"], genre: "dancehall", bpm: [100, 105], mood: "bright", note: "dutty-rock dancehall bounce: bashment bubble" },
+    { name: "Bob Marley", aka: ["bob marley"], genre: "reggae", bpm: [75, 90], mood: "chill", note: "one-drop roots groove: skanking offbeat, heavy heartbeat bass" }
+  ];
+  /* Detect "[name] type beat" / "[name]-type beat" / "[name] style beat" /
+     "in the style of [name]" phrasing in a request. Returns the matched
+     style reference or null. */
+  D.parseStyleRequest = function (prompt) {
+    var p = " " + String(prompt || "").toLowerCase().replace(/[''']/g, "'") + " ";
+    if (p.indexOf("type beat") === -1 && p.indexOf("type-beat") === -1 &&
+        p.indexOf("style beat") === -1 && p.indexOf("in the style of") === -1) return null;
+    var i, j, ak, ref;
+    for (i = 0; i < STYLE_REFS.length; i++) {
+      ref = STYLE_REFS[i];
+      for (j = 0; j < ref.aka.length; j++) {
+        ak = " " + ref.aka[j] + " ";
+        if (p.indexOf(ak + "type beat") !== -1 || p.indexOf(ak + "type-beat") !== -1 ||
+            p.indexOf(ak.replace(/ $/, "-") + "type beat") !== -1 ||
+            p.indexOf(ak + "style beat") !== -1 || p.indexOf(ak + "style") !== -1 ||
+            p.indexOf("in the style of" + ak) !== -1) return ref;
+      }
+    }
+    return null;
+  };
+  D.STYLE_REFS = STYLE_REFS;
   function pad7(n) { n = String(n); while (n.length < 7) n = "0" + n; return n; }
   var beatId = function (n) { return "JAH-BEAT-" + pad7(n); };
 

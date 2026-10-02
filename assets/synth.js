@@ -173,6 +173,13 @@
       case "drum-and-bass": on(pat.kick, [0, 10]); on(pat.snare, [4, 12]); for (i = 0; i < 16; i++) pat.hat[i] = (i % 2 === 0) ? 1 : (rng() < 0.5 ? 1 : 0); break;
       case "reggae": on(pat.kick, [4, 12]); on(pat.snare, [0, 8]); for (i = 0; i < 16; i++) pat.hat[i] = (i % 2 === 0) ? 1 : 0; break;
       case "funk": on(pat.kick, [0, 3, 8]); on(pat.snare, [4, 12, 15]); for (i = 0; i < 16; i++) pat.hat[i] = 1; on(pat.clap, [12]); break;
+      case "drill": on(pat.kick, [0, 7, 10]); on(pat.snare, [8]); on(pat.clap, [8]); for (i = 0; i < 16; i++) pat.hat[i] = (i % 4 === 2) ? 1 : (rng() < 0.35 ? 1 : 0); on(pat.tom, [14]); break;
+      case "rnb": on(pat.kick, [0, 7, 10]); on(pat.snare, [4, 12]); on(pat.clap, [12]); for (i = 0; i < 16; i++) pat.hat[i] = (i % 2 === 0) ? 1 : (rng() < 0.35 ? 1 : 0); on(pat.shaker, [6]); break;
+      case "afrobeats": on(pat.kick, [0, 6, 10]); on(pat.snare, [4, 12]); for (i = 0; i < 16; i += 2) pat.shaker[i] = 1; for (i = 0; i < 16; i++) pat.hat[i] = (i % 4 === 0) ? 0 : (rng() < 0.3 ? 1 : 0); on(pat.tom, [7, 15]); break;
+      case "reggaeton": on(pat.kick, [0, 3, 8]); on(pat.snare, [4, 12]); on(pat.shaker, [2, 6, 10, 14]); on(pat.tom, [6, 14]); for (i = 0; i < 16; i++) pat.hat[i] = (i % 2 === 1) ? 1 : 0; break;
+      case "dancehall": on(pat.kick, [0, 8]); on(pat.snare, [4, 12]); for (i = 0; i < 16; i++) pat.hat[i] = (i % 2 === 1) ? 1 : (rng() < 0.2 ? 1 : 0); on(pat.shaker, [0, 4, 8, 12]); break;
+      case "gospel": on(pat.kick, [0, 8, 11]); on(pat.snare, [4, 12]); on(pat.clap, [12]); for (i = 0; i < 16; i += 2) pat.hat[i] = 1; on(pat.shaker, [2, 6, 10, 14]); break;
+      case "country": on(pat.kick, [0, 8]); on(pat.snare, [4, 12]); for (i = 0; i < 16; i += 2) pat.hat[i] = 1; on(pat.shaker, [14]); break;
       default: on(pat.kick, [0, 8]); on(pat.snare, [4, 12]); for (i = 0; i < 16; i++) pat.hat[i] = (i % 2 === 0) ? 1 : 0;
     }
     // seeded human-ish variation
