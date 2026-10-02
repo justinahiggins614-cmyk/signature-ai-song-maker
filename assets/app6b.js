@@ -3,6 +3,7 @@
   "use strict";
   var S = window.__S, D = window.__D, $ = window.__$, esc = window.__esc, dl = window.__dl,
       openModal = window.__openModal, closeModal = window.__closeModal;
+  var PKEY = "sigstudio.project.v1";
   var PROJ = window.__proj();
 
   function stagePane() { return $("stagepane"); }
@@ -322,6 +323,18 @@
     });
     var R = { 1: stage1, 2: stage2, 3: stage3, 4: stage4, 5: stage5, 6: stage6, 7: stage7 };
     (R[n] || stage1)();
+    /* persistent session toolbar — popups available at every step */
+    var tb = document.createElement("div");
+    tb.className = "row"; tb.style.margin = "0 0 10px 0";
+    tb.innerHTML = '<div><button class="btn ghost" id="tb-inst">🎹 Instruments</button> ' +
+      '<button class="btn ghost" id="tb-song">🔎 Song search</button> ' +
+      '<button class="btn ghost" id="tb-guides">📖 Beat guides</button> ' +
+      '<button class="btn ghost" id="tb-daw">🎛️ Open DAW</button></div>';
+    stagePane().insertBefore(tb, stagePane().firstChild);
+    $("tb-inst").onclick = function () { window.__openInstrumentPicker(function (ids) { PROJ.instruments = ids; saveProjSafe(); window.__palSay(ids.length + " instruments picked."); }, true); };
+    $("tb-song").onclick = function () { window.__openSongSearch(function (id) { PROJ.cd.tracks.push(id); saveProjSafe(); window.__palSay("Added " + id + " — open stage 7 to order it onto your CD."); }); };
+    $("tb-guides").onclick = function () { window.__openGuides(PROJ.genre || "hip-hop"); };
+    $("tb-daw").onclick = function () { window.__openDAW(); };
     if (window.__palSay) window.__palSay(({
       1: "Stage 1 — Sounds: browse the library A–Z, pop any file open, preview it, and save the keepers to My Library.",
       2: "Stage 2 — Beat: make your beat (try an 'Eminem type beat'!) and pick your instruments from the popup.",

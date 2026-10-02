@@ -126,7 +126,7 @@
     var body = openModal(multi === false ? "Pick an instrument" : "Pick instruments", "", true);
     var picked = [];
     function draw(q) {
-      var h = '<div class="row"><div><label>Search instruments</label><input type="text" id="ipq" placeholder="e.g. piano, 808, strings…"></div></div><div class="ipgrid">', c = 0, i;
+      var h = '<div class="row"><div><label>Search instruments</label><input type="text" id="ipq" value="' + esc(q || "") + '" placeholder="e.g. piano, 808, strings…"></div></div><div class="ipgrid">', c = 0, i;
       for (i = 0; i < rows.length && c < 48; i++) {
         var rec = D.genSound(parseInt(rows[i][0].slice(-7), 10));
         if (rec.subtype !== "instrument") continue;
@@ -159,7 +159,7 @@
     var rows = idx.filter(function (r) { return r[2] === "song"; });
     var body = openModal("Search the song archive", "", true);
     function draw(q) {
-      var h = '<div class="row"><div><label>Search songs</label><input type="text" id="ssq" placeholder="title, genre, mood, lyric word…"></div></div><div class="grid">', c = 0, i;
+      var h = '<div class="row"><div><label>Search songs</label><input type="text" id="ssq" value="' + esc(q || "") + '" placeholder="title, genre, mood, lyric word…"></div></div><div class="grid">', c = 0, i;
       q = (q || "").toLowerCase();
       for (i = 0; i < rows.length && c < 24; i++) {
         var rec = D.genSong(parseInt(rows[i][0].slice(-7), 10));

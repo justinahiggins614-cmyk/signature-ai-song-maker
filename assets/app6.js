@@ -55,27 +55,7 @@
   }
   window.__openGuides = openGuides;
 
-  /* ---------- stage framework ---------- */
-  var STAGE_NAMES = { 1: "Sounds", 2: "Beat", 3: "Lyrics", 4: "Singing", 5: "Mix/Master", 6: "Filters", 7: "Burn CD" };
-  var doneStages = {};
-  function markDone(n) { doneStages[n] = 1; var b = document.querySelector('#stagebtns [data-stage="' + n + '"]'); if (b) b.classList.add("done"); }
-  function gotoStage(n) {
-    PROJ.stage = n; saveProj();
-    Array.prototype.forEach.call(document.querySelectorAll("#stagebtns button"), function (b) {
-      b.classList.toggle("on", +b.getAttribute("data-stage") === n);
-    });
-    renderStage(n);
-    palSay(STAGE_TIPS[n] || "");
-  }
-  var STAGE_TIPS = {
-    1: "Stage 1 — Sounds: browse the library A–Z, pop any file open, preview it, and save the keepers to My Library.",
-    2: "Stage 2 — Beat: make your beat (try an 'Eminem type beat'!) and pick your instruments from the popup.",
-    3: "Stage 3 — Lyrics: search the song archive in a popup, or write your own — the AI can draft too.",
-    4: "Stage 4 — Singing: lead vocal, backup singers, and vocal edits. Your voice or a created voice.",
-    5: "Stage 5 — Mix/Master: blend the buses, then pick a master — radio, club, tape, streaming.",
-    6: "Stage 6 — Filters: universal, tape, stage, and a whole rack more. Stack them.",
-    7: "Stage 7 — Burn CD: order your songs, name the album and artist, tag the disc, burn it."
-  };
+  /* ---------- stage framework (live implementation in app6b.js) ---------- */
 
   /* ---------- AI pal ---------- */
   function palSay(t) { $("palsay").textContent = t; }
