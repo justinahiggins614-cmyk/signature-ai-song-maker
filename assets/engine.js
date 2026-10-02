@@ -184,6 +184,7 @@
     { key: "90s-boombap", name: "90s boom-bap style", bpm: [85, 96], note: "dusty head-nod groove of the 1990s boom-bap era" },
     { key: "00s-crunk", name: "00s crunk style", bpm: [65, 76], note: "rowdy call-and-response energy of the 2000s crunk era" }
   ];
+  var BEAT_ADJ = ["Neon", "Velvet", "Copper", "Midnight", "Amber", "Silver", "Crimson", "Golden", "Electric", "Quiet", "Paper", "Static", "Hollow", "Bright", "Distant", "Wild", "Slow", "Restless", "Patient", "Bold", "Smoky", "Chrome"];
   /* ---------- "type beat" style references ----------
      Original sonic profiles keyed by well-known style names. A profile
      describes ONLY the sound: pattern genre, tempo range, mood, and a
