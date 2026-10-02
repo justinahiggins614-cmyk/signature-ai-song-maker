@@ -40,6 +40,7 @@
     return new Blob([out], { type: "application/zip" });
   }
   function wavToBytes(blob) { return blob.arrayBuffer().then(function (ab) { return new Uint8Array(ab); }); }
+  window.__buildZip = buildZip;
 
   /* ---------- melody from lyrics (scale follows genre) ---------- */
   function melodyFromLyrics(lines, genre) {

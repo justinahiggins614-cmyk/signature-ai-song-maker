@@ -221,8 +221,8 @@
       if (act === "read") readAloud((rec.title || rec.name) + ". " + rec.desc + (rec.lyrics ? " Lyrics: " + rec.lyrics : ""), rec.id);
       if (act === "txt") navigator.clipboard.writeText(JSON.stringify(rec, null, 2));
       if (act === "json") navigator.clipboard.writeText(JSON.stringify(rec));
-      if (act === "play") { b.textContent = "Rendering…"; S.renderSong(rec, 60, window.__mixOf ? window.__mixOf() : null).then(function (buf) { S.playBuffer(buf); b.textContent = "▶ Play demo mix"; dl(S.bufferToWav(buf), rec.id + ".wav"); }); }
-      if (act === "wav") { b.textContent = "Rendering…"; S.renderSong(rec, 120, window.__mixOf ? window.__mixOf() : null).then(function (buf) { dl(S.bufferToWav(buf), rec.id + ".wav"); b.textContent = "⬇ .wav"; }); }
+      if (act === "play") { b.textContent = "Rendering…"; S.renderFullSong(rec, window.__mixOf ? window.__mixOf() : null, null).then(function (buf) { S.playBuffer(buf); b.textContent = "▶ Play demo mix"; dl(S.bufferToWav(buf), rec.id + ".wav"); }); }
+      if (act === "wav") { b.textContent = "Rendering…"; S.renderFullSong(rec, window.__mixOf ? window.__mixOf() : null, null).then(function (buf) { dl(S.bufferToWav(buf), rec.id + ".wav"); b.textContent = "⬇ .wav"; }); }
       if (act === "preview") previewSound(rec);
       if (act === "swav") renderSoundWav(rec);
       if (act === "bplay" && window.__playBeatRec) window.__playBeatRec(rec);

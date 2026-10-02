@@ -222,21 +222,27 @@
   };
   (function () {
     function showSong(rec) {
+      var styleLine = rec.styleNote ? '<div class="honest">🎯 ' + esc(rec.styleNote) + "</div>" : "";
       var h = '<div class="rec"><h3 style="color:var(--gold);margin-top:0">' + esc(rec.title) + ' <span class="id">' + esc(rec.id) + '</span></h3>' +
-        '<p class="meta">' + esc(rec.genre) + " · " + esc(rec.mood) + " · " + rec.tempo + " BPM · " + esc(rec.key) + '</p>' +
+        '<p class="meta">' + esc(rec.genre) + " · " + esc(rec.mood) + " · " + rec.tempo + " BPM · " + esc(rec.key) + '</p>' + styleLine +
         '<p class="chords">' + esc(rec.chords) + '</p><pre class="lyrics">' + esc(rec.lyrics) + "</pre>" +
         '<p><button class="btn" id="swplay">▶ Play demo mix</button> <button class="btn teal" id="swwav">⬇ .wav</button> ' +
         '<button class="btn ghost" id="swtxt">Copy spec</button> <button class="btn ghost" id="swopen">Open record →</button></p></div>';
       $("songout").innerHTML = h;
-      $("swplay").onclick = function () { try { S.unlockAudio(); } catch (e) {} this.textContent = "Rendering…"; var b = this; S.renderSong(rec, 60, window.__mixOf ? window.__mixOf() : null).then(function (buf) { S.playBuffer(buf, "song"); b.textContent = "▶ Play demo mix"; }); };
-      $("swwav").onclick = function () { this.textContent = "Rendering…"; var b = this; S.renderSong(rec, 120, window.__mixOf ? window.__mixOf() : null).then(function (buf) { dl(S.bufferToWav(buf), rec.id + ".wav"); b.textContent = "⬇ .wav"; }); };
+      $("swplay").onclick = function () { try { S.unlockAudio(); } catch (e) {} this.textContent = "Rendering…"; var b = this; S.renderFullSong(rec, window.__mixOf ? window.__mixOf() : null, null).then(function (buf) { S.playBuffer(buf, "song"); b.textContent = "▶ Play demo mix"; }); };
+      $("swwav").onclick = function () { this.textContent = "Rendering…"; var b = this; S.renderFullSong(rec, window.__mixOf ? window.__mixOf() : null, null).then(function (buf) { dl(S.bufferToWav(buf), rec.id + ".wav"); b.textContent = "⬇ .wav"; }); };
       $("swtxt").onclick = function () { navigator.clipboard.writeText(JSON.stringify(rec, null, 2)); this.textContent = "Copied!"; };
       $("swopen").onclick = function () { location.search = "?song=" + rec.id; };
     }
     $("songwrite").onclick = function () {
+      try { S.unlockAudio(); } catch (e) {}
       var theme = $("songtheme").value || "midnight highway";
-      var genre = window.__resolveGenre(theme, $("songgenre").value, S.GENRES);
-      showSong(window.__writeSong(theme, genre, $("songmood").value || undefined));
+      var styleRef = (D.parseStyleRequest) ? D.parseStyleRequest(theme) : null;
+      var genre = styleRef ? styleRef.genre : window.__resolveGenre(theme, $("songgenre").value, S.GENRES);
+      var mood = styleRef ? styleRef.mood : ($("songmood").value || undefined);
+      var rec = window.__writeSong(theme, genre, mood);
+      if (styleRef) rec.styleNote = styleRef.name + " type song — an original Signature composition in the style of " + styleRef.name + " (" + styleRef.note + "). Not affiliated with or endorsed by " + styleRef.name + "; no melodies or lyrics reproduced.";
+      showSong(rec);
     };
     $("songself").onclick = function () {
       var rec = D.genSong(1);

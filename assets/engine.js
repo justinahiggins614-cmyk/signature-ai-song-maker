@@ -241,7 +241,33 @@
     { name: "Daddy Yankee", aka: ["daddy yankee"], genre: "reggaeton", bpm: [95, 100], mood: "driving", note: "classic dembow riddim: the gasolina bounce" },
     { name: "Bad Bunny", aka: ["bad bunny"], genre: "reggaeton", bpm: [90, 100], mood: "smooth", note: "perreo-pop dembow bounce: moody and melodic" },
     { name: "Sean Paul", aka: ["sean paul"], genre: "dancehall", bpm: [100, 105], mood: "bright", note: "dutty-rock dancehall bounce: bashment bubble" },
-    { name: "Bob Marley", aka: ["bob marley"], genre: "reggae", bpm: [75, 90], mood: "chill", note: "one-drop roots groove: skanking offbeat, heavy heartbeat bass" }
+    { name: "Bob Marley", aka: ["bob marley"], genre: "reggae", bpm: [75, 90], mood: "chill", note: "one-drop roots groove: skanking offbeat, heavy heartbeat bass" },
+    { name: "Eminem", aka: ["eminem", "slim shady"], genre: "hip-hop", bpm: [88, 100], mood: "gritty", note: "relentless Detroit rap bounce: driving piano-style stabs, machine-tight drums" },
+    { name: "Dr. Dre", aka: ["dr. dre", "dr dre", "dre"], genre: "hip-hop", bpm: [90, 100], mood: "smooth", note: "G-funk west-coast glide: whining synth lead feel, deep rolling bass" },
+    { name: "Snoop Dogg", aka: ["snoop dogg", "snoop"], genre: "hip-hop", bpm: [90, 98], mood: "chill", note: "laid-back G-funk flow: lazy drawl groove, smooth funk bounce" },
+    { name: "50 Cent", aka: ["50 cent", "fifty cent"], genre: "hip-hop", bpm: [88, 98], mood: "driving", note: "early-00s club-rap bounce: catchy synth hooks, hard drums" },
+    { name: "Lil Wayne", aka: ["lil wayne", "weezy"], genre: "hip-hop", bpm: [90, 100], mood: "driving", note: "mixtape-era southern bounce: syrupy synths, triplet flows feel" },
+    { name: "Nicki Minaj", aka: ["nicki minaj", "nicki"], genre: "hip-hop", bpm: [95, 110], mood: "bright", note: "playful barbie-era bounce: bouncy drums, animated delivery feel" },
+    { name: "Cardi B", aka: ["cardi b", "cardi"], genre: "hip-hop", bpm: [95, 105], mood: "driving", note: "bronx bodak bounce: brash drums, club-ready energy" },
+    { name: "Post Malone", aka: ["post malone", "posty"], genre: "hip-hop", bpm: [85, 100], mood: "dreamy", note: "guitar-tinged melodic rap: hazy chords, sad-boy bounce" },
+    { name: "Rihanna", aka: ["rihanna", "riri"], genre: "pop", bpm: [95, 115], mood: "smooth", note: "island-pop royalty bounce: dancehall-inflected groove" },
+    { name: "Adele", aka: ["adele"], genre: "pop", bpm: [70, 90], mood: "epic", note: "soul-ballad grandeur: piano-led, powerhouse lift" },
+    { name: "Ed Sheeran", aka: ["ed sheeran"], genre: "pop", bpm: [95, 110], mood: "bright", note: "loop-pedal folk-pop: acoustic bounce, catchy lift" },
+    { name: "Prince", aka: ["prince"], genre: "funk", bpm: [95, 115], mood: "driving", note: "minneapolis funk mastery: linn-style drums, falsetto-ready bounce" },
+    { name: "Stevie Wonder", aka: ["stevie wonder", "stevie"], genre: "funk", bpm: [95, 110], mood: "bright", note: "soul-funk genius bounce: clavinet-style groove, joyful swing" },
+    { name: "James Brown", aka: ["james brown"], genre: "funk", bpm: [95, 110], mood: "driving", note: "godfather-of-soul funk: the hardest working drums in show business" },
+    { name: "Marvin Gaye", aka: ["marvin gaye", "marvin"], genre: "60s-soul", bpm: [85, 100], mood: "smooth", note: "what's-going-on soul: silky groove, socially conscious warmth" },
+    { name: "The Beatles", aka: ["the beatles", "beatles"], genre: "pop", bpm: [110, 130], mood: "bright", note: "british-invasion bounce: jangly lift, timeless songcraft" },
+    { name: "Jimi Hendrix", aka: ["jimi hendrix", "hendrix"], genre: "rock", bpm: [100, 120], mood: "epic", note: "psychedelic guitar-fire groove: wah-drenched bounce" },
+    { name: "Led Zeppelin", aka: ["led zeppelin", "zeppelin"], genre: "rock", bpm: [100, 120], mood: "epic", note: "thunder-god rock: Bonham-style stomp, riff monoliths" },
+    { name: "Pink Floyd", aka: ["pink floyd"], genre: "rock", bpm: [90, 110], mood: "dreamy", note: "cosmic prog drift: spacious groove, atmospheric lift" },
+    { name: "David Bowie", aka: ["david bowie", "bowie"], genre: "rock", bpm: [100, 120], mood: "driving", note: "stardust art-rock: chameleon bounce, theatrical lift" },
+    { name: "Elton John", aka: ["elton john", "elton"], genre: "pop", bpm: [95, 115], mood: "bright", note: "piano-man pop-rock: rolling ivories, rocket lift" },
+    { name: "Madonna", aka: ["madonna"], genre: "pop", bpm: [115, 125], mood: "bright", note: "queen-of-pop dance: synth-pop strut, vogue-ready groove" },
+    { name: "Coldplay", aka: ["coldplay"], genre: "pop", bpm: [95, 115], mood: "epic", note: "stadium-anthem lift: shimmering guitars, skyward build" },
+    { name: "Linkin Park", aka: ["linkin park"], genre: "rock", bpm: [100, 120], mood: "gritty", note: "nu-metal hybrid drive: rap-rock bounce, electronic edge" },
+    { name: "Red Hot Chili Peppers", aka: ["red hot chili peppers", "rhcp", "chili peppers"], genre: "funk", bpm: [100, 115], mood: "bright", note: "cali funk-rock slap: bouncy bass, party energy" },
+    { name: "Guns N' Roses", aka: ["guns n' roses", "guns n roses", "gnr"], genre: "rock", bpm: [110, 130], mood: "driving", note: "sunset-strip sleaze rock: swaggering shuffle, screaming lift" }
   ];
   /* Detect "[name] type beat" / "[name]-type beat" / "[name] style beat" /
      "in the style of [name]" phrasing in a request. Returns the matched
@@ -249,7 +275,9 @@
   D.parseStyleRequest = function (prompt) {
     var p = " " + String(prompt || "").toLowerCase().replace(/[''']/g, "'") + " ";
     if (p.indexOf("type beat") === -1 && p.indexOf("type-beat") === -1 &&
-        p.indexOf("style beat") === -1 && p.indexOf("in the style of") === -1) return null;
+        p.indexOf("style beat") === -1 && p.indexOf("in the style of") === -1 &&
+        p.indexOf("type song") === -1 && p.indexOf("type-song") === -1 &&
+        p.indexOf("type track") === -1 && p.indexOf("style song") === -1) return null;
     var i, j, ak, ref;
     for (i = 0; i < STYLE_REFS.length; i++) {
       ref = STYLE_REFS[i];
@@ -257,6 +285,8 @@
         ak = " " + ref.aka[j] + " ";
         if (p.indexOf(ak + "type beat") !== -1 || p.indexOf(ak + "type-beat") !== -1 ||
             p.indexOf(ak.replace(/ $/, "-") + "type beat") !== -1 ||
+            p.indexOf(ak + "type song") !== -1 || p.indexOf(ak + "type-song") !== -1 ||
+            p.indexOf(ak + "type track") !== -1 || p.indexOf(ak + "style song") !== -1 ||
             p.indexOf(ak + "style beat") !== -1 || p.indexOf(ak + "style") !== -1 ||
             p.indexOf("in the style of" + ak) !== -1) return ref;
       }
