@@ -19,7 +19,7 @@
     ["Spec Catalog", "signature-one-archive/specs.html"], ["Signature Llama", "signature-llama"], ["PC Depository", "jah-computer-systems"],
     ["Cyber Mega-Mall", "signature-cyber-mega-mall"], ["Signature University", "signature-university"], ["Book Depository", "signature-books"],
     ["Comic Store", "signature-comics"], ["Global Newspaper Archive", "signature-newspapers"], ["3D Print Depository", "signature-3d-print"],
-    ["Signature Backend", "signature-backend"], ["Boundless Generator Archive", "signature-boundless-generators"], ["AI Mix Lab", "signature-ai-mixlab"],
+    ["Mad Scientist Lab", "signature-backend"], ["Boundless Generator Archive", "signature-boundless-generators"], ["AI Mix Lab", "signature-ai-mixlab"],
     ["AI Olypics", "signature-ai-olypics"], ["Chip Maker and Archive", "signature-chip-maker"], ["App Archive", "signature-app-archive"],
     ["AI Robot Matcher", "signature-ai-robot-matcher"], ["Experiment Solver", "signature-experiment-solver"], ["Signature AI Pixel", "signature-ai-image-video-maker"]
   ];
@@ -43,16 +43,21 @@
     });
   });
 
-  /* ---------- tiered read-aloud (speechSynthesis -> ResponsiveVoice -> Google TTS) ---------- */
+  /* ---------- tiered read-aloud (speechSynthesis -> ResponsiveVoice -> Google TTS) ----------
+     BUG FIX 2026-10-02: Facebook's in-app browser has NO speechSynthesis.
+     The old code then waited on a 9-second ResponsiveVoice script timeout
+     before falling to Google TTS — the tap appeared dead. Now: no
+     speechSynthesis -> straight to Google TTS audio, instantly, inside
+     the tap gesture. */
   var readQueue = [], reading = false, readText = "";
   function speakTier(text, done) {
     try {
-      if ("speechSynthesis" in window) {
+      if ("speechSynthesis" in window && window.speechSynthesis) {
         var u = new SpeechSynthesisUtterance(text); u.rate = 1; u.onend = done; u.onerror = done;
         speechSynthesis.cancel(); speechSynthesis.speak(u); return;
       }
     } catch (e) {}
-    tier2(text, done);
+    tier3(text, done);
   }
   function tier2(text, done) {
     try {
@@ -212,6 +217,7 @@
     box.addEventListener("click", function (e) {
       var b = e.target.closest("[data-act]"); if (!b) return;
       var act = b.getAttribute("data-act");
+      if (act === "play" || act === "bplay" || act === "preview") { try { S.unlockAudio(); } catch (e2) {} }
       if (act === "read") readAloud((rec.title || rec.name) + ". " + rec.desc + (rec.lyrics ? " Lyrics: " + rec.lyrics : ""), rec.id);
       if (act === "txt") navigator.clipboard.writeText(JSON.stringify(rec, null, 2));
       if (act === "json") navigator.clipboard.writeText(JSON.stringify(rec));

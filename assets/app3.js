@@ -87,6 +87,7 @@
     };
     function selBackups() { return Array.prototype.map.call($("vbackup").selectedOptions, function (o) { return o.value; }); }
     $("vsing").onclick = function () {
+      try { S.unlockAudio(); } catch (e) {}
       var lines = $("vlyrics").value.split("\n").map(function (l) { return l.trim(); }).filter(Boolean);
       if (!lines.length) { $("vinfo").textContent = "Type some lyrics first."; return; }
       var genre = window.__resolveGenre(lines.join(" "), $("vgenre").value, D.BEAT_STYLES);
@@ -99,7 +100,7 @@
       p.then(function (buf) { vocalBuf = buf; S.playBuffer(buf, "vocal"); b.textContent = "🎤 Sing it"; $("vinfo").textContent = "Done — synthesized vocal" + (backs.length ? " with " + backs.join(", ") : "") + ". Labeled synthesized, always."; })
        .catch(function (e) { b.textContent = "🎤 Sing it"; $("vinfo").textContent = "Couldn't render: " + e.message; });
     };
-    $("vplay").onclick = function () { if (vocalBuf) S.playBuffer(vocalBuf, "vocal"); };
+    $("vplay").onclick = function () { try { S.unlockAudio(); } catch (e) {} if (vocalBuf) S.playBuffer(vocalBuf, "vocal"); };
     $("vwav").onclick = function () { if (vocalBuf) dl(S.bufferToWav(vocalBuf), "signature-vocal.wav"); };
   })();
 
@@ -118,6 +119,7 @@
       $("bkspec").textContent = "Backup singers to spec: " + chosenBackups.join(", ");
     });
     $("bkhear").onclick = function () {
+      try { S.unlockAudio(); } catch (e) {}
       if (!chosenBackups.length) { $("bkspec").textContent = "Pick at least one type first."; return; }
       var mel = [{ midi: 64, len: 1 }, { midi: 67, len: 1 }, { midi: 69, len: 2 }, { midi: 67, len: 1 }];
       S.renderVocal(mel, "ember", chosenBackups, 20).then(function (buf) { S.playBuffer(buf, "backup"); });
@@ -133,11 +135,13 @@
       f.arrayBuffer().then(function (ab) { S.ensureCtx().decodeAudioData(ab).then(function (buf) { upBuf = buf; $("cuinfo").textContent = "Vocals loaded (" + buf.duration.toFixed(1) + "s)."; }); });
     };
     $("cuclean").onclick = function () {
+      try { S.unlockAudio(); } catch (e) {}
       if (!upBuf) { $("cuinfo").textContent = "Upload your vocals first."; return; }
       var b = this; b.textContent = "Cleaning…";
       S.cleanupVocal(upBuf).then(function (buf) { cleanBuf = buf; S.playBuffer(buf, "clean"); b.textContent = "✨ AI: Clean it up"; $("cuinfo").textContent = "Cleaned: de-rumble, de-hiss, compression, normalized. Honest work — no magic."; });
     };
     $("curesing").onclick = function () {
+      try { S.unlockAudio(); } catch (e) {}
       if (!upBuf) { $("cuinfo").textContent = "Upload your vocals first."; return; }
       var b = this; b.textContent = "Detecting…";
       // detect pitch across windows, quantize to a melody, re-sing with the synth
@@ -151,7 +155,7 @@
       b.textContent = "Singing…";
       S.renderVocal(mel, "nova", [], 60).then(function (buf) { cleanBuf = buf; S.playBuffer(buf, "clean"); b.textContent = "🎤 AI: Re-sing it clean"; $("cuinfo").textContent = "Re-sung clean: detected " + mel.length + " notes and sang them back with the Nova synth voice."; });
     };
-    $("cuplay").onclick = function () { if (cleanBuf) S.playBuffer(cleanBuf, "clean"); };
+    $("cuplay").onclick = function () { try { S.unlockAudio(); } catch (e) {} if (cleanBuf) S.playBuffer(cleanBuf, "clean"); };
     $("cuwav").onclick = function () { if (cleanBuf) dl(S.bufferToWav(cleanBuf), "signature-vocal-clean.wav"); };
   })();
 

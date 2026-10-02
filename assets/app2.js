@@ -80,6 +80,7 @@
     });
     $("libgrid").addEventListener("click", function (e) {
       var p = e.target.closest("[data-libplay]"), o = e.target.closest("[data-libopen]");
+      if (p || o) { try { S.unlockAudio(); } catch (e2) {} }
       if (p) window.__findRecord(p.getAttribute("data-libplay")).then(previewSound);
       if (o) { location.search = "?sound=" + o.getAttribute("data-libopen"); }
     });
@@ -156,6 +157,7 @@
     fillGenre(vsel, D.BEAT_STYLES);
     S.MOODS.forEach(function (m) { var o = document.createElement("option"); o.value = m; o.textContent = m; msel.appendChild(o); });
     $("beatmake").onclick = function () {
+      try { S.unlockAudio(); } catch (e) {}
       var prompt = $("beatprompt").value || "untitled groove";
       var styleRef = (D.parseStyleRequest) ? D.parseStyleRequest(prompt) : null;
       var genre, bpm;
@@ -199,11 +201,12 @@
     }
     $("patterngrid").addEventListener("click", function (e) {
       var td = e.target.closest("[data-lane]"); if (!td || !beatPat) return;
+      try { S.unlockAudio(); } catch (e2) {}
       var lane = td.getAttribute("data-lane"), st = +td.getAttribute("data-step");
       beatPat.steps[lane][st] = beatPat.steps[lane][st] ? 0 : 1;
       renderBeatBuf();
     });
-    $("beatplay").onclick = function () { if (beatBuf) S.playBuffer(beatBuf, "beat"); };
+    $("beatplay").onclick = function () { try { S.unlockAudio(); } catch (e) {} if (beatBuf) S.playBuffer(beatBuf, "beat"); };
     $("beatstop").onclick = function () { S.stopLive("beat"); };
     $("beatwav").onclick = function () { if (beatBuf) dl(S.bufferToWav(beatBuf), "signature-beat.wav"); };
   })();
@@ -224,7 +227,7 @@
         '<p><button class="btn" id="swplay">▶ Play demo mix</button> <button class="btn teal" id="swwav">⬇ .wav</button> ' +
         '<button class="btn ghost" id="swtxt">Copy spec</button> <button class="btn ghost" id="swopen">Open record →</button></p></div>';
       $("songout").innerHTML = h;
-      $("swplay").onclick = function () { this.textContent = "Rendering…"; var b = this; S.renderSong(rec, 60, window.__mixOf ? window.__mixOf() : null).then(function (buf) { S.playBuffer(buf, "song"); b.textContent = "▶ Play demo mix"; }); };
+      $("swplay").onclick = function () { try { S.unlockAudio(); } catch (e) {} this.textContent = "Rendering…"; var b = this; S.renderSong(rec, 60, window.__mixOf ? window.__mixOf() : null).then(function (buf) { S.playBuffer(buf, "song"); b.textContent = "▶ Play demo mix"; }); };
       $("swwav").onclick = function () { this.textContent = "Rendering…"; var b = this; S.renderSong(rec, 120, window.__mixOf ? window.__mixOf() : null).then(function (buf) { dl(S.bufferToWav(buf), rec.id + ".wav"); b.textContent = "⬇ .wav"; }); };
       $("swtxt").onclick = function () { navigator.clipboard.writeText(JSON.stringify(rec, null, 2)); this.textContent = "Copied!"; };
       $("swopen").onclick = function () { location.search = "?song=" + rec.id; };

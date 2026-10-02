@@ -20,7 +20,15 @@
   function pick(rng, arr) { return arr[Math.floor(rng() * arr.length) % arr.length]; }
   function midiHz(m) { return 440 * Math.pow(2, (m - 69) / 12); }
 
-  /* ---------- audio context (lazy) ---------- */
+  /* ---------- audio context (lazy) ----------
+     BUG FIX 2026-10-02 (his phone report: taps play, hears nothing):
+     In-app WebViews (Facebook etc.) start the AudioContext SUSPENDED and
+     only allow resume() inside a real user gesture. The old code called
+     ac() -> resume() inside promise .then() continuations (after an async
+     offline render), which is no longer the gesture, so the context stayed
+     suspended forever -> silence. Fix: unlockAudio() runs SYNCHRONOUSLY at
+     the top of every tap handler, plus a document-level pointerdown/
+     touchend hook unlocks on the very first tap anywhere. */
   var _ctx = null, _master = null, _noiseBuf = null, _analyser = null;
   function ac() {
     if (!_ctx) {
@@ -31,8 +39,33 @@
       _analyser = _ctx.createAnalyser(); _analyser.fftSize = 512;
       _master.connect(_analyser); _analyser.connect(_ctx.destination);
     }
-    if (_ctx.state === "suspended") _ctx.resume();
+    if (_ctx.state === "suspended") { try { var p = _ctx.resume(); if (p && p.catch) p.catch(function () {}); } catch (e) {} }
     return _ctx;
+  }
+  function unlockAudio() {
+    try {
+      var c = ac();
+      if (c && c.state === "suspended" && c.resume) { var p2 = c.resume(); if (p2 && p2.catch) p2.catch(function () {}); }
+    } catch (e) { /* surfaced by playBuffer toast */ }
+    return _ctx;
+  }
+  function audioToast(msg) {
+    try {
+      var doc = root.document; if (!doc) return;
+      var d = doc.getElementById("__sig_audio_toast");
+      if (!d) {
+        d = doc.createElement("div"); d.id = "__sig_audio_toast";
+        d.style.cssText = "position:fixed;left:50%;bottom:70px;transform:translateX(-50%);background:#1a1428;color:#f5c542;border:2px solid #f5c542;border-radius:10px;padding:10px 16px;z-index:99999;font-size:14px;max-width:90vw;text-align:center";
+        doc.body.appendChild(d);
+      }
+      d.textContent = msg; d.style.display = "block";
+      clearTimeout(d.__t); d.__t = setTimeout(function () { d.style.display = "none"; }, 4000);
+    } catch (e) {}
+  }
+  if (root.document && root.document.addEventListener) {
+    var _unlockOnce = function () { unlockAudio(); };
+    root.document.addEventListener("pointerdown", _unlockOnce, { passive: true });
+    root.document.addEventListener("touchend", _unlockOnce, { passive: true });
   }
   /* live VU level: 0..1 RMS off the master analyser */
   var _vuBuf = null;
@@ -405,8 +438,17 @@
   var _live = {};
   function playBuffer(buf, id) {
     stopLive(id || "main");
-    var c = ac(), src = c.createBufferSource(); src.buffer = buf; src.connect(_master); src.start();
-    _live[id || "main"] = src; return src;
+    var c = unlockAudio();
+    if (!c) { audioToast("Audio is not available in this browser."); return null; }
+    if (c.state === "suspended") {
+      audioToast("Tap the play button again — your browser held the audio the first time.");
+      try { c.resume(); } catch (e) {}
+      return null;
+    }
+    try {
+      var src = c.createBufferSource(); src.buffer = buf; src.connect(_master); src.start();
+      _live[id || "main"] = src; return src;
+    } catch (e) { audioToast("Couldn't play the audio: " + e.message); return null; }
   }
   function stopLive(id) { var s = _live[id || "main"]; if (s) { try { s.stop(); } catch (e) {} delete _live[id || "main"]; } }
   function playTone(midi, dur, voice) { var c = ac(); tone(c, _master, c.currentTime + 0.02, midi, dur || 1, voice || "keys", 1); }
@@ -423,6 +465,6 @@
     renderVocal: renderVocal, renderOwnVoice: renderOwnVoice,
     detectPitch: detectPitch, nearestMidi: nearestMidi, cleanupVocal: cleanupVocal,
     playBuffer: playBuffer, stopLive: stopLive, playTone: playTone, playDrum: playDrum,
-    ensureCtx: ac, meterLevel: meterLevel, makeBuses: makeBuses
+    ensureCtx: ac, unlockAudio: unlockAudio, meterLevel: meterLevel, makeBuses: makeBuses
   };
 })(typeof window !== "undefined" ? window : (typeof self !== "undefined" ? self : this));

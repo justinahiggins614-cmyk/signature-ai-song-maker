@@ -68,6 +68,7 @@
     $("beatq").oninput = draw;
     $("beatgrid").addEventListener("click", function (e) {
       var p = e.target.closest("[data-bplay]"), o = e.target.closest("[data-bopen]");
+      if (p) { try { S.unlockAudio(); } catch (e2) {} }
       if (p) window.__findRecord(p.getAttribute("data-bplay")).then(playBeatRec);
       if (o) { location.search = "?beat=" + o.getAttribute("data-bopen"); }
     });
