@@ -113,3 +113,8 @@ canvas.wave{width:100%;height:90px;background:#0d0a14;border:1px solid var(--lin
 .fxcard.on{border-color:var(--gold);box-shadow:0 0 8px rgba(245,197,66,.4)}
 .fxcard b{color:var(--gold);display:block;margin-bottom:4px}
 .mylib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+/* ---- song walkthrough ---- */
+.sigmodal-body .say{background:#241d38;border-radius:10px;padding:10px 14px;margin:8px 0;font-size:15px}
+.walkprog{font-size:13px;color:var(--mut);letter-spacing:1px}
+.sigmodal-body label{font-size:15px}
+.sigmodal-body input[type=text],.sigmodal-body input[type=number],.sigmodal-body textarea,.sigmodal-body select{background:#0d0a14;border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:9px 10px;font-size:15px}

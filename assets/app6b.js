@@ -269,9 +269,12 @@
     var chain = Promise.resolve(), tracks = [], start = 0;
     ids.forEach(function (id) {
       chain = chain.then(function () {
-        return window.__findRecord(id).then(function (rec) {
+        return (window.__resolveTrack || window.__findRecord)(id).then(function (rec) {
           var songLike = rec.kind === "song" ? rec : { id: id, title: rec.name || id, genre: "hip-hop", tempo: 92 };
-          return S.renderFullSong(songLike, PROJ.mix, PROJ.fx.map(function (f) { return { id: f.id }; })).then(function (buf) {
+          var renderP = rec._studio
+            ? S.renderStudioSong(rec._studio, PROJ.mix, PROJ.fx.map(function (f) { return { id: f.id }; }))
+            : S.renderFullSong(songLike, PROJ.mix, PROJ.fx.map(function (f) { return { id: f.id }; }));
+          return renderP.then(function (buf) {
             tracks.push({ title: songLike.title, buf: buf, start: start });
             start += buf.duration + 2;
           });

@@ -672,6 +672,359 @@
     renderVocal: renderVocal, renderOwnVoice: renderOwnVoice,
     detectPitch: detectPitch, nearestMidi: nearestMidi, cleanupVocal: cleanupVocal,
     playBuffer: playBuffer, stopLive: stopLive, playTone: playTone, playDrum: playDrum,
+    kick: kick, snare: snare, hat: hat, clap: clap, tom: tom, shaker: shaker,
+    tone: tone, riser: riser, singNote: singNote,
     ensureCtx: ac, unlockAudio: unlockAudio, meterLevel: meterLevel, makeBuses: makeBuses
   };
+})(typeof window !== "undefined" ? window : (typeof self !== "undefined" ? self : this));
+
+/* ============================================================
+   SigSynth studio extension — the 5-minute full-song standard,
+   custom voice profiles, placement-aware scheduling.
+   Standard: intro build-up, THREE 30-second chorus breaks,
+   fade out (or chosen ending). Total: exactly 5:00.
+   ============================================================ */
+(function (root) {
+  "use strict";
+  var S = root.SigSynth;
+  if (!S) return;
+
+  /* ---------- 24 custom voice profiles ----------
+     man / woman / boy / girl x deep / light x low / mid / high.
+     Honest: all synthesized formant voices, labeled as such. */
+  var VOICE_BASES = [
+    { k: "man-deep",    label: "Man · Deep",    formants: [300, 800, 2100],  vib: 4.0, oct: -12 },
+    { k: "man-light",   label: "Man · Light",   formants: [450, 1050, 2500], vib: 5.0, oct: -5 },
+    { k: "woman-deep",  label: "Woman · Deep",  formants: [480, 1100, 2400], vib: 5.0, oct: 0 },
+    { k: "woman-light", label: "Woman · Light", formants: [600, 1400, 2800], vib: 5.5, oct: 0 },
+    { k: "boy-deep",    label: "Boy · Deep",    formants: [520, 1200, 2700], vib: 6.0, oct: 5 },
+    { k: "boy-light",   label: "Boy · Light",   formants: [650, 1500, 3000], vib: 6.5, oct: 7 },
+    { k: "girl-deep",   label: "Girl · Deep",   formants: [560, 1300, 2800], vib: 6.0, oct: 7 },
+    { k: "girl-light",  label: "Girl · Light",  formants: [700, 1600, 3200], vib: 7.0, oct: 12 }
+  ];
+  var VOICE_RANGES = [["low", -5, "Low range"], ["mid", 0, "Mid range"], ["high", 5, "High range"]];
+  var VOICE_PROFILES = [];
+  VOICE_BASES.forEach(function (b) {
+    VOICE_RANGES.forEach(function (r) {
+      VOICE_PROFILES.push({ id: b.k + "-" + r[0], label: b.label + " · " + r[2],
+        formants: b.formants.slice(), vib: b.vib, level: 0.55, oct: b.oct + r[1] });
+    });
+  });
+  function voiceProfile(id) {
+    var i;
+    for (i = 0; i < VOICE_PROFILES.length; i++) if (VOICE_PROFILES[i].id === id) return VOICE_PROFILES[i];
+    for (i = 0; i < S.CREATED_VOICES.length; i++) {
+      var cv = S.CREATED_VOICES[i];
+      if (cv.id === id) return { id: cv.id, label: cv.name + " (synth)", formants: cv.formants, vib: cv.vib, level: cv.level, oct: 0 };
+    }
+    return VOICE_PROFILES[10]; /* woman-light-mid */
+  }
+
+  /* ---------- placement zones (seconds) ---------- */
+  function zoneOf(t) { return t < 84 ? "beginning" : (t < 174 ? "middle" : "end"); }
+  function zoneHit(t, zones) {
+    if (!zones || !zones.length) return true;
+    return zones.indexOf(zoneOf(t)) !== -1;
+  }
+
+  /* ---------- snare voices ---------- */
+  function playSnare(c, dest, t, v, kind) {
+    if (kind === "rim") { S.snare(c, dest, t, v * 0.5); return; }
+    if (kind === "brush") { S.shaker(c, dest, t, v * 0.9); return; }
+    if (kind === "clapstack") { S.clap(c, dest, t, v); S.snare(c, dest, t, v * 0.6); return; }
+    S.snare(c, dest, t, v); /* crack */
+  }
+  /* ---------- bass voices: one call covers a 2-bar (32-step) slot ---------- */
+  function playBass(c, dest, t, midi, kind, step, bus) {
+    var i;
+    if (kind === "funk") {
+      for (i = 0; i < 32; i += 2) S.tone(c, dest, t + i * step, midi + (i % 16 === 14 ? 7 : 0), step * 1.6, "bass", 0.85, bus);
+    } else if (kind === "reese") {
+      S.tone(c, dest, t, midi, step * 30, "bass", 0.8, bus);
+      S.tone(c, dest, t, midi + 1, step * 30, "bass", 0.45, bus);
+    } else if (kind === "punch") {
+      for (i = 0; i < 8; i++) S.tone(c, dest, t + i * 4 * step, midi + (i % 4 === 3 ? 12 : 0), step * 3, "bass", 0.9, bus);
+    } else { /* deep sub */
+      for (i = 0; i < 8; i++) S.tone(c, dest, t + i * 4 * step, midi, step * 3.4, "sub", 0.9, bus);
+    }
+  }
+  function playFill(c, dest, t, step, v) {
+    var seq = [48, 50, 52, 55], i;
+    for (i = 0; i < 8; i++) S.tom(c, dest, t + i * step, v, seq[Math.min(3, Math.floor(i / 2))]);
+    playSnare(c, dest, t + 8 * step, v, "crack");
+  }
+  function drumStep(c, dd, t, st, i, v, snareKind) {
+    if (st.kick[i]) S.kick(c, dd, t, v);
+    if (st.snare[i]) playSnare(c, dd, t, v, snareKind);
+    if (st.hat[i]) S.hat(c, dd, t, v * 0.9, i % 4 === 3);
+    if (st.clap[i]) S.clap(c, dd, t, v);
+    if (st.tom[i]) S.tom(c, dd, t, v, 50);
+    if (st.shaker[i]) S.shaker(c, dd, t, v);
+  }
+
+  /* ---------- the 5:00 standard ---------- */
+  var SONG_LEN = 300;
+  function studioSections() {
+    return [
+      { name: "Intro build-up", start: 0,   end: 24,  kind: "build" },
+      { name: "Verse",          start: 24,  end: 54,  kind: "verse" },
+      { name: "Chorus break 1", start: 54,  end: 84,  kind: "chorus", brk: 1 },
+      { name: "Verse 2",        start: 84,  end: 114, kind: "verse" },
+      { name: "Chorus break 2", start: 114, end: 144, kind: "chorus", brk: 2 },
+      { name: "Bridge",         start: 144, end: 174, kind: "bridge" },
+      { name: "Chorus break 3", start: 174, end: 204, kind: "chorus", brk: 3 },
+      { name: "Out jam",        start: 204, end: 285, kind: "jam" },
+      { name: "Ending",         start: 285, end: 300, kind: "ending" }
+    ];
+  }
+
+  /* spec: {seed,title,genre,bpm,rhythm,bass{kind,zones},snare{kind,zones},
+     fills{kind,zones},custom[{voice,zones}],extras[{voice,feel,zones}],
+     chorus:"same"|"bigger"|"different",ending:"fade"|"funky"|"designed",
+     endingNote,lyrics,voiceId,ownSample(AudioBuffer|null),backups[]} */
+  function renderStudioSong(spec, mix, fxList) {
+    spec = spec || {};
+    var bpm = Math.max(60, Math.min(180, spec.bpm || 100));
+    var step = 60 / bpm / 4, barLen = 16 * step;
+    var rng = S.rngFrom("studio:" + (spec.seed || "untitled"));
+    var genre = spec.genre || "hip-hop";
+    var keyRoot = 48 + Math.floor(rng() * 12);
+    var chords = S.chordsFor(keyRoot, genre, rng);
+    var altPool = ["trap", "drum-and-bass", "house", "funk", "hip-hop", "techno"];
+    var altGenre = altPool[Math.floor(rng() * altPool.length)];
+    if (altGenre === genre) altGenre = "trap";
+    var altChords = S.chordsFor(keyRoot, altGenre, rng);
+    var rhythmGenre = (spec.rhythm && spec.rhythm !== "auto") ? spec.rhythm : genre;
+    var pat = S.patternFor((spec.seed || "x") + ":main", rhythmGenre, bpm);
+    var chorusPat = spec.chorus === "different"
+      ? S.patternFor((spec.seed || "x") + ":chorus2", altGenre, bpm)
+      : S.patternFor((spec.seed || "x") + ":chorus", rhythmGenre, bpm);
+    var bridgePat = S.patternFor((spec.seed || "x") + ":bridge", altGenre, bpm);
+    var sections = studioSections();
+    var melody = S.melodyFor(chords, 150, rng);
+    var bassKind = (spec.bass && spec.bass.kind) || "sub";
+    var bassZones = (spec.bass && spec.bass.zones) || null;
+    var snareKind = (spec.snare && spec.snare.kind) || "crack";
+    var snareZones = (spec.snare && spec.snare.zones) || null;
+    var fillsKind = (spec.fills && spec.fills.kind) || "toms";
+    var fillsZones = (spec.fills && spec.fills.zones) || null;
+    var custom = spec.custom || [];
+    var extras = spec.extras || [];
+    var ending = spec.ending || "fade";
+    var vp = voiceProfile(spec.voiceId || "woman-light-mid");
+    var lines = spec.lyrics ? String(spec.lyrics).split("\n").map(function (l) { return l.trim(); }).filter(Boolean) : [];
+    var backups = spec.backups || [];
+    var ownSample = spec.ownSample || null;
+
+    /* vocal plan: lyric lines spread across verse/chorus sections */
+    var vocalSecs = ["Verse", "Chorus break 1", "Verse 2", "Chorus break 2", "Chorus break 3"];
+    var per = lines.length ? Math.max(1, Math.ceil(lines.length / vocalSecs.length)) : 0;
+    var vocalNotes = []; /* {t, midi, dur, line} */
+    if (lines.length) {
+      var li = 0, si, sec;
+      for (si = 0; si < vocalSecs.length && li < lines.length; si++) {
+        sec = null;
+        var s2; for (s2 = 0; s2 < sections.length; s2++) if (sections[s2].name === vocalSecs[si]) sec = sections[s2];
+        if (!sec) continue;
+        var take = Math.min(per, lines.length - li), k;
+        for (k = 0; k < take; k++, li++) {
+          var lt0 = sec.start + (k / take) * (sec.end - sec.start);
+          var llen = (sec.end - sec.start) / take;
+          var words = lines[li].split(/\s+/).filter(Boolean), w;
+          var base = 60 + vp.oct + [0, 4, 7, 12][Math.floor(rng() * 4)];
+          for (w = 0; w < words.length; w++) {
+            base += Math.floor(rng() * 5) - 2;
+            vocalNotes.push({ t: lt0 + (w / words.length) * llen, midi: base, dur: Math.max(0.18, llen / words.length * 0.9), word: words[w] });
+          }
+        }
+      }
+    } else {
+      /* instrumental: sing the melody line on "ooh" through verses + choruses */
+      var mt = 24, mi = 0;
+      while (mt < 285 && mi < melody.length) {
+        var n = melody[mi++];
+        if (n.midi > 0) vocalNotes.push({ t: mt, midi: n.midi + vp.oct - 12, dur: n.len * step * 0.9, word: "ooh" });
+        mt += n.len * step;
+      }
+    }
+
+    return S.renderBuffer(SONG_LEN + 0.5, function (c, dest, t0) {
+      var fin = c.createGain(); fin.connect(dest); /* ending envelope lives here */
+      var mx = S.makeBuses(c, fin, mix);
+      var dd = mx.drums, bb = mx.bass, cc = mx.chords, ll = mx.lead, vb = mx.vocal;
+      var s, t, i, b;
+
+      /* intro riser across the build-up */
+      S.riser(c, fin, t0 + 2, 20, 0.9);
+
+      for (s = 0; s < sections.length; s++) {
+        var sec = sections[s];
+        var isChorus = sec.kind === "chorus", isBridge = sec.kind === "bridge";
+        var st = isBridge ? bridgePat.steps : (isChorus ? chorusPat.steps : pat.steps);
+        var vel = sec.kind === "build" ? 0.55 : sec.kind === "verse" ? 0.92 : isChorus ? 1.06 : isBridge ? 1.0 : sec.kind === "jam" ? 0.95 : 0.9;
+        /* drums on the step grid */
+        for (t = sec.start; t < sec.end - 0.001; t += step) {
+          var ti = Math.round((t - sec.start) / step) % 16;
+          var tv = vel, tt = t0 + t;
+          if (sec.kind === "build") tv *= 0.35 + 0.65 * (t / 24); /* build-up swell */
+          if (sec.kind === "ending" && ending === "fade") tv *= Math.max(0.15, 1 - (t - 285) / 15);
+          var snOn = zoneHit(t, snareZones);
+          if (st.kick[ti]) S.kick(c, dd, tt, tv);
+          if (st.snare[ti] && snOn) playSnare(c, dd, tt, tv, snareKind);
+          if (st.hat[ti]) S.hat(c, dd, tt, tv * 0.9, ti % 4 === 3);
+          if (st.clap[ti]) S.clap(c, dd, tt, tv);
+          if (st.tom[ti]) S.tom(c, dd, tt, tv, 50);
+          if (st.shaker[ti]) S.shaker(c, dd, tt, tv);
+          if (isChorus && spec.chorus === "bigger" && ti === 0) { S.clap(c, dd, tt, tv); S.shaker(c, dd, tt, tv); }
+        }
+        /* fills at section starts */
+        if (fillsKind !== "none" && sec.kind !== "build" && zoneHit(sec.start + 0.01, fillsZones)) {
+          var ft = t0 + Math.max(0, sec.start - 1.2);
+          if (fillsKind === "shakerf") { for (i = 0; i < 8; i++) S.shaker(c, dd, ft + i * step / 2, vel * 0.8); }
+          else if (fillsKind === "perc") { for (i = 0; i < 6; i++) S.tom(c, dd, ft + i * step, vel, 62 + (i % 3) * 5); }
+          else playFill(c, dd, ft, step, vel);
+        }
+        /* chords + bass: one slot = 2 bars */
+        var slotLen = 2 * barLen;
+        for (t = sec.start; t < sec.end - 0.001; t += slotLen) {
+          var slotIx = Math.round(t / slotLen);
+          var ch = (isBridge ? altChords : chords)[slotIx % 4];
+          var ctt = t0 + t;
+          var padV = isChorus || sec.kind === "bridge" ? "strings" : "pad";
+          S.tone(c, cc, ctt, ch[1], slotLen * 0.95, padV, isChorus ? 0.55 : 0.42);
+          S.tone(c, cc, ctt, ch[2], slotLen * 0.95, padV, isChorus ? 0.45 : 0.34);
+          if (zoneHit(t, bassZones) && sec.kind !== "build" && sec.kind !== "ending")
+            playBass(c, bb, ctt, ch[0] - 12, bassKind, step, 0);
+        }
+        /* custom library sounds: accents in their zones */
+        for (i = 0; i < custom.length; i++) {
+          var csu = custom[i];
+          if (!zoneHit(sec.start + 0.01, csu.zones)) continue;
+          var vvx = csu.voice || "keys";
+          var drumV = { kick: 1, snare: 1, hat: 1, clap: 1, tom: 1, shaker: 1 }[vvx];
+          if (drumV) {
+            var lane = pat.steps[vvx] || pat.steps.kick;
+            for (t = sec.start; t < sec.end - 0.001; t += step) {
+              var li2 = Math.round((t - sec.start) / step) % 16;
+              if (lane[li2]) drumStep(c, dd, t0 + t, pat.steps, li2, vel * 0.7, snareKind);
+            }
+          } else if (vvx === "riser") {
+            S.riser(c, fin, t0 + sec.start, Math.min(8, sec.end - sec.start), 0.5);
+          } else if (vvx === "impact") {
+            S.kick(c, dd, t0 + sec.start, 1); S.clap(c, dd, t0 + sec.start, 0.8);
+          } else {
+            var slotIx2 = 0;
+            for (t = sec.start; t < sec.end - 0.001; t += slotLen, slotIx2++) {
+              var ch2 = (isBridge ? altChords : chords)[slotIx2 % 4];
+              S.tone(c, ll, t0 + t, ch2[0] + 12, step * 6, vvx, 0.5);
+            }
+          }
+        }
+        /* extra parts: many drums / fills / pianos */
+        for (i = 0; i < extras.length; i++) {
+          var ex = extras[i];
+          if (!zoneHit(sec.start + 0.01, ex.zones)) continue;
+          var exv = ex.voice || "keys";
+          var exDrum = { kick: 1, snare: 1, hat: 1, clap: 1, tom: 1, shaker: 1 }[exv];
+          for (t = sec.start; t < sec.end - 0.001; t += step) {
+            var rel = t - sec.start, ti3 = Math.round(rel / step);
+            var hit = ex.feel === "driving" ? (ti3 % 2 === 0) : ex.feel === "offbeat" ? (ti3 % 2 === 1) : (ti3 % 16 === 0);
+            if (!hit) continue;
+            if (exDrum) {
+              if (exv === "kick") S.kick(c, dd, t0 + t, vel * 0.8);
+              else if (exv === "snare") playSnare(c, dd, t0 + t, vel * 0.8, snareKind);
+              else if (exv === "hat") S.hat(c, dd, t0 + t, vel * 0.7, false);
+              else if (exv === "clap") S.clap(c, dd, t0 + t, vel * 0.8);
+              else if (exv === "tom") S.tom(c, dd, t0 + t, vel * 0.8, 45 + (ti3 % 4) * 4);
+              else S.shaker(c, dd, t0 + t, vel * 0.7);
+            } else {
+              var chx = (isBridge ? altChords : chords)[Math.round(t / slotLen) % 4];
+              S.tone(c, exv === "keys" || exv === "epiano" || exv === "marimba" ? cc : ll,
+                t0 + t, chx[0] + 12 + (ti3 % 32 === 16 ? 7 : 0), step * 1.8, exv, 0.4);
+            }
+          }
+        }
+      }
+
+      /* lead melody in verses/choruses/jam (soft under vocals) */
+      var mti = 0, mtt = t0 + 24;
+      var leadVel = lines.length ? 0.3 : 0.7;
+      while (mtt < t0 + 285 && mti < melody.length) {
+        var mn = melody[mti++];
+        if (mn.midi > 0) S.tone(c, ll, mtt, mn.midi, mn.len * step * 0.9, "lead", leadVel);
+        mtt += mn.len * step;
+      }
+
+      /* vocals */
+      var vi;
+      if (ownSample) {
+        for (vi = 0; vi < vocalNotes.length; vi++) {
+          var vn = vocalNotes[vi];
+          var src = c.createBufferSource(); src.buffer = ownSample; src.loop = true;
+          src.playbackRate.value = S.midiHz(vn.midi) / 220;
+          var g = c.createGain(), vt = t0 + vn.t;
+          g.gain.setValueAtTime(0.0001, vt); g.gain.exponentialRampToValueAtTime(0.7, vt + 0.05);
+          g.gain.setValueAtTime(0.7, vt + Math.max(0.05, vn.dur - 0.08));
+          g.gain.exponentialRampToValueAtTime(0.0001, vt + vn.dur);
+          src.connect(g); g.connect(vb); src.start(vt, 0, vn.dur + 0.05);
+        }
+      } else {
+        for (vi = 0; vi < vocalNotes.length; vi++) {
+          var vn2 = vocalNotes[vi];
+          S.singNote(c, vb, t0 + vn2.t, vn2.midi, vn2.dur, vp, 1);
+        }
+        /* backup stacks */
+        var b2;
+        for (b2 = 0; b2 < backups.length; b2++) {
+          var bt = null, k2;
+          for (k2 = 0; k2 < S.BACKUP_TYPES.length; k2++) if (S.BACKUP_TYPES[k2].id === backups[b2]) bt = S.BACKUP_TYPES[k2];
+          if (!bt) continue;
+          for (vi = 0; vi < vocalNotes.length; vi++) {
+            var vn3 = vocalNotes[vi];
+            if (bt.id === "adlibs") { if (rng() < 0.25) S.singNote(c, vb, t0 + vn3.t, vn3.midi + 12, vn3.dur * 0.7, vp, 0.5); }
+            else if (bt.id === "choir") { S.singNote(c, vb, t0 + vn3.t, vn3.midi + bt.shift, vn3.dur, vp, 0.5); }
+            else S.singNote(c, vb, t0 + vn3.t, vn3.midi + bt.shift, vn3.dur, vp, 0.55);
+          }
+        }
+      }
+
+      /* ending */
+      if (ending === "funky") {
+        /* cold stop + final hit */
+        fin.gain.setValueAtTime(1, t0); fin.gain.setValueAtTime(1, t0 + 296.2);
+        fin.gain.linearRampToValueAtTime(0.0001, t0 + 296.7);
+        S.kick(c, fin, t0 + 296.2, 1); S.clap(c, fin, t0 + 296.2, 0.9); S.hat(c, fin, t0 + 296.2, 0.8, true);
+      } else if (ending === "designed") {
+        /* stab accents then fade, per the user's note */
+        var eb;
+        for (eb = 0; eb < 4; eb++) {
+          var ech = chords[eb % 4], et = t0 + 288 + eb * 2 * step * 4;
+          S.tone(c, fin, et, ech[0] + 12, step * 2, "brass", 0.6);
+          S.kick(c, fin, et, 0.9);
+        }
+        fin.gain.setValueAtTime(1, t0); fin.gain.setValueAtTime(1, t0 + 294);
+        fin.gain.linearRampToValueAtTime(0.0001, t0 + 300);
+      } else {
+        /* fade out: the standard */
+        fin.gain.setValueAtTime(1, t0); fin.gain.setValueAtTime(1, t0 + 285);
+        fin.gain.linearRampToValueAtTime(0.0001, t0 + 300);
+      }
+    }).then(function (buf) { return S.applyFXChain(buf, fxList); });
+  }
+
+  function studioPlanSummary(spec) {
+    var ending = spec.ending === "funky" ? "a funky cold-stop finish"
+      : spec.ending === "designed" ? "your designed ending" : "a fade out";
+    return "5:00 standard — intro build-up, verse, THREE 30-second chorus breaks (0:54, 1:54, 2:54), " +
+      "bridge beat-switch, out jam, and " + ending + ". " +
+      (spec.lyrics ? "Full lyrics included, sung by " + voiceProfile(spec.voiceId || "").label + ". " : "Instrumental. ") +
+      "Genre: " + (spec.genre || "hip-hop") + " at " + (spec.bpm || 100) + " BPM.";
+  }
+
+  S.VOICE_PROFILES = VOICE_PROFILES;
+  S.voiceProfile = voiceProfile;
+  S.renderStudioSong = renderStudioSong;
+  S.studioSections = studioSections;
+  S.studioPlanSummary = studioPlanSummary;
+  S.SONG_LEN = SONG_LEN;
 })(typeof window !== "undefined" ? window : (typeof self !== "undefined" ? self : this));
