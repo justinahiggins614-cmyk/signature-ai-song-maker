@@ -102,12 +102,22 @@
     o.type = "sine"; o.frequency.setValueAtTime(160, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.11);
     g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.95 * v, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.32);
     o.connect(g); g.connect(dest); o.start(t); o.stop(t + 0.35);
+    // click transient layer (QUALITY: less "Nintendo", more thump)
+    var n = c.createBufferSource(); n.buffer = noiseBuffer(c);
+    var f = c.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 1200;
+    var g2 = c.createGain(); g2.gain.setValueAtTime(0.4 * v, t); g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.03);
+    n.connect(f); f.connect(g2); g2.connect(dest); n.start(t); n.stop(t + 0.05);
   }
   function snare(c, dest, t, v) {
     var n = c.createBufferSource(); n.buffer = noiseBuffer(c);
     var f = c.createBiquadFilter(); f.type = "highpass"; f.frequency.value = 1600;
     var g = c.createGain(); g.gain.setValueAtTime(0.6 * v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
     n.connect(f); f.connect(g); g.connect(dest); n.start(t); n.stop(t + 0.2);
+    // crack layer: bandpassed noise snap
+    var n2 = c.createBufferSource(); n2.buffer = noiseBuffer(c);
+    var f2 = c.createBiquadFilter(); f2.type = "bandpass"; f2.frequency.value = 3200; f2.Q.value = 1.1;
+    var g3 = c.createGain(); g3.gain.setValueAtTime(0.5 * v, t); g3.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
+    n2.connect(f2); f2.connect(g3); g3.connect(dest); n2.start(t); n2.stop(t + 0.11);
     var o = c.createOscillator(), g2 = c.createGain(); o.type = "triangle"; o.frequency.value = 190;
     g2.gain.setValueAtTime(0.35 * v, t); g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.1);
     o.connect(g2); g2.connect(dest); o.start(t); o.stop(t + 0.12);
@@ -118,6 +128,10 @@
     var g = c.createGain(), d = open ? 0.32 : 0.05;
     g.gain.setValueAtTime(0.28 * v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
     n.connect(f); f.connect(g); g.connect(dest); n.start(t); n.stop(t + d + 0.02);
+    // metallic shimmer layer
+    var o = c.createOscillator(), g2 = c.createGain(); o.type = "square"; o.frequency.value = 9800;
+    g2.gain.setValueAtTime(0.05 * v, t); g2.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    o.connect(g2); g2.connect(dest); o.start(t); o.stop(t + d + 0.02);
   }
   function clap(c, dest, t, v) {
     var i, tt;
@@ -262,13 +276,19 @@
     return mel;
   }
 
-  /* ---------- offline render + WAV ---------- */
+  /* ---------- offline render + WAV ----------
+     QUALITY 2026-10-02: every render runs through a gentle glue
+     compressor on the master — warmer, more "radio", less sterile. */
   function renderBuffer(seconds, scheduleFn) {
     var rate = 44100, OC = root.OfflineAudioContext || root.webkitOfflineAudioContext;
     if (!OC) return Promise.reject(new Error("Offline rendering not supported."));
     var c = new OC(2, Math.ceil(seconds * rate), rate);
+    var master = c.createGain(); master.gain.value = 1;
+    var glue = c.createDynamicsCompressor();
+    glue.threshold.value = -14; glue.ratio.value = 2.5; glue.attack.value = 0.008; glue.release.value = 0.2;
+    master.connect(glue); glue.connect(c.destination);
     return new Promise(function (res, rej) {
-      try { scheduleFn(c, c.destination, 0.05); } catch (e) { rej(e); return; }
+      try { scheduleFn(c, master, 0.05); } catch (e) { rej(e); return; }
       c.startRendering().then(res, rej);
     });
   }
@@ -288,7 +308,193 @@
     return new root.Blob([ab], { type: "audio/wav" });
   }
 
-  /* ---------- full-song render ---------- */
+  /* ---------- FX chain (offline): filters & mastering ----------
+     Applied to any rendered buffer. fx: array of {id, amount}. */
+  var FX_DEFS = [
+    { id: "normalize", name: "Normalize", desc: "Peak leveling to broadcast-safe −1 dB" },
+    { id: "glue", name: "Glue compressor", desc: "Gentle bus compression that glues the mix" },
+    { id: "limiter", name: "Limiter", desc: "Ceiling maximizer for loud, radio-ready masters" },
+    { id: "tape", name: "Tape warmth", desc: "Analog tape saturation, gentle top-end roll, wow & flutter" },
+    { id: "vinyl", name: "Vinyl", desc: "Vinyl crackle, warmth, and soft highs" },
+    { id: "stage", name: "Stage reverb", desc: "Big-room stage ambience" },
+    { id: "room", name: "Room reverb", desc: "Small natural room" },
+    { id: "delay", name: "Echo delay", desc: "Tempo-synced slapback echo" },
+    { id: "chorus", name: "Chorus", desc: "Widening modulation shimmer" },
+    { id: "phaser", name: "Phaser", desc: "Sweeping jet-plane phase" },
+    { id: "distort", name: "Drive", desc: "Tube-style harmonic drive" },
+    { id: "bitcrush", name: "Bitcrush", desc: "Lo-fi digital grit" },
+    { id: "eqbright", name: "Bright EQ", desc: "Air and presence lift" },
+    { id: "eqwarm", name: "Warm EQ", desc: "Low-mid body, tamed harshness" },
+    { id: "wide", name: "Stereo wide", desc: "Extra stereo width on music beds" },
+    { id: "radio", name: "Radio", desc: "Band-limited radio voice" }
+  ];
+  function impulse(c, seconds, decay) {
+    var rate = c.sampleRate, len = Math.floor(rate * seconds), buf = c.createBuffer(2, len, rate), ch, i;
+    var rng = rngFrom("impulse:" + seconds + ":" + decay);
+    for (ch = 0; ch < 2; ch++) { var d = buf.getChannelData(ch); for (i = 0; i < len; i++) d[i] = (rng() * 2 - 1) * Math.pow(1 - i / len, decay); }
+    return buf;
+  }
+  function applyFXChain(buffer, fxList) {
+    fxList = (fxList || []).filter(function (f) { return f && f.id; });
+    if (!fxList.length) return Promise.resolve(buffer);
+    var rate = 44100, OC = root.OfflineAudioContext || root.webkitOfflineAudioContext;
+    var c = new OC(2, buffer.length, rate), src = c.createBufferSource(); src.buffer = buffer;
+    var head = src, i, f;
+    function insert(node) { head.connect(node); head = node; }
+    for (i = 0; i < fxList.length; i++) {
+      f = fxList[i]; var amt = (f.amount == null ? 1 : f.amount);
+      if (f.id === "normalize") {
+        var peak = 0, d0 = buffer.getChannelData(0), k;
+        for (k = 0; k < d0.length; k += 7) peak = Math.max(peak, Math.abs(d0[k]));
+        var g = c.createGain(); g.gain.value = peak > 0 ? 0.89 / peak : 1; insert(g);
+      } else if (f.id === "glue" || f.id === "limiter") {
+        var comp = c.createDynamicsCompressor();
+        if (f.id === "glue") { comp.threshold.value = -18; comp.ratio.value = 3; comp.attack.value = 0.01; comp.release.value = 0.24; }
+        else { comp.threshold.value = -6; comp.ratio.value = 20; comp.attack.value = 0.002; comp.release.value = 0.08; }
+        insert(comp);
+      } else if (f.id === "tape") {
+        var sh = c.createWaveShaper(), curve = new Float32Array(256), ci;
+        for (ci = 0; ci < 256; ci++) { var x = ci / 128 - 1; curve[ci] = Math.tanh(2.2 * x) * 0.85; }
+        sh.curve = curve;
+        var lp = c.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 14000;
+        var wow = c.createOscillator(), wg = c.createGain(); wow.frequency.value = 0.8; wg.gain.value = 0.003;
+        insert(sh); insert(lp);
+        wow.connect(wg); wg.connect(lp.frequency); wow.start(0); wow.stop(buffer.length / rate);
+      } else if (f.id === "vinyl") {
+        var nz = c.createBufferSource(); nz.buffer = noiseBuffer(c); nz.loop = true;
+        var nf = c.createBiquadFilter(); nf.type = "lowpass"; nf.frequency.value = 5000;
+        var ng = c.createGain(); ng.gain.value = 0.015 * amt;
+        nz.connect(nf); nf.connect(ng); ng.connect(c.destination); nz.start(0);
+        var vlp = c.createBiquadFilter(); vlp.type = "lowpass"; vlp.frequency.value = 15000; insert(vlp);
+      } else if (f.id === "stage" || f.id === "room") {
+        var conv = c.createConvolver(); conv.buffer = impulse(c, f.id === "stage" ? 2.2 : 0.7, f.id === "stage" ? 2.2 : 3.2);
+        var wet = c.createGain(); wet.gain.value = (f.id === "stage" ? 0.35 : 0.2) * amt;
+        var dry = c.createGain(); dry.gain.value = 1;
+        head.connect(dry); head.connect(conv); conv.connect(wet);
+        var sum = c.createGain(); dry.connect(sum); wet.connect(sum); head = sum;
+      } else if (f.id === "delay") {
+        var dl2 = c.createDelay(2); dl2.delayTime.value = 0.32;
+        var fb = c.createGain(); fb.gain.value = 0.35 * amt;
+        var wet2 = c.createGain(); wet2.gain.value = 0.3 * amt;
+        head.connect(dl2); dl2.connect(fb); fb.connect(dl2); dl2.connect(wet2);
+        var sum2 = c.createGain(); head.connect(sum2); wet2.connect(sum2); head = sum2;
+      } else if (f.id === "chorus") {
+        var cdl = c.createDelay(0.05); cdl.delayTime.value = 0.018;
+        var lfo = c.createOscillator(), lg2 = c.createGain(); lfo.frequency.value = 1.4; lg2.gain.value = 0.006;
+        lfo.connect(lg2); lg2.connect(cdl.delayTime); lfo.start(0); lfo.stop(buffer.length / rate);
+        var wet3 = c.createGain(); wet3.gain.value = 0.4 * amt;
+        head.connect(cdl); cdl.connect(wet3);
+        var sum3 = c.createGain(); head.connect(sum3); wet3.connect(sum3); head = sum3;
+      } else if (f.id === "phaser") {
+        var ap = c.createBiquadFilter(); ap.type = "allpass"; ap.frequency.value = 1200; ap.Q.value = 4;
+        var plfo = c.createOscillator(), pg = c.createGain(); plfo.frequency.value = 0.5; pg.gain.value = 900;
+        plfo.connect(pg); pg.connect(ap.frequency); plfo.start(0); plfo.stop(buffer.length / rate);
+        insert(ap);
+      } else if (f.id === "distort") {
+        var ds = c.createWaveShaper(), dc = new Float32Array(256), di2;
+        for (di2 = 0; di2 < 256; di2++) { var xx = di2 / 128 - 1; dc[di2] = Math.tanh(4 * xx) * 0.7; }
+        ds.curve = dc; insert(ds);
+      } else if (f.id === "bitcrush") {
+        var bc = c.createWaveShaper(), bcc = new Float32Array(256), bi2, bits = 6;
+        for (bi2 = 0; bi2 < 256; bi2++) { var xv = bi2 / 128 - 1; bcc[bi2] = Math.round(xv * bits) / bits * 0.9; }
+        bc.curve = bcc; insert(bc);
+      } else if (f.id === "eqbright") {
+        var hb = c.createBiquadFilter(); hb.type = "highshelf"; hb.frequency.value = 8000; hb.gain.value = 4 * amt; insert(hb);
+      } else if (f.id === "eqwarm") {
+        var lw = c.createBiquadFilter(); lw.type = "lowshelf"; lw.frequency.value = 300; lw.gain.value = 3 * amt;
+        var hc = c.createBiquadFilter(); hc.type = "highshelf"; hc.frequency.value = 9000; hc.gain.value = -3 * amt;
+        insert(lw); insert(hc);
+      } else if (f.id === "wide") {
+        var spl = c.createChannelSplitter(2), mrg = c.createChannelMerger(2);
+        var dlL = c.createDelay(0.05); dlL.delayTime.value = 0.012;
+        head.connect(spl); spl.connect(dlL, 0); dlL.connect(mrg, 0, 0); spl.connect(mrg, 1, 1);
+        head = mrg;
+      } else if (f.id === "radio") {
+        var bp = c.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 1800; bp.Q.value = 0.8; insert(bp);
+      }
+    }
+    head.connect(c.destination); src.start(0);
+    return c.startRendering();
+  }
+
+  /* ---------- full-song render: lead-in + sections + beat switch ----------
+     Every song is a FULL song: riser lead-in intro, verse/chorus arc,
+     a bridge with a real beat SWITCH, and an outro. */
+  function sectionPlan(song) {
+    var rng = rngFrom("fullsong:" + song.id), keyRoot = 48 + Math.floor(rng() * 12);
+    var genre = song.genre || "pop";
+    var chords = chordsFor(keyRoot, genre, rng);
+    var switchGenre = pick(rng, ["trap", "drum-and-bass", "house", "funk", "hip-hop", "techno"]);
+    if (switchGenre === genre) switchGenre = "trap";
+    var sections = [
+      { name: "intro", bars: 4, beat: "leadin", drums: 0.5 },
+      { name: "verse", bars: 8, beat: genre, drums: 0.9 },
+      { name: "chorus", bars: 8, beat: genre, drums: 1.0 },
+      { name: "verse2", bars: 8, beat: genre, drums: 0.95 },
+      { name: "chorus", bars: 8, beat: genre, drums: 1.0 },
+      { name: "bridge", bars: 8, beat: switchGenre, drums: 1.0, switched: true },
+      { name: "chorus", bars: 8, beat: genre, drums: 1.05 },
+      { name: "outro", bars: 4, beat: "fadeout", drums: 0.7 }
+    ];
+    var melody = melodyFor(chords, 60, rng);
+    return { keyRoot: keyRoot, chords: chords, melody: melody, sections: sections, bpm: song.tempo || 100, genre: genre, switchGenre: switchGenre };
+  }
+  function renderFullSong(song, mix, fxList) {
+    var plan = sectionPlan(song), bpm = plan.bpm, step = 60 / bpm, rng = rngFrom("fsched:" + song.id);
+    var totalBeats = 0, si;
+    for (si = 0; si < plan.sections.length; si++) totalBeats += plan.sections[si].bars * 4;
+    var dur = totalBeats * step + 2;
+    return renderBuffer(dur, function (c, dest, t0) {
+      var mx = makeBuses(c, dest, mix);
+      var t = t0, s, b, ch, mi = 0;
+      // lead-in riser across the intro
+      riser(c, dest, t0, plan.sections[0].bars * 4 * step, 0.8);
+      for (s = 0; s < plan.sections.length; s++) {
+        var sec = plan.sections[s], secStart = t, secBeats = sec.bars * 4;
+        var pat = (sec.beat === "leadout" || sec.beat === "leadin" || sec.beat === "fadeout")
+          ? patternFor(song.title + ":intro", plan.genre, bpm)
+          : patternFor(song.title + ":" + sec.beat, sec.beat, bpm);
+        // drums for this section (intro filtered, outro fading)
+        var dd = busDest(mx, dest, "drums");
+        var barLen = 16 * step;
+        for (b = 0; b < sec.bars; b++) {
+          var bt = secStart + b * barLen, vel = sec.drums;
+          if (sec.beat === "leadin") vel *= 0.45 + 0.55 * (b / sec.bars);
+          if (sec.beat === "fadeout") vel *= 1 - 0.8 * (b / sec.bars);
+          (function (t2, vv, human) {
+            var st = pat.steps, i2;
+            for (i2 = 0; i2 < 16; i2++) {
+              var ht = t2 + i2 * step + (human ? (rng() - 0.5) * 0.012 : 0);
+              var hv = vv * (human ? 0.92 + rng() * 0.16 : 1);
+              if (st.kick[i2]) kick(c, dd, ht, hv);
+              if (st.snare[i2]) snare(c, dd, ht, hv);
+              if (st.hat[i2]) hat(c, dd, ht, hv * (i2 % 4 === 0 ? 1 : 0.82), i2 % 4 === 3);
+              if (st.clap[i2]) clap(c, dd, ht, hv);
+              if (st.tom[i2]) tom(c, dd, ht, hv, 50);
+              if (st.shaker[i2]) shaker(c, dd, ht, hv);
+            }
+          })(bt, vel, true);
+        }
+        // chords + bass for the section
+        for (b = 0; b < sec.bars; b++) {
+          ch = plan.chords[(b + s) % plan.chords.length];
+          var ct = secStart + b * 4 * step;
+          tone(c, dest, ct, ch[0] - 12, 3.6 * step, "sub", 0.9, mx.bass);
+          tone(c, dest, ct, ch[1], 3.8 * step, sec.name === "chorus" ? "strings" : "pad", 0.5, mx.chords);
+          tone(c, dest, ct, ch[2], 3.8 * step, sec.name === "chorus" ? "strings" : "pad", 0.4, mx.chords);
+          if (sec.switched) tone(c, dest, ct + 2 * step, ch[0] + 12, 1.6 * step, "brass", 0.4, mx.lead);
+        }
+        t += secBeats * step;
+      }
+      // melody across the whole song (chorus sections lifted an octave feel via velocity)
+      var mt = t0 + plan.sections[0].bars * 4 * step;
+      for (mi = 0; mi < plan.melody.length && mt < t0 + dur - 2; mi++) {
+        var n = plan.melody[mi];
+        if (n.midi > 0) tone(c, dest, mt, n.midi, n.len * step * 0.92, "lead", 0.72, mx.lead);
+        mt += n.len * step;
+      }
+    }).then(function (buf) { return applyFXChain(buf, fxList); });
+  }
   function songPlan(song) {
     var rng = rngFrom("song:" + song.id), keyRoot = 48 + Math.floor(rng() * 12);
     var chords = chordsFor(keyRoot, song.genre, rng);
@@ -459,8 +665,9 @@
     rngFrom: rngFrom, pick: pick, midiHz: midiHz, noteName: noteName,
     GENRES: GENRES, MOODS: MOODS, hashSeed: hashSeed,
     patternFor: patternFor, scheduleBeat: scheduleBeat,
-    chordsFor: chordsFor, melodyFor: melodyFor, songPlan: songPlan,
-    renderBuffer: renderBuffer, bufferToWav: bufferToWav, renderSong: renderSong,
+    chordsFor: chordsFor, melodyFor: melodyFor, songPlan: songPlan, sectionPlan: sectionPlan,
+    renderBuffer: renderBuffer, bufferToWav: bufferToWav, renderSong: renderSong, renderFullSong: renderFullSong,
+    FX_DEFS: FX_DEFS, applyFXChain: applyFXChain,
     CREATED_VOICES: CREATED_VOICES, BACKUP_TYPES: BACKUP_TYPES,
     renderVocal: renderVocal, renderOwnVoice: renderOwnVoice,
     detectPitch: detectPitch, nearestMidi: nearestMidi, cleanupVocal: cleanupVocal,

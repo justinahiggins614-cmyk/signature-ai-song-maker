@@ -171,6 +171,34 @@
 <div><label>Search</label><input type="text" id="beatq" placeholder="Search beats…"></div></div>
 <div class="grid" id="beatgrid"></div>
 </section>
+
+<section class="sec" id="session">
+<h2>🎛️ Studio Session — make a song step by step</h2>
+<p><b>Anything a studio does, as a process.</b> Walk the stages in order — or let the <b>AI pal</b> guide you or finish the whole project for you. Every stage opens what you need as a popup.</p>
+<div class="aipal" id="aipal">
+<h3>🤖 AI Pal</h3>
+<div class="say" id="palsay">Hey! I'm your studio pal. We'll go stage by stage — sounds, beat, lyrics, singing, mix, filters, CD. Tap a stage, or tell me to take over.</div>
+<div class="row">
+<div><label>Talk to your pal</label><input type="text" id="palq" placeholder='e.g. "take over", "make me a dark trap song", "what is stage 3?"'></div>
+<div style="flex:0"><label>&nbsp;</label><button class="btn violet" id="palgo">Send</button></div>
+</div>
+<p><button class="btn" id="palauto">🤖 AI: auto-complete my whole project</button>
+<button class="btn ghost" id="paldaw">🎛️ Open the DAW (Cakewalk-type studio popup)</button></p>
+</div>
+<div class="stages" id="stagebtns">
+<button data-stage="1" class="on">1 · Sounds</button>
+<button data-stage="2">2 · Beat</button>
+<button data-stage="3">3 · Lyrics</button>
+<button data-stage="4">4 · Singing</button>
+<button data-stage="5">5 · Mix/Master</button>
+<button data-stage="6">6 · Filters</button>
+<button data-stage="7">7 · Burn CD</button>
+</div>
+<div class="stagepane" id="stagepane"></div>
+<h3 style="color:var(--gold)">💾 My Library — your showpiece shelf</h3>
+<p class="seqlab">Every sound you save lives here, ready to use in any session. Stored on your device.</p>
+<div class="mylib-grid" id="mylibgrid"></div>
+</section>
 </div>
 
 <footer><div class="wrap">
@@ -188,5 +216,7 @@
 <script src="assets/app2.js"></script>
 <script src="assets/app3.js"></script>
 <script src="assets/app4.js"></script>
+<script src="assets/app5.js"></script>
+<script src="assets/app6.js"></script>
 </body>
 </html>

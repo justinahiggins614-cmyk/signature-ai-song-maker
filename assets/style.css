@@ -72,3 +72,44 @@ canvas.wave{width:100%;height:90px;background:#0d0a14;border:1px solid var(--lin
 .checklist{font-family:Arial;font-size:14px}
 .checklist label{display:flex;gap:8px;align-items:center;margin:6px 0;color:var(--ink)}
 @media(max-width:640px){.hero h1{font-size:32px}}
+/* ---- modal popups ---- */
+.sigmodal-back{position:fixed;inset:0;background:rgba(8,5,14,.82);z-index:90000;display:flex;align-items:center;justify-content:center;padding:14px}
+.sigmodal{background:#241d38;border:2px solid var(--gold);border-radius:16px;max-width:560px;width:100%;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 0 40px rgba(245,197,66,.25)}
+.sigmodal.wide{max-width:860px}
+.sigmodal-head{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding:12px 16px}
+.sigmodal-head h3{margin:0;color:var(--gold);font-size:20px}
+.sigmodal-x{background:none;border:1px solid var(--line);color:var(--ink);border-radius:8px;font-size:16px;cursor:pointer;padding:4px 10px}
+.sigmodal-body{padding:16px;overflow-y:auto}
+.ipgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin:10px 0}
+.ipcard{background:#1a1428;border:1px solid var(--line);border-radius:8px;padding:8px;cursor:pointer;font-size:13px;text-align:center}
+.ipcard b{color:var(--ink)}
+.ipcard.on{border-color:var(--teal);box-shadow:0 0 10px rgba(79,227,193,.4)}
+.ipcard.on b{color:var(--teal)}
+/* ---- studio session stepper ---- */
+.stages{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+.stages button{background:#1a1428;border:2px solid var(--line);color:var(--ink);border-radius:12px;padding:10px 12px;font-size:14px;cursor:pointer;font-family:Arial}
+.stages button.on{border-color:var(--teal);color:var(--teal)}
+.stages button.done{border-color:var(--gold);color:var(--gold)}
+.stagepane{background:#1a1428;border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:10px;min-height:120px}
+/* ---- DAW popup ---- */
+.daw-transport{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.daw-transport button{background:#0d0a14;border:2px solid var(--gold);color:var(--gold);border-radius:10px;font-size:18px;padding:8px 14px;cursor:pointer}
+.daw-transport button.rec{border-color:#ff5a5a;color:#ff5a5a}
+.daw-transport button.armed{background:#ff5a5a;color:#0d0a14}
+.daw-lane{display:grid;grid-template-columns:90px 1fr 44px 44px 90px;gap:6px;align-items:center;margin:6px 0;background:#0d0a14;border-radius:8px;padding:6px}
+.daw-lane .lname{font-size:13px;color:var(--mut);font-family:Arial}
+.daw-region{height:34px;border-radius:6px;position:relative;overflow:hidden;background:#241d38;border:1px solid var(--line)}
+.daw-region .blk{position:absolute;top:0;bottom:0;border-radius:4px;opacity:.9}
+.daw-lane button{background:#241d38;border:1px solid var(--line);color:var(--mut);border-radius:6px;font-size:12px;cursor:pointer;padding:4px}
+.daw-lane button.m.on{background:var(--gold);color:#14101d}
+.daw-lane button.s.on{background:var(--teal);color:#14101d}
+.daw-lane input[type=range]{width:100%}
+/* ---- AI pal ---- */
+.aipal{background:#0d0a14;border:2px solid var(--violet);border-radius:14px;padding:16px;margin:16px 0}
+.aipal h3{color:var(--violet);margin-top:0}
+.aipal .say{background:#241d38;border-radius:10px;padding:10px 14px;margin:8px 0;font-size:15px}
+.fxgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.fxcard{background:#0d0a14;border:1px solid var(--line);border-radius:8px;padding:8px;font-size:13px;cursor:pointer;text-align:center}
+.fxcard.on{border-color:var(--gold);box-shadow:0 0 8px rgba(245,197,66,.4)}
+.fxcard b{color:var(--gold);display:block;margin-bottom:4px}
+.mylib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}

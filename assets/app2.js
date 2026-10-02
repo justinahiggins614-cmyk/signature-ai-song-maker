@@ -82,7 +82,8 @@
       var p = e.target.closest("[data-libplay]"), o = e.target.closest("[data-libopen]");
       if (p || o) { try { S.unlockAudio(); } catch (e2) {} }
       if (p) window.__findRecord(p.getAttribute("data-libplay")).then(previewSound);
-      if (o) { location.search = "?sound=" + o.getAttribute("data-libopen"); }
+      /* his order: sound files POP open (popup), not page navigation */
+      if (o) { if (window.__openSoundModal) window.__openSoundModal(o.getAttribute("data-libopen")); else location.search = "?sound=" + o.getAttribute("data-libopen"); }
     });
     renderLib();
   };
@@ -106,7 +107,7 @@
     $("gearq").oninput = function () { draw($("gearcat").value, this.value.toLowerCase()); };
     $("geargird").addEventListener("click", function (e) {
       var o = e.target.closest("[data-gearopen]"), r = e.target.closest("[data-gearread]");
-      if (o) location.search = "?gear=" + o.getAttribute("data-gearopen");
+      if (o) { if (window.__openGearModal) window.__openGearModal(o.getAttribute("data-gearopen")); else location.search = "?gear=" + o.getAttribute("data-gearopen"); }
       if (r) window.__findRecord(r.getAttribute("data-gearread")).then(function (rec) { readAloud(rec.name + ". " + rec.desc, rec.id); });
     });
   };
