@@ -134,20 +134,82 @@
   $("readclose").onclick = $("readstop").onclick;
   $("readplay").onclick = function () { if (readText) readAloud(readText); };
 
-  /* ---------- data ---------- */
-  var IDX = [], MANIFEST = null;
+  /* ---------- data ----------
+     2026-10-03: authoritative boot. music-manifest.json (tiny) is fetched
+     first so counts appear instantly from the single source of truth; the
+     index follows with timeout + one retry. States: LOADING / LIVE /
+     INDEX ERROR / OFFLINE / CACHED (last saved copy) / NO RECORDS. */
+  var IDX = [], MANIFEST = null, MM = null;
+  var BOOT = { state: "LOADING", note: "Fetching the archive index…" };
+  window.__bootState = function () { return BOOT.state; };
+  function fetchT(url, ms) {
+    return new Promise(function (res, rej) {
+      var done = false;
+      var to = setTimeout(function () { if (!done) { done = true; rej(new Error("timeout after " + ms + "ms")); } }, ms || 20000);
+      fetch(url).then(function (r) {
+        if (done) return; done = true; clearTimeout(to);
+        if (!r.ok) rej(new Error("HTTP " + r.status)); else res(r);
+      }, function (e) { if (!done) { done = true; clearTimeout(to); rej(e); } });
+    });
+  }
+  function renderCountsFromMM() {
+    if (!MM || !MM.archive) return;
+    var a = MM.archive, g = a.goals || {};
+    $("counters").innerHTML = "📀 <b>" + a.songs.toLocaleString() + "</b> / " + (g.songs || 1000000).toLocaleString() + " songs &nbsp;·&nbsp; 🎛️ <b>" +
+      a.library_sounds.toLocaleString() + "</b> / " + (g.library_sounds || 1000000).toLocaleString() + " instruments, sets &amp; packs &nbsp;·&nbsp; 🥁 <b>" +
+      a.beats.toLocaleString() + "</b> beats &nbsp;·&nbsp; 🎚️ <b>" + a.equipment.toLocaleString() + "</b> equipment records";
+    var lc = $("libcount"); if (lc) lc.textContent = "(" + a.library_sounds.toLocaleString() + " / " + (g.library_sounds || 1000000).toLocaleString() + ")";
+  }
+  function paintBoot() {
+    var badge = { "LOADING": "⏳ LOADING", "LIVE": "🟢 LIVE", "INDEX ERROR": "🔴 INDEX ERROR", "OFFLINE": "📴 OFFLINE", "CACHED": "🟡 CACHED", "NO RECORDS": "⚪ NO RECORDS" }[BOOT.state] || BOOT.state;
+    var c = $("counters");
+    if (BOOT.state === "LOADING" && !MM) c.innerHTML = '<span class="spinner"></span>Loading the archive…';
+    else if (BOOT.state === "LIVE" || (BOOT.state === "CACHED" && MM)) { renderCountsFromMM(); if (BOOT.state === "CACHED") c.innerHTML += ' <span class="seqlab">(' + badge + " — " + esc(BOOT.note) + ")</span>"; }
+    else if (BOOT.state === "LOADING") renderCountsFromMM();
+    else c.innerHTML = badge + ' — ' + esc(BOOT.note || "The archive could not be reached.") + ' <button class="btn ghost" onclick="location.reload()">↻ Retry</button>';
+  }
+  function setBoot(s, note) { BOOT.state = s; BOOT.note = note || ""; paintBoot(); }
+  window.__bootErrorCard = function (what) {
+    return '<div class="card" role="alert"><h4>⚠️ ' + esc(what) + ' unavailable</h4><p class="seqlab">' + esc(BOOT.note || "The archive index did not load.") +
+      '</p><p><button class="btn" onclick="location.reload()">↻ Retry</button></p></div>';
+  };
+  function loadIndexOnce() {
+    return fetchT("data/index/index.json.gz", 25000).then(function (r) { return r.arrayBuffer(); })
+      .then(function (ab) { return new Response(new Blob([ab]).stream().pipeThrough(new DecompressionStream("gzip"))).text(); })
+      .then(function (t) { return t.split("\n").filter(Boolean).map(JSON.parse); });
+  }
+  function cacheIdx(rows) {
+    try { localStorage.setItem("sigstudio_idx_v1", JSON.stringify({ at: new Date().toISOString(), rows: rows })); } catch (e) {}
+  }
+  function cachedIdx() {
+    try { var c = JSON.parse(localStorage.getItem("sigstudio_idx_v1") || "null"); return (c && c.rows && c.rows.length) ? c : null; } catch (e) { return null; }
+  }
   function loadData() {
-    return Promise.all([
-      fetch("data/manifest.json").then(function (r) { return r.json(); }).then(function (m) { MANIFEST = m; }),
-      gunzip("data/index/index.json.gz").then(function (t) { IDX = t.split("\n").filter(Boolean).map(JSON.parse); })
-    ]).then(function () {
-      var songs = IDX.filter(function (r) { return r[2] === "song"; }).length;
-      var lib = IDX.filter(function (r) { return r[2] === "sound"; }).length;
-      var gear = IDX.filter(function (r) { return r[2] === "gear"; }).length;
-      var beats = IDX.filter(function (r) { return r[2] === "beat"; }).length;
-      $("counters").innerHTML = "📀 <b>" + songs.toLocaleString() + "</b> / 1,000,000 songs &nbsp;·&nbsp; 🎛️ <b>" + lib.toLocaleString() + "</b> / 1,000,000 instruments, sets &amp; packs &nbsp;·&nbsp; 🥁 <b>" + beats.toLocaleString() + "</b> beats &nbsp;·&nbsp; 🎚️ <b>" + gear.toLocaleString() + "</b> equipment records";
-      $("libcount").textContent = "(" + lib.toLocaleString() + " / 1,000,000)";
-    }).catch(function () { $("counters").textContent = "Archive loading…"; });
+    setBoot("LOADING", "Fetching the archive index…");
+    var mmP = fetchT("music-manifest.json", 10000).then(function (r) { return r.json(); }).then(function (m) {
+      MM = m; renderCountsFromMM();
+      try { localStorage.setItem("sigstudio_mm_v1", JSON.stringify(m)); } catch (e) {}
+    }, function () {
+      try { MM = JSON.parse(localStorage.getItem("sigstudio_mm_v1") || "null"); } catch (e) { MM = null; }
+      if (MM) renderCountsFromMM();
+    });
+    var manP = fetchT("data/manifest.json", 10000).then(function (r) { return r.json(); }).then(function (m) { MANIFEST = m; }, function () {});
+    var idxP = loadIndexOnce().catch(function () {
+      return new Promise(function (res) { setTimeout(res, 1500); }).then(loadIndexOnce); // one retry
+    }).then(function (rows) { return { rows: rows, cached: false }; }, function (e) {
+      var c = cachedIdx();
+      if (c) return { rows: c.rows, cached: true, at: c.at };
+      throw e;
+    });
+    return Promise.all([mmP, manP, idxP]).then(function (r) {
+      IDX = r[2].rows;
+      if (!IDX.length) setBoot("NO RECORDS", "The index loaded but contains no records yet.");
+      else if (r[2].cached) { setBoot("CACHED", "showing the last saved copy (" + (r[2].at || "unknown time") + ")."); }
+      else { setBoot("LIVE"); cacheIdx(IDX); }
+    }).catch(function (e) {
+      setBoot(navigator.onLine === false ? "OFFLINE" : "INDEX ERROR",
+        (e && e.message ? e.message : "fetch failed") + " — check your connection, then retry.");
+    });
   }
   function detGen(id) {
     // deterministic fallback: generate directly from the ID number

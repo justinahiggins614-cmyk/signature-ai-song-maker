@@ -171,3 +171,11 @@ body.playerbar-pad{padding-bottom:70px}
 .cdtrack{display:flex;align-items:center;gap:.5rem;padding:.4rem .5rem;border:1px solid var(--line);border-radius:8px;margin:.3rem 0;background:#141a2b}
 .cdtrack.now{border-color:var(--teal);background:#182235}
 .cdtrack .id{font-size:.72rem;color:#8b93a8;margin-left:auto;white-space:nowrap}
+
+/* ---- 2026-10-03: optional drop boxes (Manon's order) ---- */
+details.dropbox{border:1px solid var(--line);border-radius:10px;padding:.4rem .8rem;background:#141a2b}
+details.dropbox[open]{padding-bottom:.8rem}
+summary.dropbox-sum{cursor:pointer;list-style:none;display:flex;align-items:baseline;gap:.6rem;flex-wrap:wrap}
+summary.dropbox-sum::-webkit-details-marker{display:none}
+summary.dropbox-sum::before{content:"▸";color:var(--gold);font-size:1.1rem}
+details.dropbox[open] summary.dropbox-sum::before{content:"▾"}

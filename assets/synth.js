@@ -531,10 +531,11 @@
 
   /* ---------- vocal synth (honest: synthesized voices, labeled as such) ---------- */
   var CREATED_VOICES = [
-    { id: "nova",  name: "Nova",  desc: "Bright airy synthesized soprano", formants: [600, 1400, 2800], vib: 5.5, level: 0.5 },
-    { id: "ember", name: "Ember", desc: "Warm synthesized alto",           formants: [480, 1100, 2400], vib: 5.0, level: 0.55 },
-    { id: "drift", name: "Drift", desc: "Soft breathy synthesized tenor",  formants: [420, 1000, 2600], vib: 6.0, level: 0.48 },
-    { id: "stone", name: "Stone", desc: "Deep resonant synthesized bass",   formants: [340, 850, 2200],  vib: 4.5, level: 0.6 }
+    // 2026-10-03: permanent voice IDs (JAH-VOICE-######) + versions — never reused
+    { id: "nova",  jahId: "JAH-VOICE-000001", version: "v1", name: "Nova",  desc: "Bright airy synthesized soprano", formants: [600, 1400, 2800], vib: 5.5, level: 0.5 },
+    { id: "ember", jahId: "JAH-VOICE-000002", version: "v1", name: "Ember", desc: "Warm synthesized alto",           formants: [480, 1100, 2400], vib: 5.0, level: 0.55 },
+    { id: "drift", jahId: "JAH-VOICE-000003", version: "v1", name: "Drift", desc: "Soft breathy synthesized tenor",  formants: [420, 1000, 2600], vib: 6.0, level: 0.48 },
+    { id: "stone", jahId: "JAH-VOICE-000004", version: "v1", name: "Stone", desc: "Deep resonant synthesized bass",   formants: [340, 850, 2200],  vib: 4.5, level: 0.6 }
   ];
   var BACKUP_TYPES = [
     { id: "soprano", name: "Soprano section", shift: 12, desc: "High harmony line, octave shimmer" },

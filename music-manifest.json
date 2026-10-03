@@ -1,0 +1,109 @@
+{
+  "schema": "JAH-MUSIC-MANIFEST/1.0",
+  "site": "Signature Music Studio",
+  "site_number": 23,
+  "network": "THE JAH NETWORK \u2014 27 sites",
+  "generated_at": "2026-10-03T16:25:47.032278+00:00",
+  "archive": {
+    "songs": 5700,
+    "library_sounds": 5450,
+    "equipment": 350,
+    "beats": 2750,
+    "total": 14250,
+    "goals": {
+      "songs": 1000000,
+      "library_sounds": 1000000
+    },
+    "id_ranges": {
+      "song": {
+        "first": "JAH-SONG-0000001",
+        "last": "JAH-SONG-0005700",
+        "count": 5700
+      },
+      "sound": {
+        "first": "JAH-SOUND-0000001",
+        "last": "JAH-SOUND-0005450",
+        "count": 5450
+      },
+      "gear": {
+        "first": "JAH-GEAR-0000001",
+        "last": "JAH-GEAR-0000350",
+        "count": 350
+      },
+      "beat": {
+        "first": "JAH-BEAT-0000001",
+        "last": "JAH-BEAT-0002750",
+        "count": 2750
+      }
+    }
+  },
+  "engine": {
+    "name": "Signature Music Engine",
+    "version": "SIGMUSIC-V1",
+    "seed_algorithm": "FNV-1a 32-bit (hashSeed) \u2014 'songtheme:<theme>' -> n = 1 + seed % 1000000",
+    "determinism": "same request + same engine version + same voice version = same composition (structure, chords, melody, lyrics) and same rendered WAV bytes",
+    "sound_library_version": "SIGSOUND-V1"
+  },
+  "voices": [
+    {
+      "id": "JAH-VOICE-000001",
+      "name": "Nova",
+      "version": "v1",
+      "kind": "synthesized soprano"
+    },
+    {
+      "id": "JAH-VOICE-000002",
+      "name": "Ember",
+      "version": "v1",
+      "kind": "synthesized alto"
+    },
+    {
+      "id": "JAH-VOICE-000003",
+      "name": "Drift",
+      "version": "v1",
+      "kind": "synthesized tenor"
+    },
+    {
+      "id": "JAH-VOICE-000004",
+      "name": "Stone",
+      "version": "v1",
+      "kind": "synthesized bass"
+    }
+  ],
+  "voices_note": "All voices are synthesized. There are no human singers on this site \u2014 no exceptions.",
+  "index": {
+    "file": "data/index/index.json.gz",
+    "records": 14250,
+    "sha256": "64ce9c91d07cad3208c29494d8d55d790d9a7d2a7317d33c6ff37150791609af",
+    "row_format": [
+      "id",
+      "title",
+      "kind",
+      "chunk"
+    ],
+    "chunk_pointers_verified": true
+  },
+  "id_schemes": {
+    "song": "JAH-SONG-%07d (7-digit, permanent, never reused)",
+    "beat": "JAH-BEAT-%07d (7-digit, permanent, never reused)",
+    "sound": "JAH-SOUND-%07d (7-digit, permanent, never reused)",
+    "equipment": "JAH-GEAR-%07d (7-digit, permanent, never reused)",
+    "voice": "JAH-VOICE-%06d (6-digit, permanent, never reused)",
+    "project": "JAH-PROJECT-%07d (reserved \u2014 user projects)",
+    "cd": "JAH-CD-%07d (reserved \u2014 CD records)",
+    "mix": "JAH-MIX-%07d (reserved \u2014 mix records)",
+    "cleanup": "JAH-CLEANUP-%07d (reserved \u2014 vocal cleanup records)",
+    "patch": "JAH-PATCH-%07d (reserved \u2014 patch records)"
+  },
+  "deep_links": {
+    "song": "?song=JAH-SONG-0000001",
+    "sound": "?sound=JAH-SOUND-0000001",
+    "gear": "?gear=JAH-GEAR-0000001",
+    "beat": "?beat=JAH-BEAT-0000001"
+  },
+  "provenance": {
+    "generated_by": "code/drip.py + code/seed.py (deterministic node driver over assets/engine.js)",
+    "composition_stable": "song spec (notes/chords/lyrics/structure) is stable even if the render engine improves",
+    "audio_synthesis": "All audio synthesized client-side with the Web Audio API \u2014 no samples, no human singers"
+  }
+}

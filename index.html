@@ -27,10 +27,11 @@
 <nav class="jahnet" aria-label="JAH Network Global Ecosystem"><div class="wrap" id="jahnet"></div></nav>
 
 <header class="hero"><div class="wrap">
-<div class="kick">SITE 25 OF 25 · THE JAH NETWORK</div>
+<div class="kick">SITE 23 OF 27 · THE JAH NETWORK</div>
 <h1>SIGNATURE MUSIC STUDIO</h1>
 <div><span class="official">OFFICIAL SIGNATURE SITE — within the Signature/JAH system</span></div>
 <p class="sub">The full music-making studio. Every sound, every instrument, all the studio equipment with real patch guides — make your music <b>on your own</b>, <b>via AI</b>, or <b>in collaboration with AI</b>.</p>
+<p style="margin:.6rem 0"><a class="btn big gold" href="#songs" style="text-decoration:none">📀 Open the Song Archive</a> <span class="seqlab">Every finished song — search, filter, one-tap play.</span></p>
 <details class="statdrawer"><summary>📊 Archive counts</summary><p class="counter" id="counters">Loading the archive…</p></details>
 <div class="honest">Every sound on this site is synthesized live in your browser with the Web Audio API — no samples, no downloads needed to play. All voices are synthesized; there are no human singers here. What the AI makes, it makes from a deterministic seed: the same request always makes the same music.</div>
 </div></header>
@@ -196,7 +197,7 @@
 <h2>📀 Song Archive</h2>
 <p>Every song fully made — lyrics, chords, structure, tempo, key — and <b>ready to play</b>: one click renders the demo mix. Marching to one million.</p>
 <p><button class="btn violet" data-walkopen>🎧 Step-by-step: make a song like these</button> <span class="seqlab">Opens the walkthrough in a popup — one easy question per screen.</span></p>
-<div class="filterbar"><div class="row"><div><label>Search songs</label><input type="text" id="songq" placeholder="Search songs…" aria-label="Search songs"></div></div></div>
+<div class="filterbar"><div class="row"><div><label>Search songs</label><input type="text" id="songq" placeholder="Search songs…" aria-label="Search songs"></div><div><label>Genre</label><select id="songgenre" aria-label="Filter songs by genre"><option value="">All genres</option></select></div><div><label>Order</label><select id="songorder" aria-label="Sort songs"><option value="new">Newest first</option><option value="old">Oldest first</option></select></div></div></div>
 <div class="az" id="songaz"></div>
 <div class="grid" id="songgrid"><div class="card" role="status">Loading the archive…</div></div>
 </section>
@@ -211,7 +212,8 @@
 </section>
 
 <section class="sec" id="session">
-<h2>🎛️ Studio Session — make a song step by step</h2>
+<details class="dropbox" id="sessiondrop">
+<summary class="dropbox-sum"><h2 style="display:inline">🎛️ Studio Session — make a song step by step</h2> <span class="seqlab">optional — tap to open the step-by-step guide</span></summary>
 <p><b>Anything a studio does, as a process.</b> Walk the stages in order — or let the <b>AI pal</b> guide you or finish the whole project for you. Every stage opens what you need as a popup.</p>
 <div class="aipal" id="walklaunch" style="margin-bottom:14px">
 <h3>🎧 Song Walkthrough — the easy way</h3>
@@ -245,6 +247,7 @@
 <h3 style="color:var(--gold)">💾 My Library — your showpiece shelf</h3>
 <p class="seqlab">Every sound you save lives here, ready to use in any session. Stored on your device.</p>
 <div class="mylib-grid" id="mylibgrid"></div>
+</details>
 </section>
 
 <section class="sec" id="addons">

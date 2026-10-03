@@ -58,6 +58,7 @@
     $("libgrid").innerHTML = h || '<div class="card">No matches in the loaded index slice — try clearing filters.</div>';
   }
   window.__initLibrary = function (idx) {
+    if (!idx.length && window.__bootState && window.__bootState() !== "LIVE" && window.__bootState() !== "CACHED") { var g = document.getElementById("libgrid"); if (g) g.innerHTML = window.__bootErrorCard("Sound Library"); return; }
     // extend index rows with family/type for sounds: fetch from records lazily is heavy; derive from id deterministically instead
     LIB.rows = idx.map(function (r) {
       if (r[2] !== "sound") return r;
@@ -90,6 +91,7 @@
 
   /* ---------- equipment browser ---------- */
   window.__initGear = function (idx) {
+    if (!idx.length && window.__bootState && window.__bootState() !== "LIVE" && window.__bootState() !== "CACHED") { var g = document.getElementById("geargird"); if (g) g.innerHTML = window.__bootErrorCard("Equipment"); return; }
     var rows = idx.filter(function (r) { return r[2] === "gear"; }).slice(0, 60);
     function draw(f, q) {
       var h = "";
@@ -113,32 +115,73 @@
   };
 
   /* ---------- song archive browser ---------- */
+  /* Song Archive grid — 2026-10-03: genre filter + newest/oldest sort +
+     one-tap play on every card (Manon's order: "make access to song archive
+     easy"). Archive order = numeric ID (newest = highest n). */
   window.__initSongs = function (idx) {
+    if (!idx.length && window.__bootState && window.__bootState() !== "LIVE" && window.__bootState() !== "CACHED") { var g = document.getElementById("songgrid"); if (g) g.innerHTML = window.__bootErrorCard("Song Archive"); return; }
     var rows = idx.filter(function (r) { return r[2] === "song"; });
+    var songs = rows.map(function (r) { return { id: r[0], title: r[1], n: parseInt(r[0].slice(-7), 10) || 0 }; });
+    var grid = $("songgrid"), qEl = $("songq"), gEl = $("songgenre"), oEl = $("songorder");
     var az = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
     $("songaz").innerHTML = az.map(function (l) { return '<button data-saz="' + l + '">' + l + "</button>"; }).join("");
-    function draw(letter) {
-      var q = ($("songq") && $("songq").value || "").toLowerCase();
-      var h = "", c = 0, i;
-      for (i = 0; i < rows.length && c < 60; i++) {
-        if (letter && rows[i][1][0].toUpperCase() !== letter) continue;
-        if (q && (rows[i][1] + " " + rows[i][0]).toLowerCase().indexOf(q) === -1) continue;
-        c++;
-        h += '<div class="card"><h4>' + esc(rows[i][1]) + '</h4><div class="id">' + esc(rows[i][0]) + '</div>' +
-          '<p><button class="btn ghost" data-songopen="' + esc(rows[i][0]) + '">Open →</button></p></div>';
+    // genre dropdown from the engine's canonical genre list
+    if (gEl && gEl.options.length <= 1) {
+      try { S.GENRES.forEach(function (g) { var o = document.createElement("option"); o.value = g; o.textContent = g.replace(/-/g, " "); gEl.appendChild(o); }); } catch (e) {}
+    }
+    var genreCache = null;
+    function genreOf(s) {
+      if (!genreCache) {
+        genreCache = {};
+        var i; for (i = 0; i < songs.length; i++) { try { genreCache[songs[i].id] = D.genSong(songs[i].n).genre; } catch (e) { genreCache[songs[i].id] = ""; } }
       }
-      $("songgrid").innerHTML = h || '<div class="card">No songs match — try clearing filters.</div>';
+      return genreCache[s.id] || "";
+    }
+    function draw(letter) {
+      var q = (qEl && qEl.value || "").toLowerCase(),
+          gf = gEl ? gEl.value : "",
+          order = oEl ? oEl.value : "new";
+      var list = [], i, s;
+      for (i = 0; i < songs.length; i++) {
+        s = songs[i];
+        if (letter && (s.title[0] || "#").toUpperCase() !== letter) continue;
+        if (gf && genreOf(s) !== gf) continue;
+        if (q && (s.title + " " + s.id).toLowerCase().indexOf(q) === -1) continue;
+        list.push(s);
+      }
+      list.sort(function (a, b) { return order === "old" ? a.n - b.n : b.n - a.n; });
+      var h = "", c = 0;
+      for (i = 0; i < list.length && c < 60; i++) {
+        s = list[i]; c++;
+        h += '<div class="card"><h4>' + esc(s.title) + '</h4><div class="id">' + esc(s.id) + '</div>' +
+          '<p><button class="fplay" data-splay="' + esc(s.id) + '">\u25B6 Play</button> ' +
+          '<button class="btn ghost" data-songopen="' + esc(s.id) + '">Open \u2192</button></p></div>';
+      }
+      grid.innerHTML = h || '<div class="card">No songs match — try clearing filters.</div>';
     }
     draw("");
     var _curLetter = "";
-    if ($("songq")) $("songq").addEventListener("input", function () { draw(_curLetter); });
+    function refilter() { draw(_curLetter); }
+    if (qEl) qEl.addEventListener("input", refilter);
+    if (gEl) gEl.addEventListener("change", refilter);
+    if (oEl) oEl.addEventListener("change", refilter);
     $("songaz").addEventListener("click", function (e) {
       var b = e.target.closest("[data-saz]"); if (!b) return;
       Array.prototype.forEach.call($("songaz").querySelectorAll("button"), function (x) { x.classList.remove("on"); });
       b.classList.add("on"); _curLetter = b.getAttribute("data-saz"); draw(_curLetter);
     });
-    $("songgrid").addEventListener("click", function (e) {
-      var o = e.target.closest("[data-songopen]"); if (o) location.search = "?song=" + o.getAttribute("data-songopen");
+    grid.addEventListener("click", function (e) {
+      var o = e.target.closest("[data-songopen]"); if (o) { location.search = "?song=" + o.getAttribute("data-songopen"); return; }
+      var p = e.target.closest("[data-splay]"); if (!p) return;
+      var id = p.getAttribute("data-splay");
+      p.textContent = "Rendering\u2026"; p.disabled = true;
+      try { S.unlockAudio(); } catch (e2) {}
+      window.__findRecord(id).then(function (rec) {
+        try { S.setPlayerLabel(rec.title || rec.id); S.setBusy("Rendering song\u2026"); } catch (e3) {}
+        return S.renderSong(rec, 150, window.__mixOf ? window.__mixOf() : null);
+      }).then(function (buf) {
+        S.playBuffer(buf, "songcard"); p.textContent = "\u25B6 Play"; p.disabled = false;
+      }).catch(function () { p.textContent = "\u25B6 Play"; p.disabled = false; });
     });
   };
 

@@ -44,6 +44,7 @@
 
   /* ---------- beat archive browser ---------- */
   window.__initBeats = function (idx) {
+    if (!idx.length && window.__bootState && window.__bootState() !== "LIVE" && window.__bootState() !== "CACHED") { var g = document.getElementById("beatgrid"); if (g) g.innerHTML = window.__bootErrorCard("Beat Archive"); return; }
     var rows = idx.filter(function (r) { return r[2] === "beat"; });
     var styles = {};
     rows.forEach(function (r) {

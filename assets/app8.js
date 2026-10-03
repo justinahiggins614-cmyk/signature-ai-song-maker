@@ -185,6 +185,9 @@
   function renderExplore() {
     var g = $("exploregrid");
     if (!g) return;
+    if (window.__bootState && window.__bootState() !== "LIVE" && window.__bootState() !== "CACHED" && window.__getIdx && !window.__getIdx().length) {
+      g.innerHTML = window.__bootErrorCard("Explore feed"); return;
+    }
     var songs = latest("song", 6), beats = latest("beat", 6), h = "";
     songs.forEach(function (r) {
       h += '<div class="card"><h4>' + esc(r[1]) + '</h4><div class="id">' + esc(r[0]) + ' · song</div>' +
