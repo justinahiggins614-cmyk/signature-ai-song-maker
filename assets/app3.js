@@ -84,7 +84,9 @@
     $("vupload").onclick = function () { $("vfile").click(); };
     $("vfile").onchange = function () {
       var f = this.files[0]; if (!f) return;
-      f.arrayBuffer().then(function (ab) { S.ensureCtx().decodeAudioData(ab).then(function (buf) { ownSample = buf; $("vinfo").textContent = "Sample loaded (" + buf.duration.toFixed(1) + "s)."; }); });
+      /* Gemini fix 4 (2026-10-02): 10 MB upload cap, honest words. */
+      if (f.size > 10 * 1024 * 1024) { $("vinfo").textContent = "That file is over the 10 MB upload limit — pick a shorter sample."; this.value = ""; return; }
+      f.arrayBuffer().then(function (ab) { S.ensureCtx().decodeAudioData(ab).then(function (buf) { ownSample = buf; $("vinfo").textContent = "Sample loaded (" + buf.duration.toFixed(1) + "s) — stays on this device only."; }); });
     };
     function selBackups() { return Array.prototype.map.call($("vbackup").selectedOptions, function (o) { return o.value; }); }
     $("vsing").onclick = function () {

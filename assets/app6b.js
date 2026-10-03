@@ -50,7 +50,7 @@
   /* ----- Stage 2: Beat ----- */
   function stage2() {
     var h = "<h3>Stage 2 — Beat</h3>" +
-      '<div class="row"><div><label>Describe your beat (try "Nas type beat" or "Eminem type beat")</label><input type="text" id="s2prompt" placeholder="e.g. dark trap banger, Nas type beat…"></div>' +
+      '<div class="row"><div><label>Describe your beat (try "gritty boom-bap" or "dark trap")</label><input type="text" id="s2prompt" placeholder="e.g. dark trap banger, dusty boom-bap…"></div>' +
       '<div><label>Genre</label><select id="s2genre"><option value="">Any — surprise me</option></select></div>' +
       '<div><label>BPM</label><input type="number" id="s2bpm" value="92" min="60" max="180"></div></div>' +
       "<p><button class='btn' id='s2make'>🤖 Make my beat</button> " +
@@ -221,7 +221,7 @@
       '<div><label>Artist name</label><input type="text" id="s7artist" value="' + esc(PROJ.cd.artist) + '" placeholder="e.g. Signature"></div></div>' +
       "<div id='s7tracks'></div>" +
       "<p><button class='btn ghost' id='s7add'>+ Add song by ID</button> <button class='btn ghost' id='s7mine'>+ Add my session song</button></p>" +
-      "<p><button class='btn' id='s7burn'>💿 Tag & build my CD</button> <span class='seqlab' id='s7info'></span></p>" +
+      "<p><button class='btn' id='s7burn'>💿 Tag & build my CD</button> <span class='seqlab'>⚠️ Your browser can't burn discs — this builds a <b>disc image</b> (.zip + cue sheet) for your own burner software.</span> <span class='seqlab' id='s7info'></span></p>" +
       "<div id='s7out'></div>";
     stagePane().innerHTML = h;
     function drawTracks() {
@@ -340,7 +340,7 @@
     $("tb-daw").onclick = function () { window.__openDAW(); };
     if (window.__palSay) window.__palSay(({
       1: "Stage 1 — Sounds: browse the library A–Z, pop any file open, preview it, and save the keepers to My Library.",
-      2: "Stage 2 — Beat: make your beat (try an 'Eminem type beat'!) and pick your instruments from the popup.",
+      2: "Stage 2 — Beat: make your beat (try a 'gritty boom-bap' or 'dark trap' groove!) and pick your instruments from the popup.",
       3: "Stage 3 — Lyrics: search the song archive in a popup, or write your own — the AI can draft too.",
       4: "Stage 4 — Singing: lead vocal, backup singers, and vocal edits. Your voice or a created voice.",
       5: "Stage 5 — Mix/Master: blend the buses, then pick a master — radio, club, tape, streaming.",

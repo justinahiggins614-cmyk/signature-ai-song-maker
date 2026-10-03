@@ -316,23 +316,28 @@
     else if (rec.style) ld.genre = rec.style.replace(/-/g, " ");
     if (rec.kind === "song") ld.recordingOf = { "@type": "MusicComposition", "name": rec.title, "identifier": rec.id };
     if (rec.kind === "song") {
+      /* Gemini fix 6 (2026-10-02): permanent ID + reproducible seed, plain words. */
+      var seedLine = (rec.n != null) ? '<p class="seqlab">🔑 Permanent ID <b>' + esc(rec.id) + '</b> · reproducible seed <b>' + esc(rec.n) + '</b> — the same ID always makes this exact song.</p>' : "";
       h = '<div class="rec"><h2>' + esc(rec.title) + ' <span class="id">' + esc(rec.id) + '</span></h2>' +
-        '<p class="meta">' + esc(rec.genre) + " · " + esc(rec.mood) + " · " + rec.tempo + " BPM · " + esc(rec.key) + '</p>' +
+        '<p class="meta">' + esc(rec.genre) + " · " + esc(rec.mood) + " · " + rec.tempo + " BPM · " + esc(rec.key) + '</p>' + seedLine +
         '<p>' + esc(rec.desc) + '</p><h3>Chords</h3><p class="chords">' + esc(rec.chords) + '</p>' +
         '<h3>Structure</h3><p>' + esc(rec.structure) + '</p><h3>Lyrics</h3><pre class="lyrics">' + esc(rec.lyrics) + "</pre>" +
         '<p><button class="btn" data-act="play">▶ Play demo mix</button>' +
         '<button class="btn teal" data-act="wav">⬇ .wav</button>' +
+        '<button class="btn ghost" data-act="proj">📦 Export project</button>' +
         '<button class="btn ghost" data-act="read">🔊 Read aloud</button>' +
         '<button class="btn ghost" data-act="txt">Copy .txt</button>' +
         '<button class="btn ghost" data-act="json">Copy .json</button></p>' +
         '<div class="row"><div><label>Ask about this song</label><input type="text" data-qa placeholder="e.g. what is the tempo?"></div></div><div class="ans" data-qaout style="display:none"></div></div>';
     } else if (rec.kind === "beat") {
+      var bseedLine = (rec.n != null) ? '<p class="seqlab">🔑 Permanent ID <b>' + esc(rec.id) + '</b> · reproducible seed <b>' + esc(rec.n) + '</b> — the same ID always makes this exact beat.</p>' : "";
       h = '<div class="rec"><h2>' + esc(rec.name) + ' <span class="id">' + esc(rec.id) + '</span></h2>' +
-        '<p class="meta">' + esc(rec.style.replace(/-/g, " ")) + " · " + rec.bpm + ' BPM' + (rec.era ? ' · vintage-era style' : '') + '</p>' +
+        '<p class="meta">' + esc(rec.style.replace(/-/g, " ")) + " · " + rec.bpm + ' BPM' + (rec.era ? ' · vintage-era style' : '') + '</p>' + bseedLine +
         '<p>' + esc(rec.desc) + '</p>' +
         '<div class="honest">Original Signature composition — in the style of the era, never a copy of any real song.</div>' +
         '<p><button class="btn" data-act="bplay">▶ Play beat</button>' +
         '<button class="btn teal" data-act="bwav">⬇ .wav</button>' +
+        '<button class="btn ghost" data-act="proj">📦 Export project</button>' +
         '<button class="btn ghost" data-act="read">🔊 Read aloud</button>' +
         '<button class="btn ghost" data-act="txt">Copy .txt</button>' +
         '<button class="btn ghost" data-act="json">Copy .json</button></p>' +
@@ -362,6 +367,7 @@
       if (act === "read") readAloud((rec.title || rec.name) + ". " + rec.desc + (rec.lyrics ? " Lyrics: " + rec.lyrics : ""), rec.id);
       if (act === "txt") navigator.clipboard.writeText(JSON.stringify(rec, null, 2));
       if (act === "json") navigator.clipboard.writeText(JSON.stringify(rec));
+      if (act === "proj" && window.__exportProject) window.__exportProject(rec);
       if (act === "play") { b.textContent = "Rendering…"; try { S.setPlayerLabel(rec.title || rec.id); S.setBusy("Rendering song…"); } catch (e2) {} S.renderFullSong(rec, window.__mixOf ? window.__mixOf() : null, null).then(function (buf) { S.playBuffer(buf); b.textContent = "▶ Play demo mix"; dl(S.bufferToWav(buf), rec.id + ".wav"); }); }
       if (act === "wav") { b.textContent = "Rendering…"; S.renderFullSong(rec, window.__mixOf ? window.__mixOf() : null, null).then(function (buf) { dl(S.bufferToWav(buf), rec.id + ".wav"); b.textContent = "⬇ .wav"; }); }
       if (act === "preview") previewSound(rec);

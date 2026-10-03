@@ -38,7 +38,7 @@
 <h2>✨ Make a Song</h2>
 <p class="seqlab">Describe it. One button. The studio does the rest — full song, 18-bar verses, four chorus breaks, rhyming lyrics that make sense.</p>
 <div><label for="promptbox" style="font-size:18px;color:var(--gold)">Describe your song — make any song you can imagine…</label>
-<textarea id="promptbox" rows="3" style="width:100%" placeholder="e.g. a dark hip-hop anthem about the midnight highway, Nas type beat with a sung chorus…"></textarea></div>
+<textarea id="promptbox" rows="3" style="width:100%" placeholder="e.g. a dark hip-hop anthem about the midnight highway, gritty 90s boom-bap with a sung chorus…"></textarea></div>
 <div class="row">
 <div><label>Style</label><select id="promptstyle"><option value="">Any — surprise me</option></select></div>
 <div><label>Lyrics</label><select id="promptlyrics"><option value="ai">AI writes them (rhyming)</option><option value="typed">I'll type them</option><option value="none">Instrumental</option></select></div>
@@ -97,7 +97,7 @@
 <h2>🥁 AI Beat Maker</h2>
 <p>Describe the beat you want — the AI arranges it from a deterministic seed. Same request, same beat, every time.</p>
 <div class="row">
-<div><label>Describe your beat</label><input type="text" id="beatprompt" placeholder="e.g. dark trap banger, Nas type beat, smooth lofi groove…"></div>
+<div><label>Describe your beat</label><input type="text" id="beatprompt" placeholder="e.g. dark trap banger, dusty boom-bap, smooth lofi groove…"></div>
 <div><label>Genre</label><select id="beatgenre"></select></div>
 <div><label>Tempo (BPM)</label><input type="number" id="beatbpm" value="92" min="60" max="180"></div>
 <div><label>Bars</label><input type="number" id="beatbars" value="4" min="1" max="16"></div>
@@ -141,18 +141,19 @@
 <button class="btn violet" id="vsing">🎤 Sing it</button>
 <button class="btn ghost" id="vplay">▶ Play</button>
 <button class="btn teal" id="vwav">⬇ Download .wav</button></p>
+<div class="honest" id="voiceprivacy"><b>🔒 Your voice, your device.</b> Recording and uploads are accepted as wav, mp3, webm or ogg (whatever your browser can decode), up to <b>10&nbsp;MB</b>. Your sample is decoded <b>in this browser's memory only — it is never uploaded anywhere and never leaves your device</b>. It is replaced when you record or upload a new sample, and it is gone when you reload or close the page.</div>
 <p class="seqlab" id="vinfo"></p>
 </section>
 
 <section class="sec" id="backups">
 <h2>🎶 Backup Singers</h2>
-<p>All types, selectable <b>to spec</b> — they join the song's spec record and its mix.</p>
+<p>All types, selectable <b>to spec</b> — they join the song's spec record and its mix. Every backup singer is a <b>synthesized voice</b>, never a human singer.</p>
 <div class="grid" id="backupgrid"></div>
 </section>
 
 <section class="sec" id="cleanup">
 <h2>✨ Vocal Cleanup</h2>
-<p>Upload your vocals — the AI cleans them up: de-rumble, de-hiss, compression, leveling. <b>Re-sing clean</b> detects your melody and has the vocal synth sing it back alike, cleaned up.</p>
+<p>Upload your vocals — the AI cleans them up: de-rumble, de-hiss, compression, leveling. <b>Re-sing clean</b> detects your melody and has the vocal synth sing it back alike, cleaned up — the re-sung voice is <b>synthesized</b>, not a human singer.</p>
 <div class="honest">Honest limits: cleanup cannot fix hard clipping or heavy distortion. Record with peaks near −12&nbsp;dB for best results.</div>
 <p><button class="btn ghost" id="cup">⬆ Upload vocals</button><input type="file" id="cufile" accept="audio/*" style="display:none">
 <button class="btn" id="cuclean">✨ AI: Clean it up</button>
@@ -167,7 +168,7 @@
 <p>Pick songs from the archive — the site renders each to CD-quality audio, builds a cue sheet, and packages a <b>disc image download</b> with step-by-step burning instructions.</p>
 <div class="honest">Browsers cannot drive a CD burner directly, so this page prepares the disc image; you burn it with your own burner software using the included guide. First: does your system have a CD burner? <select id="burnerq" style="width:auto;display:inline-block"><option value="">— choose —</option><option value="yes">Yes, it has a burner</option><option value="no">No burner</option><option value="dk">I don't know</option></select></div>
 <div><label>Add songs by ID (one per line, e.g. JAH-SONG-0000001)</label><textarea id="cdlist" placeholder="JAH-SONG-0000001&#10;JAH-SONG-0000042"></textarea></div>
-<p><button class="btn" id="cdrender">💿 Render my CD</button> <span class="seqlab" id="cdinfo"></span></p>
+<p><button class="btn" id="cdrender">💿 Render my CD</button> <span class="seqlab">⚠️ Browsers can't burn a disc directly — this builds a <b>disc image</b> (.zip + cue sheet) for your own burner software.</span> <span class="seqlab" id="cdinfo"></span></p>
 <div id="cdout"></div>
 </section>
 
@@ -314,5 +315,6 @@
 <script src="assets/app6b.js"></script>
 <script src="assets/app7.js"></script>
 <script src="assets/app8.js"></script>
+<script src="assets/app9.js"></script>
 </body>
 </html>

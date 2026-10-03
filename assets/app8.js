@@ -79,8 +79,10 @@
 
   function renderPromptResult(rec, prompt, lm) {
     var out = $("promptout"), h = "";
+    window.__lastPromptRec = rec; /* Gemini fix 6 (2026-10-02): exposes the fresh song for My Projects save */
     h += '<div class="card"><h4>' + esc(rec.title) + '</h4><div class="id">' + esc(rec.id) +
       " · " + esc(rec.genre) + " · " + esc(rec.tempo) + " BPM · " + esc(rec.key) + "</div>" +
+      (rec.n != null ? '<p class="seqlab">🔑 Permanent ID <b>' + esc(rec.id) + '</b> · reproducible seed <b>' + esc(rec.n) + '</b> — the same ID always makes this exact song. Saved to <b>My Projects</b> below.</p>' : "") +
       '<p class="seqlab">The 5:00 standard — intro build-up, 18-bar verses, <b>four</b> 30-second chorus breaks, bridge beat-switch, fade out.</p>';
     if (lm === "typed") {
       h += '<div><label>Your lyrics (the AI wrote a rhyming draft — make it yours)</label>' +
@@ -97,6 +99,7 @@
     h += '<p><button class="btn teal" id="promptwav">⬇ .wav</button> ' +
       '<button class="btn ghost" id="promptmidi">⬇ MIDI</button> ' +
       '<button class="btn ghost" id="promptstems">⬇ Stems (5)</button> ' +
+      '<button class="btn teal" id="promptexp">📦 Export project</button> ' +
       '<button class="btn ghost" id="promptread">🔊 Read lyrics</button> ' +
       '<button class="btn ghost" id="promptopen">📄 Open record</button> ' +
       '<button class="btn violet" id="promptwalk">🎧 Refine in walkthrough</button></p><div class="seqlab" id="promptdl"></div></div>';
@@ -136,6 +139,7 @@
       })();
     };
     $("promptread").onclick = function () { readAloud(rec.title + ". " + (rec.lyrics || "Instrumental."), "song lyrics"); };
+    $("promptexp").onclick = function () { if (window.__exportProject) window.__exportProject(rec); };
     $("promptopen").onclick = function () { location.hash = ""; location.search = "?song=" + rec.id; location.reload(); };
     $("promptwalk").onclick = function () { if (window.__openWalk) window.__openWalk(); };
     var ul = $("promptuselyrics");

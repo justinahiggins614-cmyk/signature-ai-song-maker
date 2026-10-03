@@ -140,7 +140,7 @@
         var gs = [["", "Any — surprise me"]].concat((D.BEAT_STYLES || []).map(function (g) { return [g, g.replace(/-/g, " ")]; }));
         return '<div><label>Song name (or leave it — the AI names it)</label><input type="text" id="wtitle" value="' + esc(ws.title) + '" placeholder="e.g. Midnight Highway" style="width:100%"></div>' +
           '<div><label>Genre</label><select id="wgenre" style="width:100%">' + optList(gs, ws.genre) + "</select></div>" +
-          '<div><label>…or name a style ("Nas type beat")</label><input type="text" id="wtypebeat" value="' + esc(ws.typebeat) + '" placeholder="e.g. Eminem type beat" style="width:100%"></div>' +
+          '<div><label>…or name a style ("90s boom-bap")</label><input type="text" id="wtypebeat" value="' + esc(ws.typebeat) + '" placeholder="e.g. dark trap groove" style="width:100%"></div>' +
           '<div><label>Tempo (BPM)</label><input type="number" id="wbpm" value="' + ws.bpm + '" min="60" max="180" style="width:100%"></div>';
       },
       wire: function () {},
@@ -593,20 +593,44 @@
   }, true);
 
   /* ================= AI addons section ================= */
+  /* Gemini fix 7 (2026-10-02): each specialist AI gets a visible role
+     + a Test button that genuinely runs it — opening the walkthrough at
+     the addon's own step (Finisher runs aiFinish()). Real test, real output. */
+  var ADDON_ROLES = {
+    arrange: "Role: song architect — lays out the 5:00 structure",
+    groove: "Role: rhythm designer — builds the drum pattern",
+    melody: "Role: tune writer — writes melody, chords, bass line",
+    vocalcoach: "Role: voice director — picks the voice, stacks backups",
+    master: "Role: mix finisher — balances and masters radio-ready",
+    finisher: "Role: closer — finishes any unfinished step"
+  };
   function renderAddons() {
     var g = $("addongrid");
     if (!g) return;
     g.innerHTML = D.AI_ADDONS.map(function (a, i) {
+      var role = ADDON_ROLES[a.id] || "Role: studio specialist";
       return '<div class="card"><h4>' + esc(a.name) + "</h4><p class='seqlab'>" + esc(a.desc) + "</p>" +
-        '<p><button class="btn ghost" data-addon="' + i + '">' + (a.go === -1 ? "🤖 Finish a song now" : "Use in walkthrough →") + "</button></p></div>";
+        '<p class="seqlab"><b>' + esc(role) + "</b></p>" +
+        '<p><button class="btn teal" data-addontest="' + i + '">▶ Test this AI</button> ' +
+        '<button class="btn ghost" data-addon="' + i + '">' + (a.go === -1 ? "🤖 Finish a song now" : "Use in walkthrough →") + "</button></p></div>";
     }).join("");
     g.addEventListener("click", function (e) {
-      var b = e.target.closest("[data-addon]");
-      if (!b) return;
-      var a = D.AI_ADDONS[+b.getAttribute("data-addon")];
-      openWalk();
-      if (a.go === -1) { aiFinish(); }
-      else { WSTEP = a.go; drawStep(); }
+      var b = e.target.closest ? e.target.closest("[data-addon]") : null;
+      if (b) {
+        var a = D.AI_ADDONS[+b.getAttribute("data-addon")];
+        openWalk();
+        if (a.go === -1) { aiFinish(); }
+        else { WSTEP = a.go; drawStep(); }
+        return;
+      }
+      var t = e.target.closest ? e.target.closest("[data-addontest]") : null;
+      if (t) {
+        var ta = D.AI_ADDONS[+t.getAttribute("data-addontest")];
+        try { if (window.__palSay) window.__palSay("Testing " + ta.name + " — opening the walkthrough at its step. Watch it work."); } catch (x) {}
+        openWalk();
+        if (ta.go === -1) { aiFinish(); }
+        else { WSTEP = ta.go; drawStep(); }
+      }
     });
   }
 

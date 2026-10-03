@@ -95,7 +95,7 @@
     if (/finish.*song|complete.*song|finish it|do the rest/.test(q) && window.__openWalkStep) { window.__openWalkStep(-1); return "🤖 Finisher AI is on it — completing every remaining step from your seed."; }
     if (/take over|auto|finish|complete|do it all/.test(q)) { autoProject($("palq").value || "a great song"); return "On it — building your whole project now. Watch the stages light up."; }
     if (/stage 1|sound/.test(q)) return "Stage 1: tap the Sounds stage, browse A–Z, pop a file open with ▶, and hit 'Save to My Library' on the keepers.";
-    if (/stage 2|beat/.test(q)) return "Stage 2: describe your beat — even 'Nas type beat' or 'Eminem type beat' works — then pick instruments from the popup.";
+    if (/stage 2|beat/.test(q)) return "Stage 2: describe your beat — even 'gritty 90s boom-bap' or 'dark trap banger' works — then pick instruments from the popup.";
     if (/stage 3|lyric/.test(q)) return "Stage 3: use the song-search popup to borrow structure, or type lyrics and let the AI draft.";
     if (/stage 4|sing|vocal/.test(q)) return "Stage 4: pick a voice (created or your own), add backup singers, then clean up the vocal.";
     if (/stage 5|mix|master/.test(q)) return "Stage 5: ride the faders, then choose a master preset — Radio is the all-rounder.";
