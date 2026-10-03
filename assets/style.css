@@ -32,6 +32,18 @@ a{color:var(--gold)}
 .hit{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
 .hit b{color:var(--gold)}
 .hit .go{float:right;background:var(--gold);color:#14101d;border:none;border-radius:8px;padding:8px 14px;font-weight:bold;cursor:pointer}
+/* Finder AI inline play (his order: tap ▶ hears it right in the results) */
+.freply{color:var(--violet);font-size:15px;margin:2px 0 6px}
+.fplay{background:var(--teal);color:#0c1420;border:none;border-radius:8px;padding:8px 14px;font-weight:bold;cursor:pointer;margin:6px 8px 0 0}
+.fplay:disabled{opacity:.55;cursor:default}
+.fnow{margin-top:8px;font-size:13px;color:var(--teal);min-height:4px}
+.fnow .eq{display:inline-flex;align-items:flex-end;gap:2px;height:14px;margin-right:6px;vertical-align:-2px}
+.fnow .eq span{width:3px;background:var(--teal);animation:eqb .7s ease-in-out infinite}
+.fnow .eq span:nth-child(2){animation-delay:.15s}
+.fnow .eq span:nth-child(3){animation-delay:.3s}
+@keyframes eqb{0%,100%{height:4px}50%{height:14px}}
+.fstop{background:none;border:1px solid var(--teal);color:var(--teal);border-radius:6px;padding:4px 10px;cursor:pointer;margin-left:8px;font-size:13px}
+.fblocked{color:var(--gold)}
 /* cards & grids */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
 .card{background:#1a1428;border:1px solid var(--line);border-radius:12px;padding:14px}

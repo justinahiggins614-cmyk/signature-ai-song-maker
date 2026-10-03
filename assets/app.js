@@ -118,8 +118,60 @@
     });
   }
 
-  /* ---------- Finder AI (keyword -> existing search -> top 5 cards) ---------- */
+  /* ---------- Finder AI (keyword -> existing search -> top 5 cards, inline play) ----------
+     His order 2026-10-02: the Finder AI must PULL UP the beat/song and PLAY it for
+     the user right in the results — real action, never an empty promise. Tap ▶ on a
+     result: unlockAudio() runs SYNCHRONOUSLY inside the tap gesture (his phone's
+     in-app browser suspends AudioContext otherwise), then the real record renders
+     and playBuffer starts it. Now-playing state is shown ONLY when playBuffer
+     actually returns a live source; if the browser blocks audio we say so in plain
+     words — never faked. */
   var STOP = { "the": 1, "and": 1, "for": 1, "with": 1, "from": 1, "that": 1, "this": 1, "what": 1, "make": 1, "song": 1 };
+  var _finderLiveId = "finder";
+  function finderStopAll() {
+    try { S.stopLive(_finderLiveId); } catch (e) {}
+    Array.prototype.forEach.call(document.querySelectorAll("#finderhits .fplay"), function (b) {
+      b.textContent = b.getAttribute("data-label") || "▶ Play";
+      b.disabled = false;
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("#finderhits .fnow"), function (n) { n.innerHTML = ""; });
+  }
+  function finderRenderFail(btn, nowEl, msg) {
+    btn.textContent = btn.getAttribute("data-label") || "▶ Play";
+    btn.disabled = false;
+    nowEl.innerHTML = '<span class="fblocked">' + esc(msg) + "</span>";
+  }
+  function finderPlayStarted(buf, btn, nowEl, label) {
+    var src = null;
+    try { src = S.playBuffer(buf, _finderLiveId); } catch (e) { src = null; }
+    if (!src) {
+      // Honest: the browser held the audio. Never fake "now playing".
+      finderRenderFail(btn, nowEl, 'Audio is blocked in this browser — tap ▶ again, or use "Take me there →" to play on the record page.');
+      return;
+    }
+    btn.textContent = "♪ Playing…";
+    btn.disabled = true;
+    nowEl.innerHTML = '<span class="eq" aria-hidden="true"><span></span><span></span><span></span></span><span>Now playing' + (label ? " — " + esc(label) : "") + '</span><button class="fstop" type="button">■ Stop</button>';
+    var st = nowEl.querySelector(".fstop");
+    if (st) st.onclick = function () { try { S.unlockAudio(); } catch (e2) {} finderStopAll(); };
+  }
+  function finderPlayBeat(rec, btn, nowEl) {
+    try { S.unlockAudio(); } catch (e) {} /* synchronous, inside the tap gesture */
+    finderStopAll();
+    btn.textContent = "Rendering…"; btn.disabled = true;
+    var pat = S.patternFor(rec.name, rec.style, rec.bpm);
+    S.renderBuffer(16 * (60 / rec.bpm / 4) * 4 + 0.3, function (c, dest, t0) { S.scheduleBeat(c, dest, t0, pat, 4, 1); })
+      .then(function (buf) { finderPlayStarted(buf, btn, nowEl, rec.name); },
+        function () { finderRenderFail(btn, nowEl, "Could not render this beat."); });
+  }
+  function finderPlaySong(rec, btn, nowEl) {
+    try { S.unlockAudio(); } catch (e) {} /* synchronous, inside the tap gesture */
+    finderStopAll();
+    btn.textContent = "Rendering…"; btn.disabled = true;
+    S.renderSong(rec, 30, window.__mixOf ? window.__mixOf() : null)
+      .then(function (buf) { finderPlayStarted(buf, btn, nowEl, (rec.title || rec.id) + " · 30s preview"); },
+        function () { finderRenderFail(btn, nowEl, "Could not render this song."); });
+  }
   function finderGo() {
     var q = $("finderq").value.toLowerCase().replace(/[^a-z0-9 ]/g, " ");
     var words = q.split(/\s+/).filter(function (w) { return w.length >= 3 && !STOP[w]; });
@@ -130,13 +182,32 @@
     }).filter(function (x) { return x[0] > 0; }).sort(function (a, b) { return b[0] - a[0]; }).slice(0, 5);
     var h = "";
     if (!scored.length) h = '<div class="hit">No matches yet — try "beat", "mic", "love song", "piano", "choir".</div>';
+    if (scored.length && (scored[0][1][2] === "beat" || scored[0][1][2] === "song"))
+      h += '<div class="freply">🎯 Found it — tap ▶ to hear it right here, or "Take me there →" for the full record.</div>';
     scored.forEach(function (x) {
       var r = x[1], param = r[2] === "song" ? "song" : r[2] === "sound" ? "sound" : r[2] === "beat" ? "beat" : "gear";
-      h += '<div class="hit"><b>' + esc(r[1]) + '</b> <span class="id">' + esc(r[0]) + '</span><br><span class="seqlab">' + esc(r[2]) + '</span><button class="go" data-p="' + param + '" data-id="' + esc(r[0]) + '">Take me there →</button></div>';
+      var playable = r[2] === "beat" || r[2] === "song";
+      var plabel = r[2] === "song" ? "▶ Play preview" : "▶ Play";
+      var playBtn = playable
+        ? '<button class="fplay" type="button" data-kind="' + r[2] + '" data-id="' + esc(r[0]) + '" data-label="' + plabel + '">' + plabel + "</button>"
+        : "";
+      h += '<div class="hit"><b>' + esc(r[1]) + '</b> <span class="id">' + esc(r[0]) + '</span><br><span class="seqlab">' + esc(r[2]) + "</span>" + playBtn + '<button class="go" data-p="' + param + '" data-id="' + esc(r[0]) + '">Take me there →</button><div class="fnow" aria-live="polite"></div></div>';
     });
     $("finderhits").innerHTML = h;
     Array.prototype.forEach.call($("finderhits").querySelectorAll(".go"), function (b) {
       b.onclick = function () { location.hash = ""; location.search = "?" + b.getAttribute("data-p") + "=" + b.getAttribute("data-id"); location.reload(); };
+    });
+    Array.prototype.forEach.call($("finderhits").querySelectorAll(".fplay"), function (b) {
+      b.onclick = function () {
+        try { S.unlockAudio(); } catch (e) {} /* synchronous: inside the tap gesture */
+        var kind = b.getAttribute("data-kind"), id = b.getAttribute("data-id");
+        var nowEl = b.parentNode.querySelector(".fnow");
+        b.textContent = "Loading…"; b.disabled = true;
+        findRecord(id).then(function (rec) {
+          if (kind === "beat") finderPlayBeat(rec, b, nowEl);
+          else finderPlaySong(rec, b, nowEl);
+        }, function () { finderRenderFail(b, nowEl, "Could not load this record."); });
+      };
     });
   }
   $("finderq").addEventListener("keydown", function (e) { if (e.key === "Enter") finderGo(); });
