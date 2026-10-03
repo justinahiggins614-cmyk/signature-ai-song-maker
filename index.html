@@ -9,17 +9,20 @@
 <link rel="stylesheet" href="assets/style.css">
 <link rel="stylesheet" href="assets/studio-theme.css">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebSite","name":"Signature Music Studio","url":"https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/","description":"Full music-making studio: sounds, equipment, beat maker, song writer, vocal studio, CD making."}
+{"@context":"https://schema.org","@graph":[
+{"@type":"WebSite","name":"Signature Music Studio","url":"https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/","description":"Full music-making studio: sounds, equipment, beat maker, song writer, vocal studio, CD making.","author":{"@type":"Person","name":"Justin Addam Higgins"}},
+{"@type":"Dataset","name":"Signature Music Studio","description":"Deterministic archive of original Signature songs, beats, sound-library instruments, and studio equipment records — marching to one million songs and one million instruments.","creator":{"@type":"Person","name":"Justin Addam Higgins"},"url":"https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/data/music-catalog.json"}
+]}
 </script>
 </head>
 <body>
-<nav class="jahnet" aria-label="THE JAH NETWORK"><div class="wrap" id="jahnet"></div></nav>
+<nav class="jahnet" aria-label="JAH Network Global Ecosystem"><div class="wrap" id="jahnet"></div></nav>
 
 <header class="hero"><div class="wrap">
 <h1>SIGNATURE MUSIC STUDIO</h1>
 <div><span class="official">OFFICIAL SIGNATURE SITE</span></div>
 <p class="sub">The full music-making studio. Every sound, every instrument, all the studio equipment with real patch guides — make your music <b>on your own</b>, <b>via AI</b>, or <b>in collaboration with AI</b>.</p>
-<p class="counter" id="counters">Loading the archive…</p>
+<details class="statdrawer"><summary>📊 Archive counts</summary><p class="counter" id="counters">Loading the archive…</p></details>
 <div class="honest">Every sound on this site is synthesized live in your browser with the Web Audio API — no samples, no downloads needed to play. All voices are synthesized; there are no human singers here. What the AI makes, it makes from a deterministic seed: the same request always makes the same music.</div>
 </div></header>
 
@@ -74,7 +77,7 @@
 
 <section class="sec" id="studio">
 <h2>🎛️ Sound Library</h2>
-<p>Every sound possible — drums, bass, keys, strings, brass, pads, leads, world instruments, FX — plus instruments, sound sets, and sound packs. All synthesized live. <span class="counter" id="libcount"></span></p>
+<p>Every sound possible — drums, bass, keys, strings, brass, pads, leads, world instruments, FX — plus instruments, sound sets, and sound packs. All synthesized live. <details class="statdrawer inline"><summary>📊</summary><span class="counter" id="libcount"></span></details></p>
 <div class="row"><div><label>Family</label><select id="libfam"><option value="">All families</option></select></div>
 <div><label>Type</label><select id="libtype"><option value="">All</option><option value="sound">Sounds</option><option value="instrument">Instruments</option><option value="set">Sound sets</option><option value="pack">Sound packs</option></select></div>
 <div><label>Search</label><input type="text" id="libq" placeholder="Search the library…"></div></div>
@@ -179,6 +182,7 @@
 <h2>📀 Song Archive</h2>
 <p>Every song fully made — lyrics, chords, structure, tempo, key — and <b>ready to play</b>: one click renders the demo mix. Marching to one million.</p>
 <p><button class="btn violet" data-walkopen>🎧 Step-by-step: make a song like these</button> <span class="seqlab">Opens the walkthrough in a popup — one easy question per screen.</span></p>
+<div class="filterbar"><div class="row"><div><label>Search songs</label><input type="text" id="songq" placeholder="Search songs…" aria-label="Search songs"></div></div></div>
 <div class="az" id="songaz"></div>
 <div class="grid" id="songgrid"></div>
 </section>
@@ -187,8 +191,8 @@
 <h2>🥁 Beat Archive</h2>
 <p>A vast selection of beats — <b>every genre</b>, plus <b>vintage-era classics</b>. All beats are <b>original Signature compositions</b>: era records are original beats <i>in the style of</i> classic eras — never copies of any real song, lyrics, or melody.</p>
 <p><button class="btn violet" data-walkopen>🎧 Step-by-step: make a beat like these</button> <span class="seqlab">Opens the walkthrough in a popup — one easy question per screen.</span></p>
-<div class="row"><div><label>Style</label><select id="beatstyle"><option value="">All styles</option></select></div>
-<div><label>Search</label><input type="text" id="beatq" placeholder="Search beats…"></div></div>
+<div class="filterbar"><div class="row"><div><label>Style</label><select id="beatstyle"><option value="">All styles</option></select></div>
+<div><label>Search</label><input type="text" id="beatq" placeholder="Search beats…"></div></div></div>
 <div class="grid" id="beatgrid"></div>
 </section>
 
@@ -231,13 +235,69 @@
 <p>Six specialist AIs that do the musician work with you — arrangement, groove, melody, vocal coaching, mastering, finishing. Each one is real, runs in your browser, and is free.</p>
 <div class="grid" id="addongrid"></div>
 </section>
+<section class="sec" id="staticcat">
+<h2>📚 Catalog index</h2>
+<p class="seqlab">A bot-friendly snapshot of the archive — the full feed is at <a href="data/music-catalog.json">data/music-catalog.json</a>.</p>
+<!-- STATIC-CAT-START -->
+<table class="statictable"><thead><tr><th>ID</th><th>Title</th><th>Open</th></tr></thead><tbody>
+<tr><td><span class="id">JAH-SONG-0000001</span></td><td>Amber Harbor</td><td><a href="?song=JAH-SONG-0000001">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000002</span></td><td>Silver Highway</td><td><a href="?song=JAH-SONG-0000002">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000003</span></td><td>Midnight Garden</td><td><a href="?song=JAH-SONG-0000003">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000004</span></td><td>Crimson Horizon</td><td><a href="?song=JAH-SONG-0000004">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000005</span></td><td>Restless Orbit</td><td><a href="?song=JAH-SONG-0000005">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000006</span></td><td>Golden Drift</td><td><a href="?song=JAH-SONG-0000006">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000007</span></td><td>Slow Lantern</td><td><a href="?song=JAH-SONG-0000007">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000008</span></td><td>Electric Meadow</td><td><a href="?song=JAH-SONG-0000008">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000009</span></td><td>Amber Tide</td><td><a href="?song=JAH-SONG-0000009">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000010</span></td><td>Bright River</td><td><a href="?song=JAH-SONG-0000010">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000011</span></td><td>Electric Garden</td><td><a href="?song=JAH-SONG-0000011">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000012</span></td><td>Quiet Signal</td><td><a href="?song=JAH-SONG-0000012">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000013</span></td><td>Hollow Horizon</td><td><a href="?song=JAH-SONG-0000013">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000014</span></td><td>Copper Garden</td><td><a href="?song=JAH-SONG-0000014">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000015</span></td><td>Static River</td><td><a href="?song=JAH-SONG-0000015">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000016</span></td><td>Midnight Wire</td><td><a href="?song=JAH-SONG-0000016">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000017</span></td><td>Paper Summit</td><td><a href="?song=JAH-SONG-0000017">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000018</span></td><td>Restless River</td><td><a href="?song=JAH-SONG-0000018">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000019</span></td><td>Wild Flame</td><td><a href="?song=JAH-SONG-0000019">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000020</span></td><td>Copper Tide</td><td><a href="?song=JAH-SONG-0000020">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000001</span></td><td>Signature Copper trap Beat II</td><td><a href="?beat=JAH-BEAT-0000001">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000002</span></td><td>Signature Paper 80s synthpop Beat V</td><td><a href="?beat=JAH-BEAT-0000002">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000003</span></td><td>Signature Patient rock Beat IV</td><td><a href="?beat=JAH-BEAT-0000003">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000004</span></td><td>Signature Amber 70s funk Beat IV</td><td><a href="?beat=JAH-BEAT-0000004">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000005</span></td><td>Signature Crimson techno Beat I</td><td><a href="?beat=JAH-BEAT-0000005">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000006</span></td><td>Signature Slow lofi Beat I</td><td><a href="?beat=JAH-BEAT-0000006">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000007</span></td><td>Signature Silver jazz Beat II</td><td><a href="?beat=JAH-BEAT-0000007">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000008</span></td><td>Signature Velvet 70s funk Beat II</td><td><a href="?beat=JAH-BEAT-0000008">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000009</span></td><td>Signature Bold 80s synthpop Beat IV</td><td><a href="?beat=JAH-BEAT-0000009">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000010</span></td><td>Signature Crimson pop Beat III</td><td><a href="?beat=JAH-BEAT-0000010">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000011</span></td><td>Signature Patient funk Beat V</td><td><a href="?beat=JAH-BEAT-0000011">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000012</span></td><td>Signature Hollow reggae Beat I</td><td><a href="?beat=JAH-BEAT-0000012">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000013</span></td><td>Signature Silver trap Beat V</td><td><a href="?beat=JAH-BEAT-0000013">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000014</span></td><td>Signature Distant funk Beat I</td><td><a href="?beat=JAH-BEAT-0000014">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000015</span></td><td>Signature Amber trap Beat II</td><td><a href="?beat=JAH-BEAT-0000015">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000016</span></td><td>Signature Neon 70s funk Beat III</td><td><a href="?beat=JAH-BEAT-0000016">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000017</span></td><td>Signature Golden 80s synthpop Beat I</td><td><a href="?beat=JAH-BEAT-0000017">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000018</span></td><td>Signature Distant 70s funk Beat II</td><td><a href="?beat=JAH-BEAT-0000018">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000019</span></td><td>Signature Bold 90s boombap Beat II</td><td><a href="?beat=JAH-BEAT-0000019">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000020</span></td><td>Signature Static 00s crunk Beat I</td><td><a href="?beat=JAH-BEAT-0000020">Open →</a></td></tr>
+</tbody></table>
+<p class="seqlab">Showing the first 40 archive records. Full machine-readable feed: <a href="data/music-catalog.json">data/music-catalog.json</a>.</p>
+<!-- STATIC-CAT-END -->
+
+</section>
 </div>
 
 <footer><div class="wrap">
-<nav class="jahnet" style="border:none;background:none"><div class="wrap" id="jahnet2" style="justify-content:center"></div></nav>
+<nav class="jahnet" aria-label="JAH Network (footer)" style="border:none;background:none"><div class="wrap" id="jahnet2" style="justify-content:center"></div></nav>
 <p><b style="color:var(--gold)">Signature Music Studio</b> — the official name. Make music on your own, via AI, or in collaboration with AI.<br>
 <span class="seqlab">All audio synthesized in your browser. All voices synthesized. All records original Signature content.</span></p>
 </div></footer>
+
+<div id="playerbar" style="display:none" role="region" aria-label="Now playing">
+<div class="pbeq" id="pbeq"><span></span><span></span><span></span></div>
+<div class="pbmeta"><div id="pblabel">Now playing</div><div id="pbstate" class="seqlab"></div></div>
+<div class="pbbtns"><button id="pbpause" aria-label="Pause" title="Pause">⏸</button><button id="pbplay" aria-label="Play" title="Play">▶</button><button id="pbstop" aria-label="Stop" title="Stop">⏹</button></div>
+</div>
 
 <div id="readbar"><span id="readlabel">Reading…</span>
 <button class="btn ghost" id="readplay">▶</button><button class="btn ghost" id="readstop">⏹</button><button class="btn ghost" id="readclose">✕</button></div>

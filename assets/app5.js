@@ -9,7 +9,9 @@
       readAloud = window.__readAloud;
 
   /* ---------- generic modal popup ---------- */
-  var modalEl = null;
+  var modalEl = null, _lockCount = 0;
+  function lockScroll() { _lockCount++; document.body.style.overflow = "hidden"; }
+  function unlockScroll() { _lockCount = Math.max(0, _lockCount - 1); if (!_lockCount) document.body.style.overflow = ""; }
   function openModal(title, bodyHTML, wide) {
     closeModal();
     modalEl = document.createElement("div");
@@ -18,6 +20,7 @@
       '<div class="sigmodal-head"><h3>' + esc(title) + '</h3><button class="sigmodal-x" aria-label="Close">✕</button></div>' +
       '<div class="sigmodal-body">' + bodyHTML + "</div></div>";
     document.body.appendChild(modalEl);
+    lockScroll();
     modalEl.querySelector(".sigmodal-x").onclick = closeModal;
     modalEl.addEventListener("click", function (e) { if (e.target === modalEl) closeModal(); });
     document.addEventListener("keydown", escClose);
@@ -25,7 +28,7 @@
   }
   function escClose(e) { if (e.key === "Escape") closeModal(); }
   function closeModal() {
-    if (modalEl) { modalEl.remove(); modalEl = null; }
+    if (modalEl) { modalEl.remove(); modalEl = null; unlockScroll(); }
     document.removeEventListener("keydown", escClose);
   }
   window.__openModal = openModal; window.__closeModal = closeModal;

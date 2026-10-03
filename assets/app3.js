@@ -94,6 +94,7 @@
       var genre = window.__resolveGenre(lines.join(" "), $("vgenre").value, D.BEAT_STYLES);
       var mel = melodyFromLyrics(lines, genre), voice = $("vvoice").value, backs = selBackups(), b = this;
       b.textContent = "Rendering…";
+      try { S.setPlayerLabel("Synthesized vocal — " + voice); S.setBusy("Rendering vocal…"); } catch (e) {}
       var mix = window.__mixOf ? window.__mixOf() : null;
       $("vinfo").textContent = voice === "own" ? "Resynthesizing your voice onto the melody…" : "Synthesizing vocal (" + voice + ", " + genre.replace(/-/g, " ") + " melody)…";
       var p = voice === "own" && ownSample ? S.renderOwnVoice(mel, ownSample, 90) : S.renderVocal(mel, voice === "own" ? "nova" : voice, backs, 90, mix);
@@ -123,7 +124,7 @@
       try { S.unlockAudio(); } catch (e) {}
       if (!chosenBackups.length) { $("bkspec").textContent = "Pick at least one type first."; return; }
       var mel = [{ midi: 64, len: 1 }, { midi: 67, len: 1 }, { midi: 69, len: 2 }, { midi: 67, len: 1 }];
-      S.renderVocal(mel, "ember", chosenBackups, 20).then(function (buf) { S.playBuffer(buf, "backup"); });
+      S.renderVocal(mel, "ember", chosenBackups, 20).then(function (buf) { try { S.setPlayerLabel("Backup singers demo"); } catch (e) {} S.playBuffer(buf, "backup"); });
     };
   })();
 
@@ -139,7 +140,7 @@
       try { S.unlockAudio(); } catch (e) {}
       if (!upBuf) { $("cuinfo").textContent = "Upload your vocals first."; return; }
       var b = this; b.textContent = "Cleaning…";
-      S.cleanupVocal(upBuf).then(function (buf) { cleanBuf = buf; S.playBuffer(buf, "clean"); b.textContent = "✨ AI: Clean it up"; $("cuinfo").textContent = "Cleaned: de-rumble, de-hiss, compression, normalized. Honest work — no magic."; });
+      S.cleanupVocal(upBuf).then(function (buf) { cleanBuf = buf; try { S.setPlayerLabel("Cleaned vocals"); } catch (e) {} S.playBuffer(buf, "clean"); b.textContent = "✨ AI: Clean it up"; $("cuinfo").textContent = "Cleaned: de-rumble, de-hiss, compression, normalized. Honest work — no magic."; });
     };
     $("curesing").onclick = function () {
       try { S.unlockAudio(); } catch (e) {}

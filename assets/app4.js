@@ -76,7 +76,7 @@
   function playBeatRec(rec) {
     var pat = S.patternFor(rec.name, rec.style, rec.bpm);
     S.renderBuffer(16 * (60 / rec.bpm / 4) * 4 + 0.3, function (c, dest, t0) { S.scheduleBeat(c, dest, t0, pat, 4, 1); })
-      .then(function (buf) { S.playBuffer(buf, "beatat"); });
+      .then(function (buf) { try { S.setPlayerLabel(rec.name || rec.id); } catch (e) {} S.playBuffer(buf, "beatat"); });
   }
   window.__playBeatRec = playBeatRec;
 })();

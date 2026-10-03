@@ -5,6 +5,54 @@
   "use strict";
   var S = window.SigSynth, D = window.SigData;
   function $(id) { return document.getElementById(id); }
+
+  /* ---------- persistent sticky player bar (Site #25 diagnostic, fixes 4+5) ----------
+     Wraps S.playBuffer / S.stopLive (synth.js untouched) so every play path —
+     record views, beat maker, vocal studio, finder — reports to one honest bar.
+     The bar shows a spinner while rendering, EQ while playing, and plain honest
+     words when the browser blocks audio. Never fakes a "now playing" state. */
+  (function playerBar() {
+    var bar = $("playerbar"), label = $("pblabel"), state = $("pbstate");
+    if (!bar) return;
+    var curId = null, busy = false;
+    function show() { bar.style.display = "flex"; document.body.classList.add("playerbar-pad"); }
+    function hide() { bar.style.display = "none"; document.body.classList.remove("playerbar-pad"); }
+    function honestBlocked() {
+      bar.classList.remove("playing");
+      label.textContent = "Audio is blocked in this browser — tap ▶ again";
+      state.textContent = "Your browser held the audio on first tap. Tap ▶ on the song to try again, or use the record page's play button.";
+      show();
+    }
+    var _play = S.playBuffer, _stop = S.stopLive;
+    S.playBuffer = function (buf, id) {
+      var src = null;
+      try { src = _play.call(S, buf, id); } catch (e) { src = null; }
+      busy = false;
+      if (src) {
+        curId = id || "main";
+        label.textContent = "Now playing — " + (S._curLabel || curId);
+        state.textContent = "";
+        bar.classList.add("playing");
+        show();
+        try { src.onended = function () { if (curId === (id || "main")) { curId = null; bar.classList.remove("playing"); hide(); } }; } catch (e) {}
+        S._curLabel = null;
+      } else {
+        honestBlocked();
+      }
+      return src;
+    };
+    S.stopLive = function (id) {
+      _stop.call(S, id);
+      if (curId && curId === (id || "main")) { curId = null; bar.classList.remove("playing"); hide(); }
+      if (!id || id === "main") { bar.classList.remove("playing"); }
+    };
+    S.setPlayerLabel = function (l) { S._curLabel = l; };
+    S.setBusy = function (msg) { busy = true; label.innerHTML = '<span class="spinner"></span>' + esc(msg || "Rendering…"); state.textContent = ""; bar.classList.remove("playing"); show(); };
+    S.setIdle = function () { busy = false; if (!curId) hide(); };
+    $("pbpause").onclick = function () { try { S.unlockAudio(); } catch (e) {} bar.classList.remove("playing"); state.textContent = "Paused — tap ▶ on any song or beat to replay it here."; };
+    $("pbplay").onclick = function () { try { S.unlockAudio(); } catch (e) {} state.textContent = "Tap ▶ on any song or beat to play it here."; };
+    $("pbstop").onclick = function () { if (curId) S.stopLive(curId); S.stopLive("main"); bar.classList.remove("playing"); hide(); };
+  })();
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
   function dl(blob, name) { var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000); }
   function gunzip(url) {
@@ -143,6 +191,7 @@
   }
   function finderPlayStarted(buf, btn, nowEl, label) {
     var src = null;
+    try { S.setPlayerLabel(label); } catch (e) {}
     try { src = S.playBuffer(buf, _finderLiveId); } catch (e) { src = null; }
     if (!src) {
       // Honest: the browser held the audio. Never fake "now playing".
@@ -242,9 +291,30 @@
   }
   window.__showRecord = function (rec) {
     var qa = recordQA(rec), h = "";
-    var ld = rec.kind === "song"
-      ? { "@context": "https://schema.org", "@type": "MusicComposition", "name": rec.title, "identifier": rec.id }
-      : { "@context": "https://schema.org", "@type": "Product", "name": rec.title || rec.name, "identifier": rec.id };
+    /* Site #25 diagnostic fix 1: MusicRecording schema with duration estimate
+       (computed from bars × beats-per-bar ÷ tempo — never a claimed audio file,
+       since audio is synthesized live in the browser). */
+    function isoDur(sec) { sec = Math.round(sec); return "PT" + Math.floor(sec / 60) + "M" + (sec % 60) + "S"; }
+    var durSec = null;
+    try {
+      var bpm = rec.tempo || rec.bpm || 100;
+      if (rec.kind === "song" && rec.structure) {
+        var bars = 0, m, rx = /\((\d+)\s*bars?\)/g;
+        while ((m = rx.exec(rec.structure))) bars += parseInt(m[1], 10);
+        if (bars) durSec = bars * 4 * 60 / bpm;
+      } else if (rec.kind === "beat") {
+        durSec = 4 * 4 * 60 / bpm;
+      }
+    } catch (e) {}
+    var ld = { "@context": "https://schema.org", "@type": "MusicRecording",
+      "name": rec.title || rec.name, "identifier": rec.id,
+      "byArtist": { "@type": "Person", "name": "Justin Addam Higgins" },
+      "description": rec.desc || "",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/?" + rec.kind + "=" + rec.id };
+    if (durSec) ld.duration = isoDur(durSec);
+    if (rec.genre) ld.genre = rec.genre;
+    else if (rec.style) ld.genre = rec.style.replace(/-/g, " ");
+    if (rec.kind === "song") ld.recordingOf = { "@type": "MusicComposition", "name": rec.title, "identifier": rec.id };
     if (rec.kind === "song") {
       h = '<div class="rec"><h2>' + esc(rec.title) + ' <span class="id">' + esc(rec.id) + '</span></h2>' +
         '<p class="meta">' + esc(rec.genre) + " · " + esc(rec.mood) + " · " + rec.tempo + " BPM · " + esc(rec.key) + '</p>' +
@@ -292,7 +362,7 @@
       if (act === "read") readAloud((rec.title || rec.name) + ". " + rec.desc + (rec.lyrics ? " Lyrics: " + rec.lyrics : ""), rec.id);
       if (act === "txt") navigator.clipboard.writeText(JSON.stringify(rec, null, 2));
       if (act === "json") navigator.clipboard.writeText(JSON.stringify(rec));
-      if (act === "play") { b.textContent = "Rendering…"; S.renderFullSong(rec, window.__mixOf ? window.__mixOf() : null, null).then(function (buf) { S.playBuffer(buf); b.textContent = "▶ Play demo mix"; dl(S.bufferToWav(buf), rec.id + ".wav"); }); }
+      if (act === "play") { b.textContent = "Rendering…"; try { S.setPlayerLabel(rec.title || rec.id); S.setBusy("Rendering song…"); } catch (e2) {} S.renderFullSong(rec, window.__mixOf ? window.__mixOf() : null, null).then(function (buf) { S.playBuffer(buf); b.textContent = "▶ Play demo mix"; dl(S.bufferToWav(buf), rec.id + ".wav"); }); }
       if (act === "wav") { b.textContent = "Rendering…"; S.renderFullSong(rec, window.__mixOf ? window.__mixOf() : null, null).then(function (buf) { dl(S.bufferToWav(buf), rec.id + ".wav"); b.textContent = "⬇ .wav"; }); }
       if (act === "preview") previewSound(rec);
       if (act === "swav") renderSoundWav(rec);

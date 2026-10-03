@@ -33,7 +33,7 @@
       }
     });
   }
-  function previewSound(rec) { phraseRender(rec).then(function (buf) { S.playBuffer(buf, "preview"); _cur = { buf: buf, id: rec.id }; }); }
+  function previewSound(rec) { phraseRender(rec).then(function (buf) { try { S.setPlayerLabel(rec.name || rec.id); } catch (e) {} S.playBuffer(buf, "preview"); _cur = { buf: buf, id: rec.id }; }); }
   function renderSoundWav(rec) { phraseRender(rec).then(function (buf) { dl(S.bufferToWav(buf), rec.id + ".wav"); }); }
   window.__previewSound = previewSound;
 
@@ -118,20 +118,24 @@
     var az = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
     $("songaz").innerHTML = az.map(function (l) { return '<button data-saz="' + l + '">' + l + "</button>"; }).join("");
     function draw(letter) {
+      var q = ($("songq") && $("songq").value || "").toLowerCase();
       var h = "", c = 0, i;
       for (i = 0; i < rows.length && c < 60; i++) {
         if (letter && rows[i][1][0].toUpperCase() !== letter) continue;
+        if (q && (rows[i][1] + " " + rows[i][0]).toLowerCase().indexOf(q) === -1) continue;
         c++;
         h += '<div class="card"><h4>' + esc(rows[i][1]) + '</h4><div class="id">' + esc(rows[i][0]) + '</div>' +
           '<p><button class="btn ghost" data-songopen="' + esc(rows[i][0]) + '">Open →</button></p></div>';
       }
-      $("songgrid").innerHTML = h || '<div class="card">No songs under ' + esc(letter) + " in this slice.</div>";
+      $("songgrid").innerHTML = h || '<div class="card">No songs match — try clearing filters.</div>';
     }
     draw("");
+    var _curLetter = "";
+    if ($("songq")) $("songq").addEventListener("input", function () { draw(_curLetter); });
     $("songaz").addEventListener("click", function (e) {
       var b = e.target.closest("[data-saz]"); if (!b) return;
       Array.prototype.forEach.call($("songaz").querySelectorAll("button"), function (x) { x.classList.remove("on"); });
-      b.classList.add("on"); draw(b.getAttribute("data-saz"));
+      b.classList.add("on"); _curLetter = b.getAttribute("data-saz"); draw(_curLetter);
     });
     $("songgrid").addEventListener("click", function (e) {
       var o = e.target.closest("[data-songopen]"); if (o) location.search = "?song=" + o.getAttribute("data-songopen");
@@ -182,6 +186,7 @@
       if (!beatPat) return;
       var secs = beatBars * 16 * (60 / beatPat.bpm / 4);
       $("beatinfo").textContent = "Rendering " + beatPat.genre.replace(/-/g, " ") + " beat at " + beatPat.bpm + " BPM (" + beatBars + " bars)…";
+      try { S.setPlayerLabel("AI beat — " + beatPat.genre.replace(/-/g, " ")); S.setBusy("Rendering beat…"); } catch (e) {}
       S.renderBuffer(secs + 0.3, function (c, dest, t0) { S.scheduleBeat(c, dest, t0, beatPat, beatBars, 1); })
         .then(function (buf) { beatBuf = buf; drawWave($("beatwave"), buf); drawPatternGrid(); $("beatinfo").textContent = "Seeded beat ready — same request always makes this beat. Seed: " + beatPat.seed; S.playBuffer(buf, "beat"); })
         .catch(function (e) { $("beatinfo").textContent = "Couldn't render: " + e.message; });
@@ -229,7 +234,7 @@
         '<p><button class="btn" id="swplay">▶ Play demo mix</button> <button class="btn teal" id="swwav">⬇ .wav</button> ' +
         '<button class="btn ghost" id="swtxt">Copy spec</button> <button class="btn ghost" id="swopen">Open record →</button></p></div>';
       $("songout").innerHTML = h;
-      $("swplay").onclick = function () { try { S.unlockAudio(); } catch (e) {} this.textContent = "Rendering…"; var b = this; S.renderFullSong(rec, window.__mixOf ? window.__mixOf() : null, null).then(function (buf) { S.playBuffer(buf, "song"); b.textContent = "▶ Play demo mix"; }); };
+      $("swplay").onclick = function () { try { S.unlockAudio(); } catch (e) {} this.textContent = "Rendering…"; var b = this; try { S.setPlayerLabel(rec.title || rec.id); S.setBusy("Rendering song…"); } catch (e2) {} S.renderFullSong(rec, window.__mixOf ? window.__mixOf() : null, null).then(function (buf) { S.playBuffer(buf, "song"); b.textContent = "▶ Play demo mix"; }); };
       $("swwav").onclick = function () { this.textContent = "Rendering…"; var b = this; S.renderFullSong(rec, window.__mixOf ? window.__mixOf() : null, null).then(function (buf) { dl(S.bufferToWav(buf), rec.id + ".wav"); b.textContent = "⬇ .wav"; }); };
       $("swtxt").onclick = function () { navigator.clipboard.writeText(JSON.stringify(rec, null, 2)); this.textContent = "Copied!"; };
       $("swopen").onclick = function () { location.search = "?song=" + rec.id; };
