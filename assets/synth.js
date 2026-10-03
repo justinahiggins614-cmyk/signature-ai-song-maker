@@ -762,20 +762,36 @@
     if (st.shaker[i]) S.shaker(c, dd, t, v);
   }
 
-  /* ---------- the 5:00 standard ---------- */
+  /* ---------- the full-song standard ----------
+     His standard (2026-10-02): 18-bar verses, FOUR ~30-second chorus breaks,
+     intro build-up, bridge beat-switch, out jam, and a fade/funky/designed
+     ending. Bar-based so the structure holds at any tempo; ~5:00 at 92-100 BPM. */
   var SONG_LEN = 300;
-  function studioSections() {
-    return [
-      { name: "Intro build-up", start: 0,   end: 24,  kind: "build" },
-      { name: "Verse",          start: 24,  end: 54,  kind: "verse" },
-      { name: "Chorus break 1", start: 54,  end: 84,  kind: "chorus", brk: 1 },
-      { name: "Verse 2",        start: 84,  end: 114, kind: "verse" },
-      { name: "Chorus break 2", start: 114, end: 144, kind: "chorus", brk: 2 },
-      { name: "Bridge",         start: 144, end: 174, kind: "bridge" },
-      { name: "Chorus break 3", start: 174, end: 204, kind: "chorus", brk: 3 },
-      { name: "Out jam",        start: 204, end: 285, kind: "jam" },
-      { name: "Ending",         start: 285, end: 300, kind: "ending" }
-    ];
+  function studioSections(bpm) {
+    bpm = Math.max(60, Math.min(180, bpm || 100));
+    var bar = 240 / bpm; /* seconds per 4/4 bar */
+    var secs = [], t = 0;
+    function add(name, kind, bars, extra) {
+      var s = { name: name, kind: kind, bars: bars, start: t, end: t + bars * bar };
+      if (extra) for (var k in extra) s[k] = extra[k];
+      secs.push(s); t = s.end; return s;
+    }
+    var introBars = Math.max(4, Math.round(24 / bar));
+    var chorusBars = Math.max(8, Math.round(30 / bar)); /* ~30 seconds */
+    var bridgeBars = Math.max(8, Math.round(30 / bar));
+    add("Intro build-up", "build", introBars);
+    add("Verse", "verse", 18);
+    add("Chorus break 1", "chorus", chorusBars, { brk: 1 });
+    add("Verse 2", "verse", 18);
+    add("Chorus break 2", "chorus", chorusBars, { brk: 2 });
+    add("Bridge", "bridge", bridgeBars);
+    add("Chorus break 3", "chorus", chorusBars, { brk: 3 });
+    add("Chorus break 4", "chorus", chorusBars, { brk: 4 });
+    var remain = 300 - t; /* out jam + ending fill to ~5:00 */
+    var jamBars = Math.max(0, Math.round((remain - 15) / bar));
+    if (jamBars > 0) add("Out jam", "jam", jamBars);
+    add("Ending", "ending", Math.max(4, Math.round(15 / bar)));
+    return secs;
   }
 
   /* spec: {seed,title,genre,bpm,rhythm,bass{kind,zones},snare{kind,zones},
@@ -800,7 +816,8 @@
       ? S.patternFor((spec.seed || "x") + ":chorus2", altGenre, bpm)
       : S.patternFor((spec.seed || "x") + ":chorus", rhythmGenre, bpm);
     var bridgePat = S.patternFor((spec.seed || "x") + ":bridge", altGenre, bpm);
-    var sections = studioSections();
+    var sections = studioSections(bpm);
+    var END = sections[sections.length - 1].end; /* song length follows the bar plan */
     var melody = S.melodyFor(chords, 150, rng);
     var bassKind = (spec.bass && spec.bass.kind) || "sub";
     var bassZones = (spec.bass && spec.bass.zones) || null;
@@ -817,7 +834,7 @@
     var ownSample = spec.ownSample || null;
 
     /* vocal plan: lyric lines spread across verse/chorus sections */
-    var vocalSecs = ["Verse", "Chorus break 1", "Verse 2", "Chorus break 2", "Chorus break 3"];
+    var vocalSecs = ["Verse", "Chorus break 1", "Verse 2", "Chorus break 2", "Chorus break 3", "Chorus break 4"];
     var per = lines.length ? Math.max(1, Math.ceil(lines.length / vocalSecs.length)) : 0;
     var vocalNotes = []; /* {t, midi, dur, line} */
     if (lines.length) {
@@ -840,15 +857,15 @@
       }
     } else {
       /* instrumental: sing the melody line on "ooh" through verses + choruses */
-      var mt = 24, mi = 0;
-      while (mt < 285 && mi < melody.length) {
+      var mt = sections[0].end, mi = 0;
+      while (mt < END - 15 && mi < melody.length) {
         var n = melody[mi++];
         if (n.midi > 0) vocalNotes.push({ t: mt, midi: n.midi + vp.oct - 12, dur: n.len * step * 0.9, word: "ooh" });
         mt += n.len * step;
       }
     }
 
-    return S.renderBuffer(SONG_LEN + 0.5, function (c, dest, t0) {
+    return S.renderBuffer(END + 0.5, function (c, dest, t0) {
       var fin = c.createGain(); fin.connect(dest); /* ending envelope lives here */
       var mx = S.makeBuses(c, fin, mix);
       var dd = mx.drums, bb = mx.bass, cc = mx.chords, ll = mx.lead, vb = mx.vocal;
