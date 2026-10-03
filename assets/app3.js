@@ -225,6 +225,7 @@
     }
     function stopCd() { clearTimer(); cdIx = -1; try { S.stopLive("cd"); } catch (e) {} drawCdOut(); }
     function drawCdOut() {
+      if (!cdTracks.length) { $("cdout").innerHTML = ""; return; }
       var h = '<div class="hit"><b>\uD83D\uDCBF DISC IMAGE READY</b> \u2014 not "burned": browsers can\u2019t drive a CD burner, so this is the finished disc image (.zip + cue sheet) for your own burner software.<br><span class="seqlab">' +
         cdTracks.map(function (t) { return esc(t.title); }).join(" \u00B7 ") + "</span></div>";
       h += '<div class="cdtracks" role="group" aria-label="CD tracks">';

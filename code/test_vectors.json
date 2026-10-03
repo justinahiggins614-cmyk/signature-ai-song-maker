@@ -1,0 +1,328 @@
+{
+  "engine": "SIGMUSIC-V1",
+  "seed_algorithm": "hashSeed = xmur3 (assets/synth.js); record seed = n via rngFrom('<prefix>:' + n)",
+  "canonicalization": "json.dumps(record, sort_keys=True, ensure_ascii=False, separators=(',',':')) -> utf-8 -> sha256",
+  "generated_at": "2026-10-03T16:34:38.927700+00:00",
+  "vectors": [
+    {
+      "kind": "song",
+      "n": 1,
+      "id": "JAH-SONG-0000001",
+      "sha256": "440737c3175215b2c04edf4d47bb802806a5782862d730cbfbb82d12e8d6df04",
+      "title": "Amber Harbor",
+      "genre": "rock"
+    },
+    {
+      "kind": "song",
+      "n": 2,
+      "id": "JAH-SONG-0000002",
+      "sha256": "74c7b323b0a7b261f2be44c62d5528df9162d117fab6268a3f22f3cb2b748a57",
+      "title": "Silver Highway",
+      "genre": "rock"
+    },
+    {
+      "kind": "song",
+      "n": 3,
+      "id": "JAH-SONG-0000003",
+      "sha256": "01ca86e02f991e0215c075544b579ddc555db965b0a62576f0468251c46bc0c6",
+      "title": "Midnight Garden",
+      "genre": "techno"
+    },
+    {
+      "kind": "song",
+      "n": 4,
+      "id": "JAH-SONG-0000004",
+      "sha256": "5f2f0a21811b06576a00730a816effad9fdac2f1403aad13f52941f26707574a",
+      "title": "Crimson Horizon",
+      "genre": "house"
+    },
+    {
+      "kind": "song",
+      "n": 5,
+      "id": "JAH-SONG-0000005",
+      "sha256": "15e673854f7726ca410bcff81e984a618055a72e8c025d22ec627ff03c152114",
+      "title": "Restless Orbit",
+      "genre": "hip-hop"
+    },
+    {
+      "kind": "song",
+      "n": 6,
+      "id": "JAH-SONG-0000006",
+      "sha256": "a7b89c3447c656d7d198bdc17aed35a1190d2ad19a8c89dd208b02cf4ad41d8d",
+      "title": "Golden Drift",
+      "genre": "pop"
+    },
+    {
+      "kind": "song",
+      "n": 7,
+      "id": "JAH-SONG-0000007",
+      "sha256": "1d41f4ef79b86eb568b0b37f3b728ee2bc0214ba4322f38fed9bd6c1c16a4195",
+      "title": "Slow Lantern",
+      "genre": "pop"
+    },
+    {
+      "kind": "song",
+      "n": 8,
+      "id": "JAH-SONG-0000008",
+      "sha256": "c83b87e11e14bae6ec2f1f4ff9885b577d54efbfad8d217bb0949ab0624ec335",
+      "title": "Electric Meadow",
+      "genre": "jazz"
+    },
+    {
+      "kind": "song",
+      "n": 9,
+      "id": "JAH-SONG-0000009",
+      "sha256": "e4eb64afc11f88c8a64b527e00d646279a1bb63b3423afb6e62a44853caee430",
+      "title": "Amber Tide",
+      "genre": "rock"
+    },
+    {
+      "kind": "song",
+      "n": 10,
+      "id": "JAH-SONG-0000010",
+      "sha256": "68a6a4d6273bf57f0f10999e8c7ab5eabc0cd6e8ac286c361e09413570fb237b",
+      "title": "Bright River",
+      "genre": "ambient"
+    },
+    {
+      "kind": "beat",
+      "n": 1,
+      "id": "JAH-BEAT-0000001",
+      "sha256": "c88118cd547b58314b0d57b230c885a19d81d013b6e30564765255103a26cdc9",
+      "title": "Signature Copper trap Beat II",
+      "style": "trap"
+    },
+    {
+      "kind": "beat",
+      "n": 2,
+      "id": "JAH-BEAT-0000002",
+      "sha256": "4ab2f28851e3f92fa68822cfdfe1ff77d760cdb1b676e181f12646f4811a32ef",
+      "title": "Signature Paper 80s synthpop Beat V",
+      "style": "80s-synthpop"
+    },
+    {
+      "kind": "beat",
+      "n": 3,
+      "id": "JAH-BEAT-0000003",
+      "sha256": "90e907517df4b1465d459222c2bca95b2d41029cf6acd44e1d1370a4af0ef426",
+      "title": "Signature Patient rock Beat IV",
+      "style": "rock"
+    },
+    {
+      "kind": "beat",
+      "n": 4,
+      "id": "JAH-BEAT-0000004",
+      "sha256": "b25b6d9e1e6c592f598f75ec4a963f018536a20140571c8e274b856e71a49331",
+      "title": "Signature Amber 70s funk Beat IV",
+      "style": "70s-funk"
+    },
+    {
+      "kind": "beat",
+      "n": 5,
+      "id": "JAH-BEAT-0000005",
+      "sha256": "8664e9f37090afe955a98ca0ed470d0c252664ac9124a610fb8258ecaf65ef07",
+      "title": "Signature Crimson techno Beat I",
+      "style": "techno"
+    },
+    {
+      "kind": "beat",
+      "n": 6,
+      "id": "JAH-BEAT-0000006",
+      "sha256": "98f61ec68d1b2d43edfca7cb874b257c57ccedf0a88c804249d8b4892e369b78",
+      "title": "Signature Slow lofi Beat I",
+      "style": "lofi"
+    },
+    {
+      "kind": "beat",
+      "n": 7,
+      "id": "JAH-BEAT-0000007",
+      "sha256": "6937a72dc6dad3439296d7f49805ba400d51c3776e65be0834fd3743b08ff728",
+      "title": "Signature Silver jazz Beat II",
+      "style": "jazz"
+    },
+    {
+      "kind": "beat",
+      "n": 8,
+      "id": "JAH-BEAT-0000008",
+      "sha256": "ac35ea5f0f8795e798a6705d44ae610fcd01c0895570128d4e4af761d33f3afe",
+      "title": "Signature Velvet 70s funk Beat II",
+      "style": "70s-funk"
+    },
+    {
+      "kind": "beat",
+      "n": 9,
+      "id": "JAH-BEAT-0000009",
+      "sha256": "c04aba7b24b8f77c929c338bce74d87eeb4f190eadcbcb42092311c5d9e01678",
+      "title": "Signature Bold 80s synthpop Beat IV",
+      "style": "80s-synthpop"
+    },
+    {
+      "kind": "beat",
+      "n": 10,
+      "id": "JAH-BEAT-0000010",
+      "sha256": "55da48f4d13790b793e7538042995876560651965bed1052975481ecf6eeb390",
+      "title": "Signature Crimson pop Beat III",
+      "style": "pop"
+    },
+    {
+      "kind": "sound",
+      "n": 1,
+      "id": "JAH-SOUND-0000001",
+      "sha256": "400ae16a984f5fa7a6d3182988808a6855a9847607d2553810c501173444880f",
+      "title": "Signature Grand Keys Instrument II",
+      "style": "instrument/keys"
+    },
+    {
+      "kind": "sound",
+      "n": 2,
+      "id": "JAH-SOUND-0000002",
+      "sha256": "1c923157440cbc20c64cc8479951992d46e93663b1f1c53b393917a9cb0d8e6e",
+      "title": "Signature Cosmic lead Set IV",
+      "style": "set/lead"
+    },
+    {
+      "kind": "sound",
+      "n": 3,
+      "id": "JAH-SOUND-0000003",
+      "sha256": "5e966be065f49c846a05010c1a0e1dd0d74126e7d608da242ce7e3177f2f43ab",
+      "title": "Signature Acoustic keys Pack II",
+      "style": "pack/keys"
+    },
+    {
+      "kind": "sound",
+      "n": 4,
+      "id": "JAH-SOUND-0000004",
+      "sha256": "5cd380841153f8d27b7f2d75dd5f69e4705bdd87561f15df4b07a2596e675aa1",
+      "title": "Signature Koto String IV",
+      "style": "sound/world"
+    },
+    {
+      "kind": "sound",
+      "n": 5,
+      "id": "JAH-SOUND-0000005",
+      "sha256": "f3c99cd0f57edbc9cf27117af40bcec92b442a8caa0c2ea2568329b831d33e20",
+      "title": "Signature Low Tom Instrument III",
+      "style": "instrument/drum"
+    },
+    {
+      "kind": "sound",
+      "n": 6,
+      "id": "JAH-SOUND-0000006",
+      "sha256": "9bb1ab602b3be58a3e96fc8d25e5d0a722e37a202b20762e45dca3aab45555ef",
+      "title": "Signature Studio drum Set V",
+      "style": "set/drum"
+    },
+    {
+      "kind": "sound",
+      "n": 7,
+      "id": "JAH-SOUND-0000007",
+      "sha256": "992ca850987ada791d6750c37cb4a2b4a23a7eccd71aafbe0e7f8a7cc4bc67df",
+      "title": "Signature Analog drum Pack III",
+      "style": "pack/drum"
+    },
+    {
+      "kind": "sound",
+      "n": 8,
+      "id": "JAH-SOUND-0000008",
+      "sha256": "3f757fdaa182eef255a2c442390bd4e8ad6ee050b440aaf22da541f7f9aad775",
+      "title": "Signature Soft Kick V",
+      "style": "sound/drum"
+    },
+    {
+      "kind": "sound",
+      "n": 9,
+      "id": "JAH-SOUND-0000009",
+      "sha256": "c8d34b152e3bd919536150d1c334b076e9e37bcd081d574cffeffb9f38ebf297",
+      "title": "Signature Reese Bass Instrument III",
+      "style": "instrument/bass"
+    },
+    {
+      "kind": "sound",
+      "n": 10,
+      "id": "JAH-SOUND-0000010",
+      "sha256": "00cdbb5d870be514ba0a57b7d2881b470e22e1fad6b2adedd269d442024afbd7",
+      "title": "Signature Urban brass Set V",
+      "style": "set/brass"
+    },
+    {
+      "kind": "gear",
+      "n": 1,
+      "id": "JAH-GEAR-0000001",
+      "sha256": "44b692ab56ea545f8d1cf7526f7c2f36c02bf9b63a64f70700a340bada3e2a06",
+      "title": "Signature Stage Electric Guitar",
+      "style": "instrument"
+    },
+    {
+      "kind": "gear",
+      "n": 2,
+      "id": "JAH-GEAR-0000002",
+      "sha256": "379c5f133e2ed54d7b080a1ba7144badbae020d010ef406510a856894ba4048d",
+      "title": "Signature Upright Piano",
+      "style": "instrument"
+    },
+    {
+      "kind": "gear",
+      "n": 3,
+      "id": "JAH-GEAR-0000003",
+      "sha256": "dbe0035bdd557e01599ea110e114f8576190836f71a211220616dba080221e55",
+      "title": "Signature Synth Workstation",
+      "style": "instrument"
+    },
+    {
+      "kind": "gear",
+      "n": 4,
+      "id": "JAH-GEAR-0000004",
+      "sha256": "747883b8443136648708da5d7dc16a16456c44f29587f96a16e2e6aafe619f5e",
+      "title": "Signature Drum Shell Pack",
+      "style": "instrument"
+    },
+    {
+      "kind": "gear",
+      "n": 5,
+      "id": "JAH-GEAR-0000005",
+      "sha256": "96789a18a1e5dca961f97ad3ba97edb44c413362cfd252f6022bcb6b54cc5313",
+      "title": "Signature Violin Outfit",
+      "style": "instrument"
+    },
+    {
+      "kind": "gear",
+      "n": 6,
+      "id": "JAH-GEAR-0000006",
+      "sha256": "800d14c77ab869ddab769e2665f0bfacf47a53173b8452ca901a184da0dc575f",
+      "title": "Signature Tenor Saxophone",
+      "style": "instrument"
+    },
+    {
+      "kind": "gear",
+      "n": 7,
+      "id": "JAH-GEAR-0000007",
+      "sha256": "cdfb18e06466ca87630a38994c89979b676aabae218888320e350dbea02e3e68",
+      "title": "Signature Trumpet",
+      "style": "instrument"
+    },
+    {
+      "kind": "gear",
+      "n": 8,
+      "id": "JAH-GEAR-0000008",
+      "sha256": "5e251bfbc9bdcd0ba4efc605e1dfa06d99a3886944666dc2a0476a1c70ca5e7e",
+      "title": "Signature Flute",
+      "style": "instrument"
+    },
+    {
+      "kind": "gear",
+      "n": 9,
+      "id": "JAH-GEAR-0000009",
+      "sha256": "f8c9f55b0b53a453255dad9eeeb228c34cf9a37c4bdd211ffc2554d1da460f4b",
+      "title": "Signature Bass Guitar",
+      "style": "instrument"
+    },
+    {
+      "kind": "gear",
+      "n": 10,
+      "id": "JAH-GEAR-0000010",
+      "sha256": "186ce06d8575291154076581cae392a550cc15e0052d25cf44212266c54f8479",
+      "title": "Signature SM-1 Dynamic Mic",
+      "style": "mic"
+    }
+  ]
+}
