@@ -72,6 +72,18 @@ def main():
     last_chunks.update(pack(lib, manifest))
     last_chunks.update(pack(beats, manifest))
     json.dump(manifest, open(os.path.join(DATA, "manifest.json"), "w"))
+    # build gate (2026-10-03): every new row must point at a chunk that
+    # actually contains its id — never ship another bad-pointer batch
+    for cname in set(last_chunks.values()):
+        have = set()
+        with gzip.open(os.path.join(RECDIR, cname), "rt", encoding="utf-8") as fh:
+            for l in fh:
+                if l.strip():
+                    have.add(json.loads(l)["id"])
+        for rid, c in last_chunks.items():
+            if c == cname and rid not in have:
+                raise SystemExit("BUILD GATE FAILED: %s not in %s" % (rid, cname))
+    print("build gate: %d new rows, all chunk pointers verified" % len(last_chunks))
     idx_path = os.path.join(IDXDIR, "index.json.gz")
     with gzip.open(idx_path, "at", encoding="utf-8") as fh:
         for r in songs:
