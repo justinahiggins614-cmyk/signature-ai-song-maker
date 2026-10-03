@@ -1,11 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>try{if(localStorage.getItem("jah-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Signature Music Studio — Make Music On Your Own, Via AI, or Together</title>
 <meta name="description" content="Signature Music Studio: the full music-making studio. Sound library, studio equipment with real patch guides, AI beat maker, auto song writer, vocal studio, backup singers, vocal cleanup, and CD making. Make music on your own, via AI, or in collaboration with AI.">
 <link rel="canonical" href="https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Signature Music Studio — Make Music On Your Own, Via AI, or Together">
+<meta property="og:description" content="Signature Music Studio: the full music-making studio. Sound library, studio equipment with real patch guides, AI beat maker, auto song writer, vocal studio, backup singers, vocal cleanup, and CD making. Make music on your own, via AI, or in collaboration with AI.">
+<meta property="og:url" content="https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Signature Music Studio — Make Music On Your Own, Via AI, or Together">
+<meta name="twitter:description" content="Signature Music Studio: the full music-making studio. Sound library, studio equipment with real patch guides, AI beat maker, auto song writer, vocal studio, backup singers, vocal cleanup, and CD making. Make music on your own, via AI, or in collaboration with AI.">
 <link rel="stylesheet" href="assets/style.css">
 <link rel="stylesheet" href="assets/studio-theme.css">
 <script type="application/ld+json">
@@ -323,5 +331,34 @@
 <script src="assets/app7.js"></script>
 <script src="assets/app8.js"></script>
 <script src="assets/app9.js"></script>
+<style>
+#jah-theme-toggle{position:fixed;bottom:14px;right:14px;z-index:99999;width:40px;height:40px;border-radius:50%;border:1px solid var(--line,#3a2f55);background:var(--panel,#241d38);color:var(--ink,#f2ecdf);opacity:.6;cursor:pointer;font-size:18px;line-height:1;font-family:inherit}
+#jah-theme-toggle:hover{opacity:1}
+html[data-theme="dark"]{filter:invert(1) hue-rotate(180deg)}
+html[data-theme="dark"] img,html[data-theme="dark"] video,html[data-theme="dark"] canvas,html[data-theme="dark"] svg{filter:invert(1) hue-rotate(180deg)}
+</style>
+<button id="jah-theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">&#127769;</button>
+<script>
+/* dark-mode toggle: opt-in, default look unchanged */
+(function(){var b=document.getElementById("jah-theme-toggle");function paint(){b.innerHTML=document.documentElement.getAttribute("data-theme")==="dark"?"&#9728;&#65039;":"&#127769;"}b.addEventListener("click",function(){var dark=document.documentElement.getAttribute("data-theme")==="dark";try{if(dark){document.documentElement.removeAttribute("data-theme");localStorage.setItem("jah-theme","light")}else{document.documentElement.setAttribute("data-theme","dark");localStorage.setItem("jah-theme","dark")}}catch(e){}paint()});paint()})();
+/* session restore: scroll + last-opened record, localStorage only (page-shell; studio stages untouched) */
+(function(){var KEY="jah-sr:"+location.pathname,PARAMS=["song","beat"];
+function rd(){try{return JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){return{}}}
+function wr(o){try{localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}}
+var S=rd(),q=new URLSearchParams(location.search);
+var deep=PARAMS.some(function(p){return q.has(p)});
+var t;addEventListener("scroll",function(){clearTimeout(t);t=setTimeout(function(){S.y=window.scrollY;wr(S)},300)},{passive:true});
+document.addEventListener("click",function(e){var a=e.target.closest?e.target.closest("a[href]"):null;if(!a)return;
+  for(var i=0;i<PARAMS.length;i++){var m=a.getAttribute("href").match(new RegExp("[?&]"+PARAMS[i]+"=([^&#]*)"));if(m){S.last=PARAMS[i]+":"+decodeURIComponent(m[1]);wr(S);break}}});
+function findRec(s){if(!s)return null;var p=s.split(":"),v=p.slice(1).join(":");
+  var a=document.querySelector('a[href*="?'+p[0]+'='+v+'"]')||document.querySelector('a[href*="&'+p[0]+'='+v+'"]');
+  return a||document.getElementById(v)}
+addEventListener("load",function(){setTimeout(function(){
+  if(deep){PARAMS.forEach(function(p){if(q.get(p)){S.last=p+":"+q.get(p);wr(S)}});return}
+  if(!location.hash){
+    if(typeof S.y==="number"&&S.y>0){window.scrollTo(0,S.y)}
+    else if(S.last){var el=findRec(S.last);if(el)el.scrollIntoView({block:"center"})}}
+},400)})})();
+</script>
 </body>
 </html>
