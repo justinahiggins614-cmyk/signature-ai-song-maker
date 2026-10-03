@@ -14,10 +14,10 @@ The reproducible seed for every archive record is its number `n`
 
 | Kind | ID format | Status (2026-10-03) | Canonical deep link |
 |---|---|---|---|
-| Song | `JAH-SONG-%07d` | Live, 5,700 issued | `?song=JAH-SONG-0000001` |
-| Beat | `JAH-BEAT-%07d` | Live, 2,750 issued | `?beat=JAH-BEAT-0000001` |
-| Sound (library) | `JAH-SOUND-%07d` | Live, 5,450 issued | `?sound=JAH-SOUND-0000001` |
-| Equipment | `JAH-GEAR-%07d` | Live, 350 issued | `?gear=JAH-GEAR-0000001` |
+| Song | `JAH-SONG-%07d` | Live (counts: `music-manifest.json`) | `?song=JAH-SONG-0000001` |
+| Beat | `JAH-BEAT-%07d` | Live (counts: `music-manifest.json`) | `?beat=JAH-BEAT-0000001` |
+| Sound (library) | `JAH-SOUND-%07d` | Live (counts: `music-manifest.json`) | `?sound=JAH-SOUND-0000001` |
+| Equipment | `JAH-GEAR-%07d` | Live (counts: `music-manifest.json`) | `?gear=JAH-GEAR-0000001` |
 | Voice | `JAH-VOICE-%06d` | Live, 4 issued (Nova/Ember/Drift/Stone) | — (no per-voice page) |
 | Project | `JAH-PROJECT-%07d` | **Reserved** — no IDs issued | — |
 | CD | `JAH-CD-%07d` | **Reserved** — no IDs issued | — |

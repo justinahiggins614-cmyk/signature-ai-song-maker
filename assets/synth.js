@@ -90,8 +90,11 @@
   function busDest(mx, dest, name) { return (mx && mx[name]) ? mx[name] : dest; }
   function noiseBuffer(c) {
     if (_noiseBuf && _noiseBuf.sampleRate === c.sampleRate) return _noiseBuf;
-    var b = c.createBuffer(1, c.sampleRate * 2, c.sampleRate), d = b.getChannelData(0), i;
-    for (i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    // 2026-10-03: seeded noise (mulberry32, fixed seed) — the noise floor is
+    // identical on every render, so the same request renders byte-identical
+    // audio. Math.random() here used to make every render differ slightly.
+    var rng = mulberry32(0xC0FFEE), b = c.createBuffer(1, c.sampleRate * 2, c.sampleRate), d = b.getChannelData(0), i;
+    for (i = 0; i < d.length; i++) d[i] = rng() * 2 - 1;
     if (c === _ctx) _noiseBuf = b;
     return b;
   }

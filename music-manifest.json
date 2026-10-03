@@ -3,7 +3,7 @@
   "site": "Signature Music Studio",
   "site_number": 23,
   "network": "THE JAH NETWORK \u2014 27 sites",
-  "generated_at": "2026-10-03T16:41:05.338414+00:00",
+  "generated_at": "2026-10-03T16:44:34.215583+00:00",
   "archive": {
     "songs": 6200,
     "library_sounds": 5950,
@@ -40,8 +40,8 @@
   "engine": {
     "name": "Signature Music Engine",
     "version": "SIGMUSIC-V1",
-    "seed_algorithm": "FNV-1a 32-bit (hashSeed) \u2014 'songtheme:<theme>' -> n = 1 + seed % 1000000",
-    "determinism": "same request + same engine version + same voice version = same composition (structure, chords, melody, lyrics) and same rendered WAV bytes",
+    "seed_algorithm": "xmur3 (hashSeed) feeding mulberry32 (rngFrom) \u2014 'songtheme:<theme>' -> n = 1 + hashSeed('songtheme:<theme>') % 1000000",
+    "determinism": "same request + same engine version + same voice version = same composition (structure, chords, melody, lyrics) and same rendered WAV bytes (all randomness seeded, incl. the noise floor)",
     "sound_library_version": "SIGSOUND-V1"
   },
   "voices": [

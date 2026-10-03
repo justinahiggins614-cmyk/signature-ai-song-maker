@@ -59,8 +59,8 @@ def build_music_manifest(rows, counts):
         "engine": {
             "name": "Signature Music Engine",
             "version": "SIGMUSIC-V1",
-            "seed_algorithm": "FNV-1a 32-bit (hashSeed) — 'songtheme:<theme>' -> n = 1 + seed % 1000000",
-            "determinism": "same request + same engine version + same voice version = same composition (structure, chords, melody, lyrics) and same rendered WAV bytes",
+            "seed_algorithm": "xmur3 (hashSeed) feeding mulberry32 (rngFrom) — 'songtheme:<theme>' -> n = 1 + hashSeed('songtheme:<theme>') % 1000000",
+            "determinism": "same request + same engine version + same voice version = same composition (structure, chords, melody, lyrics) and same rendered WAV bytes (all randomness seeded, incl. the noise floor)",
             "sound_library_version": "SIGSOUND-V1",
         },
         "voices": [

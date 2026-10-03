@@ -19,12 +19,9 @@ same record, forever"*).
   `rngFrom("soundrec:" + n)`, `rngFrom("gearrec:" + n)` (`assets/engine.js`).
 - **SEED-ALGORITHM** — the hash behind `SigSynth.hashSeed` / `rngFrom`.
   `rngFrom(str)` = `mulberry32(xmur3(str)())` (`assets/synth.js`).
-  **Honesty note:** `music-manifest.json` and `code/build_site_files.py`
-  label this "FNV-1a 32-bit (hashSeed)". The actual implementation in
-  `assets/synth.js` is **xmur3** (a MurmurHash3-derived string hash),
-  not FNV-1a. The label in the manifest is wrong; the behavior is locked by
-  `code/test_vectors.json` (40 vectors, verified by
-  `code/verify_test_vectors.py`).
+  (Fixed 2026-10-03: the manifest/builder label now correctly says xmur3.
+  Behavior is locked by `code/test_vectors.json` — 40 vectors, verified by
+  `code/verify_test_vectors.py`.)
 - **ENGINE-VERSION** — `SIGMUSIC-V1` (current). Recorded in
   `music-manifest.json` → `engine.version`.
 - **SOUND-LIBRARY-VERSION** — `SIGSOUND-V1`. Recorded in
@@ -65,12 +62,12 @@ same SOUND-LIBRARY-VERSION, and same VOICE-VERSION**:
 - ✅ The **song spec is version-independent**: per `music-manifest.json`
   `provenance.composition_stable`, the spec (notes/chords/lyrics/structure)
   stays valid and reproducible even if the render engine improves.
-- ⚠️ Rendered **WAV bytes are NOT guaranteed bit-identical** across renders.
-  The drum/FX noise layer (`noiseBuffer`, `assets/synth.js`) is filled with
-  `Math.random()`, so each render's white-noise buffer differs. Everything
-  *scheduled* (notes, patterns, envelopes, the seeded `impulse()` reverb
-  responses, the FX chain) is deterministic; the noise floor is not. The
-  OUTPUT-HASH therefore covers the record spec only, never the WAV.
+- ✅ Rendered **WAV bytes are bit-identical** across renders on the same
+  engine version: every randomness source is seeded, including the drum/FX
+  noise layer (`noiseBuffer` uses `mulberry32(0xC0FFEE)` — fixed 2026-10-03;
+  previously `Math.random()`). OUTPUT-HASH covers the record spec; the
+  scheduled audio (notes, patterns, envelopes, seeded reverb, FX chain) plus
+  the seeded noise floor reproduce the same WAV every time.
 - ℹ️ Any `JAH-SONG|SOUND|GEAR|BEAT-#######` ID resolves to a record even
   outside the archived range: `findRecord` (`assets/app.js`) falls back to
   deterministic regeneration (`detGen` → `SigData.gen(kind, n)`). The
