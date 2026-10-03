@@ -19,8 +19,9 @@
 <nav class="jahnet" aria-label="JAH Network Global Ecosystem"><div class="wrap" id="jahnet"></div></nav>
 
 <header class="hero"><div class="wrap">
+<div class="kick">SITE 25 OF 25 · THE JAH NETWORK</div>
 <h1>SIGNATURE MUSIC STUDIO</h1>
-<div><span class="official">OFFICIAL SIGNATURE SITE</span></div>
+<div><span class="official">OFFICIAL SIGNATURE SITE — within the Signature/JAH system</span></div>
 <p class="sub">The full music-making studio. Every sound, every instrument, all the studio equipment with real patch guides — make your music <b>on your own</b>, <b>via AI</b>, or <b>in collaboration with AI</b>.</p>
 <details class="statdrawer"><summary>📊 Archive counts</summary><p class="counter" id="counters">Loading the archive…</p></details>
 <div class="honest">Every sound on this site is synthesized live in your browser with the Web Audio API — no samples, no downloads needed to play. All voices are synthesized; there are no human singers here. What the AI makes, it makes from a deterministic seed: the same request always makes the same music.</div>
@@ -47,7 +48,7 @@
 <div id="promptout"></div>
 <h3 style="color:var(--gold)">🔥 Explore — fresh from the studio</h3>
 <p class="seqlab">Tap ▶ on anything to hear it right here.</p>
-<div class="grid" id="exploregrid"></div>
+<div class="grid" id="exploregrid"><div class="card" role="status">Loading the archive…</div></div>
 <p style="text-align:center"><button class="btn ghost" id="walkopen2">🎧 Want the guided path? Open the Song Walkthrough →</button></p>
 </section>
 
@@ -82,7 +83,7 @@
 <div><label>Type</label><select id="libtype"><option value="">All</option><option value="sound">Sounds</option><option value="instrument">Instruments</option><option value="set">Sound sets</option><option value="pack">Sound packs</option></select></div>
 <div><label>Search</label><input type="text" id="libq" placeholder="Search the library…"></div></div>
 <div class="az" id="libaz"></div>
-<div class="grid" id="libgrid"></div>
+<div class="grid" id="libgrid"><div class="card" role="status">Loading the archive…</div></div>
 </section>
 
 <section class="sec" id="equipment">
@@ -90,7 +91,7 @@
 <p>All the studio-making equipment — instruments, microphones, preamps, interfaces, monitors, patch bays — every item with <b>real instrument and mic patch lists</b>: exactly how to route it.</p>
 <div class="row"><div><label>Category</label><select id="gearcat"><option value="">All</option><option value="instrument">Instruments</option><option value="mic">Microphones</option><option value="preamp">Preamps</option><option value="interface">Interfaces</option><option value="monitor">Monitors</option><option value="patch">Patching</option><option value="processor">Processors</option></select></div>
 <div><label>Search</label><input type="text" id="gearq" placeholder="Search equipment…"></div></div>
-<div class="grid" id="geargird"></div>
+<div class="grid" id="geargird"><div class="card" role="status">Loading the archive…</div></div>
 </section>
 
 <section class="sec" id="beatmaker">
@@ -148,7 +149,7 @@
 <section class="sec" id="backups">
 <h2>🎶 Backup Singers</h2>
 <p>All types, selectable <b>to spec</b> — they join the song's spec record and its mix. Every backup singer is a <b>synthesized voice</b>, never a human singer.</p>
-<div class="grid" id="backupgrid"></div>
+<div class="grid" id="backupgrid"><div class="card" role="status">Loading the archive…</div></div>
 </section>
 
 <section class="sec" id="cleanup">
@@ -174,6 +175,9 @@
 
 <div class="teacher" id="teacher">
 <h2 style="color:var(--teal);margin-top:0">🎓 Music Teacher AI</h2>
+<div class="aicard" aria-label="AI identity card">🤖 <b>Music Teacher AI</b> — the AI that talks here.<br>
+<b>Duties:</b> teaches music theory, instruments, and production from the studio's own data — and says plainly when something isn't covered.
+<b>Engine:</b> grounded on-page Q&amp;A engine over the studio knowledge base. It claims no canon JAH-AI ID.</div>
 <p>Ask about music theory, instruments, production, or anything on this site. The teacher answers only from the studio's own data — and says plainly when something isn't covered.</p>
 <div class="row"><div><input type="text" id="teachq" placeholder="e.g. What is a chord progression? How do I patch a condenser mic?"></div><div style="flex:0"><label>&nbsp;</label><button class="btn teal" id="teachgo">Ask</button></div></div>
 <div class="ans" id="teachans" style="display:none"></div>
@@ -185,7 +189,7 @@
 <p><button class="btn violet" data-walkopen>🎧 Step-by-step: make a song like these</button> <span class="seqlab">Opens the walkthrough in a popup — one easy question per screen.</span></p>
 <div class="filterbar"><div class="row"><div><label>Search songs</label><input type="text" id="songq" placeholder="Search songs…" aria-label="Search songs"></div></div></div>
 <div class="az" id="songaz"></div>
-<div class="grid" id="songgrid"></div>
+<div class="grid" id="songgrid"><div class="card" role="status">Loading the archive…</div></div>
 </section>
 
 <section class="sec" id="beats">
@@ -194,7 +198,7 @@
 <p><button class="btn violet" data-walkopen>🎧 Step-by-step: make a beat like these</button> <span class="seqlab">Opens the walkthrough in a popup — one easy question per screen.</span></p>
 <div class="filterbar"><div class="row"><div><label>Style</label><select id="beatstyle"><option value="">All styles</option></select></div>
 <div><label>Search</label><input type="text" id="beatq" placeholder="Search beats…"></div></div></div>
-<div class="grid" id="beatgrid"></div>
+<div class="grid" id="beatgrid"><div class="card" role="status">Loading the archive…</div></div>
 </section>
 
 <section class="sec" id="session">
@@ -208,6 +212,9 @@
 </div>
 <div class="aipal" id="aipal">
 <h3>🤖 AI Pal</h3>
+<div class="aicard" aria-label="AI identity card">🤖 <b>AI Pal</b> — your studio companion here.<br>
+<b>Duties:</b> guides you stage by stage through the song-making process, answers plain-language questions about any stage, and can auto-complete your whole project from your seed.
+<b>Engine:</b> on-page studio engine — every word it says about your project is computed in your browser. It claims no canon JAH-AI ID.</div>
 <div class="say" id="palsay">Hey! I'm your studio pal. We'll go stage by stage — sounds, beat, lyrics, singing, mix, filters, CD. Tap a stage, or tell me to take over.</div>
 <div class="row">
 <div><label>Talk to your pal</label><input type="text" id="palq" placeholder='e.g. "take over", "make me a dark trap song", "what is stage 3?"'></div>
@@ -240,47 +247,47 @@
 <h2>📚 Catalog index</h2>
 <p class="seqlab">A bot-friendly snapshot of the archive — the full feed is at <a href="data/music-catalog.json">data/music-catalog.json</a>.</p>
 <!-- STATIC-CAT-START -->
-<table class="statictable"><thead><tr><th>ID</th><th>Title</th><th>Open</th></tr></thead><tbody>
-<tr><td><span class="id">JAH-SONG-0000001</span></td><td>Amber Harbor</td><td><a href="?song=JAH-SONG-0000001">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000002</span></td><td>Silver Highway</td><td><a href="?song=JAH-SONG-0000002">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000003</span></td><td>Midnight Garden</td><td><a href="?song=JAH-SONG-0000003">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000004</span></td><td>Crimson Horizon</td><td><a href="?song=JAH-SONG-0000004">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000005</span></td><td>Restless Orbit</td><td><a href="?song=JAH-SONG-0000005">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000006</span></td><td>Golden Drift</td><td><a href="?song=JAH-SONG-0000006">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000007</span></td><td>Slow Lantern</td><td><a href="?song=JAH-SONG-0000007">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000008</span></td><td>Electric Meadow</td><td><a href="?song=JAH-SONG-0000008">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000009</span></td><td>Amber Tide</td><td><a href="?song=JAH-SONG-0000009">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000010</span></td><td>Bright River</td><td><a href="?song=JAH-SONG-0000010">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000011</span></td><td>Electric Garden</td><td><a href="?song=JAH-SONG-0000011">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000012</span></td><td>Quiet Signal</td><td><a href="?song=JAH-SONG-0000012">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000013</span></td><td>Hollow Horizon</td><td><a href="?song=JAH-SONG-0000013">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000014</span></td><td>Copper Garden</td><td><a href="?song=JAH-SONG-0000014">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000015</span></td><td>Static River</td><td><a href="?song=JAH-SONG-0000015">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000016</span></td><td>Midnight Wire</td><td><a href="?song=JAH-SONG-0000016">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000017</span></td><td>Paper Summit</td><td><a href="?song=JAH-SONG-0000017">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000018</span></td><td>Restless River</td><td><a href="?song=JAH-SONG-0000018">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000019</span></td><td>Wild Flame</td><td><a href="?song=JAH-SONG-0000019">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000020</span></td><td>Copper Tide</td><td><a href="?song=JAH-SONG-0000020">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000001</span></td><td>Signature Copper trap Beat II</td><td><a href="?beat=JAH-BEAT-0000001">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000002</span></td><td>Signature Paper 80s synthpop Beat V</td><td><a href="?beat=JAH-BEAT-0000002">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000003</span></td><td>Signature Patient rock Beat IV</td><td><a href="?beat=JAH-BEAT-0000003">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000004</span></td><td>Signature Amber 70s funk Beat IV</td><td><a href="?beat=JAH-BEAT-0000004">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000005</span></td><td>Signature Crimson techno Beat I</td><td><a href="?beat=JAH-BEAT-0000005">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000006</span></td><td>Signature Slow lofi Beat I</td><td><a href="?beat=JAH-BEAT-0000006">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000007</span></td><td>Signature Silver jazz Beat II</td><td><a href="?beat=JAH-BEAT-0000007">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000008</span></td><td>Signature Velvet 70s funk Beat II</td><td><a href="?beat=JAH-BEAT-0000008">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000009</span></td><td>Signature Bold 80s synthpop Beat IV</td><td><a href="?beat=JAH-BEAT-0000009">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000010</span></td><td>Signature Crimson pop Beat III</td><td><a href="?beat=JAH-BEAT-0000010">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000011</span></td><td>Signature Patient funk Beat V</td><td><a href="?beat=JAH-BEAT-0000011">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000012</span></td><td>Signature Hollow reggae Beat I</td><td><a href="?beat=JAH-BEAT-0000012">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000013</span></td><td>Signature Silver trap Beat V</td><td><a href="?beat=JAH-BEAT-0000013">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000014</span></td><td>Signature Distant funk Beat I</td><td><a href="?beat=JAH-BEAT-0000014">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000015</span></td><td>Signature Amber trap Beat II</td><td><a href="?beat=JAH-BEAT-0000015">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000016</span></td><td>Signature Neon 70s funk Beat III</td><td><a href="?beat=JAH-BEAT-0000016">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000017</span></td><td>Signature Golden 80s synthpop Beat I</td><td><a href="?beat=JAH-BEAT-0000017">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000018</span></td><td>Signature Distant 70s funk Beat II</td><td><a href="?beat=JAH-BEAT-0000018">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000019</span></td><td>Signature Bold 90s boombap Beat II</td><td><a href="?beat=JAH-BEAT-0000019">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000020</span></td><td>Signature Static 00s crunk Beat I</td><td><a href="?beat=JAH-BEAT-0000020">Open →</a></td></tr>
+<table class="statictable"><thead><tr><th>ID</th><th>Title</th><th>Status</th><th>Open</th></tr></thead><tbody>
+<tr><td><span class="id">JAH-SONG-0000001</span></td><td>Amber Harbor</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000001">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000002</span></td><td>Silver Highway</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000002">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000003</span></td><td>Midnight Garden</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000003">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000004</span></td><td>Crimson Horizon</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000004">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000005</span></td><td>Restless Orbit</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000005">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000006</span></td><td>Golden Drift</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000006">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000007</span></td><td>Slow Lantern</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000007">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000008</span></td><td>Electric Meadow</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000008">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000009</span></td><td>Amber Tide</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000009">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000010</span></td><td>Bright River</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000010">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000011</span></td><td>Electric Garden</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000011">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000012</span></td><td>Quiet Signal</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000012">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000013</span></td><td>Hollow Horizon</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000013">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000014</span></td><td>Copper Garden</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000014">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000015</span></td><td>Static River</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000015">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000016</span></td><td>Midnight Wire</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000016">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000017</span></td><td>Paper Summit</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000017">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000018</span></td><td>Restless River</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000018">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000019</span></td><td>Wild Flame</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000019">Open →</a></td></tr>
+<tr><td><span class="id">JAH-SONG-0000020</span></td><td>Copper Tide</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000020">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000001</span></td><td>Signature Copper trap Beat II</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000001">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000002</span></td><td>Signature Paper 80s synthpop Beat V</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000002">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000003</span></td><td>Signature Patient rock Beat IV</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000003">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000004</span></td><td>Signature Amber 70s funk Beat IV</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000004">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000005</span></td><td>Signature Crimson techno Beat I</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000005">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000006</span></td><td>Signature Slow lofi Beat I</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000006">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000007</span></td><td>Signature Silver jazz Beat II</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000007">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000008</span></td><td>Signature Velvet 70s funk Beat II</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000008">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000009</span></td><td>Signature Bold 80s synthpop Beat IV</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000009">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000010</span></td><td>Signature Crimson pop Beat III</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000010">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000011</span></td><td>Signature Patient funk Beat V</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000011">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000012</span></td><td>Signature Hollow reggae Beat I</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000012">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000013</span></td><td>Signature Silver trap Beat V</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000013">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000014</span></td><td>Signature Distant funk Beat I</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000014">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000015</span></td><td>Signature Amber trap Beat II</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000015">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000016</span></td><td>Signature Neon 70s funk Beat III</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000016">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000017</span></td><td>Signature Golden 80s synthpop Beat I</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000017">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000018</span></td><td>Signature Distant 70s funk Beat II</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000018">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000019</span></td><td>Signature Bold 90s boombap Beat II</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000019">Open →</a></td></tr>
+<tr><td><span class="id">JAH-BEAT-0000020</span></td><td>Signature Static 00s crunk Beat I</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000020">Open →</a></td></tr>
 </tbody></table>
 <p class="seqlab">Showing the first 40 archive records. Full machine-readable feed: <a href="data/music-catalog.json">data/music-catalog.json</a>.</p>
 <!-- STATIC-CAT-END -->
@@ -290,7 +297,7 @@
 
 <footer><div class="wrap">
 <nav class="jahnet" aria-label="JAH Network (footer)" style="border:none;background:none"><div class="wrap" id="jahnet2" style="justify-content:center"></div></nav>
-<p><b style="color:var(--gold)">Signature Music Studio</b> — the official name. Make music on your own, via AI, or in collaboration with AI.<br>
+<p><b style="color:var(--gold)">Signature Music Studio</b> — the official name within the Signature/JAH system. Make music on your own, via AI, or in collaboration with AI.<br>
 <span class="seqlab">All audio synthesized in your browser. All voices synthesized. All records original Signature content.</span></p>
 </div></footer>
 

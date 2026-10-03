@@ -611,6 +611,7 @@
       var role = ADDON_ROLES[a.id] || "Role: studio specialist";
       return '<div class="card"><h4>' + esc(a.name) + "</h4><p class='seqlab'>" + esc(a.desc) + "</p>" +
         '<p class="seqlab"><b>' + esc(role) + "</b></p>" +
+        '<p class="seqlab">Engine: on-page studio engine — runs in your browser, from your seed. Claims no canon JAH-AI ID.</p>' +
         '<p><button class="btn teal" data-addontest="' + i + '">▶ Test this AI</button> ' +
         '<button class="btn ghost" data-addon="' + i + '">' + (a.go === -1 ? "🤖 Finish a song now" : "Use in walkthrough →") + "</button></p></div>";
     }).join("");

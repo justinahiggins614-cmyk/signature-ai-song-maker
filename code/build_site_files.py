@@ -107,10 +107,10 @@ def build_static_catalog(rows):
     index.html between the STATIC-CAT markers: first 20 songs + 20 beats."""
     songs = [r for r in rows if r[2] == "song"][:20]
     beats = [r for r in rows if r[2] == "beat"][:20]
-    parts = ['<table class="statictable"><thead><tr><th>ID</th><th>Title</th><th>Open</th></tr></thead><tbody>']
+    parts = ['<table class="statictable"><thead><tr><th>ID</th><th>Title</th><th>Status</th><th>Open</th></tr></thead><tbody>']
     for r in songs + beats:
         url = "?%s=%s" % (PARAM[r[2]], r[0])
-        parts.append('<tr><td><span class="id">%s</span></td><td>%s</td>'
+        parts.append('<tr><td><span class="id">%s</span></td><td>%s</td><td>GENERATED</td>'
                      '<td><a href="%s">Open →</a></td></tr>' % (escape(r[0]), escape(r[1]), escape(url)))
     parts.append('</tbody></table>')
     parts.append('<p class="seqlab">Showing the first 40 archive records. Full machine-readable feed: '
