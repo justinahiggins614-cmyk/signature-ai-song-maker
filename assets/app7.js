@@ -15,7 +15,7 @@
      on the walkthrough spec — arrangement, groove, melody,
      vocal coaching, mastering, finishing. */
   D.AI_ADDONS = [
-    { id: "arrange", name: "🎼 Arrangement AI", desc: "Lays out the full 5:00 standard — intro build-up, three 30-second chorus breaks, bridge beat-switch, and your chosen ending.", go: 1 },
+    { id: "arrange", name: "🎼 Arrangement AI", desc: "Lays out the full 5:00 standard — intro build-up, four 30-second chorus breaks, bridge beat-switch, and your chosen ending.", go: 1 },
     { id: "groove", name: "🥁 Groove AI", desc: "Designs the drum pattern from your rhythm words and places every part — beginning, middle, end.", go: 3 },
     { id: "melody", name: "🎹 Melody & Harmony AI", desc: "Writes the melody, chord voicings, and bass line in your song's key.", go: 4 },
     { id: "vocalcoach", name: "🎤 Vocal Coach AI", desc: "Picks the voice, stacks the backup singers, writes the ad-libs — or sings your own sample.", go: 11 },
@@ -25,7 +25,7 @@
   /* addon narrations: what each addon did, in plain words */
   function addonDid(id, ws) {
     var notes = {
-      arrange: "🎼 Arrangement AI laid out your 5:00 — intro build-up, three 30-second chorus breaks at 0:54, 1:54 and 2:54, bridge beat-switch, and a " + (ws.ending === "fade" ? "fade out" : ws.ending === "funky" ? "funky cold-stop" : "designed") + " ending.",
+      arrange: "🎼 Arrangement AI laid out your 5:00 — intro build-up, four 30-second chorus breaks at about 0:53, 2:05, 3:03 and 3:32, bridge beat-switch, and a " + (ws.ending === "fade" ? "fade out" : ws.ending === "funky" ? "funky cold-stop" : "designed") + " ending.",
       groove: "🥁 Groove AI designed your drum pattern and placed every part where you asked — beginning, middle, end.",
       melody: "🎹 Melody & Harmony AI wrote the melody and chords in your key, and voiced the bass line.",
       vocalcoach: "🎤 Vocal Coach AI " + (ws.voiceMode === "own" ? "mapped your own voice sample onto the melody" : "picked the " + voiceLabel(ws.voiceId) + " voice") + " and stacked your backups.",
@@ -129,7 +129,7 @@
     { t: "Welcome",
       q: "I'll walk you through your song one easy step at a time — genre, beat, vocals, ending — in plain words. At ANY point, tap “🤖 AI finish my song” and I'll complete the rest.",
       body: function () {
-        return "<p class='seqlab'>Your song comes out as the <b>5:00 standard</b>: intro build-up, <b>three 30-second chorus breaks</b>, bridge beat-switch, and a fade out — with full lyrics if you want them.</p>" +
+        return "<p class='seqlab'>Your song comes out as the <b>5:00 standard</b>: intro build-up, <b>four 30-second chorus breaks</b>, bridge beat-switch, and a fade out — with full lyrics if you want them.</p>" +
           "<p class='seqlab'>Tap <b>Next</b> to begin, or let the AI do it all right now.</p>";
       },
       wire: function () {}, collect: function () { return true; } },
@@ -418,7 +418,7 @@
         body.querySelector("#wrender").onclick = function () {
           try { S.unlockAudio(); } catch (e) {}
           var spec = specFromWalk(ws);
-          msg("Rendering your 5-minute song — intro build-up, three chorus breaks… this can take a minute or so on a phone. 🎶");
+          msg("Rendering your 5-minute song — intro build-up, four chorus breaks… this can take a minute or so on a phone. 🎶");
           S.renderStudioSong(spec, PROJ.mix, fxForMaster(ws.master)).then(function (buf) {
             WALKBUF = buf; WALKSPEC = spec;
             try { S.unlockAudio(); } catch (e2) {}
@@ -531,6 +531,13 @@
     if (window.__palSay) window.__palSay("Walkthrough started — one easy step at a time. Tap “🤖 AI finish my song” any time and I'll take it from there.");
   }
   window.__openWalk = openWalk;
+  /* best-AI-for-job: the AI pal routes a job to the right specialist addon.
+     i = walkthrough step to open at; -1 = Finisher AI (complete everything). */
+  window.__openWalkStep = function (i) {
+    openWalk();
+    if (i === -1) { aiFinish(); return; }
+    if (i >= 0 && i < STEPS.length) { WSTEP = i; drawStep(); }
+  };
 
   /* ================= walk-song storage + CD/DB hooks ================= */
   var WKEY = "sigstudio.walksongs.v1";
@@ -606,8 +613,8 @@
   /* ================= teacher knowledge: walkthrough + standard ================= */
   if (D.THEORY) {
     D.THEORY.push(
-      { k: ["walkthrough", "easy", "guide me", "step by step", "streamline", "simple"], t: "The Song Walkthrough", x: "The Song Walkthrough is the easy way to make a song: it asks one plain-language question per screen — genre, sounds, rhythm, bass, snare, drums, chorus, ending, lyrics, voice, backups, master — and builds your song as you answer. Every screen has an “AI finish my song” button that completes the rest for you. It always renders the 5:00 standard: intro build-up, three 30-second chorus breaks, and a fade out." },
-      { k: ["five minute", "5:00", "5 minute", "full song", "standard", "chorus break"], t: "The 5:00 full-song standard", x: "Every walkthrough song follows the 5-minute standard: a 24-second intro build-up, verses, THREE 30-second chorus breaks (at 0:54, 1:54 and 2:54), a bridge with a real beat-switch, an out jam, and a fade out — or a funky cold-stop or your own designed ending, your choice. Full lyrics are sung when you ask for them." },
+      { k: ["walkthrough", "easy", "guide me", "step by step", "streamline", "simple"], t: "The Song Walkthrough", x: "The Song Walkthrough is the easy way to make a song: it asks one plain-language question per screen — genre, sounds, rhythm, bass, snare, drums, chorus, ending, lyrics, voice, backups, master — and builds your song as you answer. Every screen has an “AI finish my song” button that completes the rest for you. It always renders the 5:00 standard: intro build-up, four 30-second chorus breaks, and a fade out." },
+      { k: ["five minute", "5:00", "5 minute", "full song", "standard", "chorus break"], t: "The 5:00 full-song standard", x: "Every walkthrough song follows the 5-minute standard: a 24-second intro build-up, verses, FOUR 30-second chorus breaks (at about 0:53, 2:05, 3:03 and 3:32), a bridge with a real beat-switch, an out jam, and a fade out — or a funky cold-stop or your own designed ending, your choice. Full lyrics are sung when you ask for them." },
       { k: ["addon", "add-on", "ai band", "arrangement ai", "groove ai", "melody ai", "vocal coach", "mastering ai", "finisher"], t: "AI addons", x: "Six specialist AIs do the musician work with you: Arrangement AI lays out the 5:00 structure, Groove AI designs the drum pattern and places every part, Melody & Harmony AI writes the tune and chords, Vocal Coach AI picks the voice and stacks backups, Mastering AI balances and masters the mix, and Finisher AI completes any unfinished step. All run in your browser — no network, no cost." },
       { k: ["custom voice", "man voice", "woman voice", "boy voice", "girl voice", "deep voice", "light voice", "voice range"], t: "Custom voices", x: "The walkthrough offers 24 created voice profiles: man, woman, boy, or girl — each in deep or light tone, each in low, mid, or high range. Or use your own voice: upload a wav or mp3 sample, or record one, and the AI sings it onto your melody. All voices are synthesized and labeled honestly." }
     );

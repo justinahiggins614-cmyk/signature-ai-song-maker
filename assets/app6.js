@@ -62,6 +62,37 @@
   window.__palSay = palSay;
   function palAnswer(q) {
     q = (q || "").toLowerCase();
+    /* ---- pull up a specified track: "play JAH-SONG-000123" ---- */
+    var idm = q.match(/jah-(song|beat)-(\d+)/);
+    if (idm) {
+      var tid = "JAH-" + idm[1].toUpperCase() + "-" + idm[2];
+      if (window.__playTrack) window.__playTrack(tid);
+      return "Pulling up " + tid + " — rendering it now, this takes a moment on a phone.";
+    }
+    /* ---- random tracks ---- */
+    if (/random/.test(q) && /beat/.test(q)) { if (window.__playRandomTrack) window.__playRandomTrack("beat"); return "Rolling the dice — a random beat, coming up."; }
+    if (/random/.test(q) && /song|track/.test(q)) { if (window.__playRandomTrack) window.__playRandomTrack("song"); return "Rolling the dice — a random song, coming up."; }
+    /* ---- playlists ---- */
+    if (/playlist|play list/.test(q) && window.__playPlaylist && window.__getIdx) {
+      var idx = window.__getIdx(), pool = idx.filter(function (r) { return r[2] === "song"; });
+      var gword = null;
+      (S.GENRES || []).forEach(function (g) { if (q.indexOf(g) !== -1) gword = g; });
+      if (gword) {
+        var gp = pool.filter(function (r) { return (r[1] || "").toLowerCase().indexOf(gword) !== -1; });
+        if (gp.length >= 3) pool = gp;
+      }
+      pool.sort(function (a, b) { var ma = /(\d+)$/.exec(a[0]), mb = /(\d+)$/.exec(b[0]); return (+(mb && mb[1])) - (+(ma && ma[1])); });
+      var ids = pool.slice(0, 5).map(function (r) { return r[0]; });
+      if (ids.length) { window.__playPlaylist(ids); return "Playlist rolling — " + ids.length + " tracks" + (gword ? " of " + gword : "") + ", playing back to back. Use Next ▶ or ■ Stop anytime."; }
+      return "No songs in the index yet — make one first and I'll queue it.";
+    }
+    /* ---- best AI for the job: delegate to the right specialist addon ---- */
+    if (/arrang|song structure|structure my/.test(q) && window.__openWalkStep) { window.__openWalkStep(1); return "🎼 Arrangement AI is on it — laying out your 5:00 standard: intro build-up, four 30-second chorus breaks, bridge beat-switch, your chosen ending."; }
+    if (/drum pattern|groove|design.*drums|make.*drums/.test(q) && window.__openWalkStep) { window.__openWalkStep(3); return "🥁 Groove AI is on it — designing your drum pattern and placing every part: beginning, middle, end."; }
+    if (/write.*melod|melod.*for|chord.*for|harmon/.test(q) && window.__openWalkStep) { window.__openWalkStep(4); return "🎹 Melody & Harmony AI is on it — writing the melody, chord voicings, and bass line in your song's key."; }
+    if (/vocal coach|coach.*vocal|pick.*voice|choose.*voice/.test(q) && window.__openWalkStep) { window.__openWalkStep(11); return "🎤 Vocal Coach AI is on it — picking the voice, stacking the backup singers, writing the ad-libs."; }
+    if (/master (my|this|the|it)|mix and master|mastering/.test(q) && window.__openWalkStep) { window.__openWalkStep(13); return "🎚️ Mastering AI is on it — balancing the mix and mastering it radio-ready."; }
+    if (/finish.*song|complete.*song|finish it|do the rest/.test(q) && window.__openWalkStep) { window.__openWalkStep(-1); return "🤖 Finisher AI is on it — completing every remaining step from your seed."; }
     if (/take over|auto|finish|complete|do it all/.test(q)) { autoProject($("palq").value || "a great song"); return "On it — building your whole project now. Watch the stages light up."; }
     if (/stage 1|sound/.test(q)) return "Stage 1: tap the Sounds stage, browse A–Z, pop a file open with ▶, and hit 'Save to My Library' on the keepers.";
     if (/stage 2|beat/.test(q)) return "Stage 2: describe your beat — even 'Nas type beat' or 'Eminem type beat' works — then pick instruments from the popup.";

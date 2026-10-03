@@ -1,0 +1,157 @@
+/* ============================================================
+   Signature Music Studio — million-dollar studio theme (2026-10-02).
+   HIS ORDER: "Lookup images of high-tech expensive studios and
+   design it like that" — dark console, glowing meters, premium
+   hardware aesthetic. Reference images in docs/studio-redesign/.
+   Signature identity kept: dark + gold. Loaded AFTER style.css;
+   visual restyle only — no class names or layout changed.
+   ============================================================ */
+:root{
+  --console:#0b0a10; --rack:#14121b; --rack2:#1a1724;
+  --metal1:#232030; --metal2:#161420;
+  --goldglow:rgba(245,197,66,.55); --golddeep:#b98a1e;
+}
+body{
+  background:
+    radial-gradient(1400px 500px at 50% -8%, rgba(245,197,66,.10) 0%, transparent 55%),
+    radial-gradient(900px 700px at 85% 110%, rgba(155,123,255,.06) 0%, transparent 60%),
+    linear-gradient(180deg,#0e0c14 0%,#08070c 100%);
+}
+/* ---- brand header: gold console glow ---- */
+.hero h1{
+  text-shadow:0 0 18px var(--goldglow),0 0 60px rgba(245,197,66,.25),0 2px 0 #000;
+  letter-spacing:4px;
+}
+.hero .sub{color:#d8cdb4}
+/* ---- rack-unit sections ---- */
+.sec{
+  background:linear-gradient(180deg,var(--rack2) 0%,var(--rack) 12%,var(--rack) 100%);
+  border:1px solid #2e2a3d;
+  border-top:2px solid rgba(245,197,66,.45);
+  box-shadow:0 10px 30px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.05);
+}
+.sec h2{
+  text-shadow:0 0 14px var(--goldglow);
+  letter-spacing:1px;
+  border-bottom:1px solid rgba(245,197,66,.25);
+  padding-bottom:10px;
+}
+.sec h3{color:#c9b8ff;text-shadow:0 0 10px rgba(155,123,255,.4)}
+/* ---- cards: dark glass with gold top edge ---- */
+.card,.hit{
+  background:linear-gradient(180deg,#1c1926 0%,#14121b 100%);
+  border:1px solid #322c46;
+  border-top:1px solid rgba(245,197,66,.35);
+  box-shadow:0 6px 18px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.04);
+}
+.card h4{color:var(--gold);text-shadow:0 0 8px rgba(245,197,66,.35)}
+.hit b{color:var(--gold)}
+/* ---- backlit console buttons ---- */
+.btn{
+  background:linear-gradient(180deg,#f7cd5a 0%,var(--gold) 45%,var(--golddeep) 100%);
+  box-shadow:0 0 14px rgba(245,197,66,.45),0 3px 0 #6e5212,inset 0 1px 0 rgba(255,255,255,.5);
+  text-shadow:0 1px 0 rgba(255,255,255,.35);
+}
+.btn:active{transform:translateY(2px);box-shadow:0 0 8px rgba(245,197,66,.4),0 1px 0 #6e5212}
+.btn.big{
+  font-size:20px;padding:16px 34px;border-radius:12px;
+  box-shadow:0 0 26px rgba(245,197,66,.65),0 4px 0 #6e5212,inset 0 1px 0 rgba(255,255,255,.55);
+}
+.btn.ghost{
+  background:linear-gradient(180deg,#1c1926,#12101a);
+  box-shadow:inset 0 0 12px rgba(245,197,66,.12),0 0 8px rgba(245,197,66,.15);
+}
+.btn.teal{
+  background:linear-gradient(180deg,#6ff5d6 0%,var(--teal) 50%,#2ba88a 100%);
+  box-shadow:0 0 14px rgba(79,227,193,.5),0 3px 0 #1c6f5c,inset 0 1px 0 rgba(255,255,255,.5);
+  color:#0c1420;
+}
+.btn.violet{
+  background:linear-gradient(180deg,#b79dff 0%,var(--violet) 50%,#6a4fd1 100%);
+  box-shadow:0 0 14px rgba(155,123,255,.5),0 3px 0 #46357f,inset 0 1px 0 rgba(255,255,255,.5);
+  color:#14101d;
+}
+/* ---- transport keys ---- */
+.fplay{
+  background:linear-gradient(180deg,#6ff5d6,var(--teal) 60%,#2ba88a);
+  box-shadow:0 0 16px rgba(79,227,193,.65),0 3px 0 #1c6f5c;
+  text-shadow:none;
+}
+.fplay:active{transform:translateY(2px)}
+.fstop,.fstop2{box-shadow:0 0 8px rgba(255,255,255,.12)}
+/* ---- recessed console slots ---- */
+input[type=text],input[type=number],select,textarea{
+  background:linear-gradient(180deg,#0d0b13,#14121c) !important;
+  border:1px solid #38324e !important;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.7) !important;
+  color:var(--ink) !important;
+  border-radius:8px;
+}
+input:focus,select:focus,textarea:focus{
+  outline:none;border-color:var(--gold) !important;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.7),0 0 12px rgba(245,197,66,.45) !important;
+}
+textarea#promptbox{
+  font-size:17px;padding:14px;
+  border:1px solid rgba(245,197,66,.5) !important;
+}
+/* ---- faders: gold console knobs ---- */
+input[type=range]{-webkit-appearance:none;background:transparent}
+input[type=range]::-webkit-slider-runnable-track{
+  height:8px;border-radius:4px;
+  background:linear-gradient(180deg,#0a0910,#1c1926);
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.8);
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:22px;height:22px;margin-top:-7px;border-radius:6px;
+  background:linear-gradient(180deg,#f7cd5a,var(--golddeep));
+  box-shadow:0 0 10px rgba(245,197,66,.7),0 2px 0 #000;
+  border:1px solid #6e5212;
+}
+input[type=range]::-moz-range-track{
+  height:8px;border-radius:4px;background:#14121c;
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.8);
+}
+input[type=range]::-moz-range-thumb{
+  width:22px;height:22px;border-radius:6px;border:1px solid #6e5212;
+  background:linear-gradient(180deg,#f7cd5a,var(--golddeep));
+  box-shadow:0 0 10px rgba(245,197,66,.7);
+}
+/* ---- glowing LED meters ---- */
+.eq span{background:linear-gradient(180deg,#8ffbe4,var(--teal));box-shadow:0 0 8px rgba(79,227,193,.9)}
+canvas.wave{
+  background:linear-gradient(180deg,#0a0d12,#0e1420);
+  border:1px solid #2a3a4a;border-radius:8px;
+  box-shadow:inset 0 0 20px rgba(0,0,0,.8),0 0 12px rgba(79,227,193,.15);
+}
+/* ---- finder / honest notes ---- */
+.finder{
+  background:linear-gradient(180deg,#151221,#0d0a14);
+  border:2px solid rgba(155,123,255,.6);
+  box-shadow:0 0 24px rgba(155,123,255,.2),inset 0 1px 0 rgba(255,255,255,.05);
+}
+.honest{
+  background:#14101d;border-left:4px solid var(--teal);
+  box-shadow:inset 0 0 16px rgba(79,227,193,.06);
+}
+/* ---- mode pills ---- */
+.modes button{
+  background:linear-gradient(180deg,#1c1926,#12101a);
+  box-shadow:0 3px 0 #000,inset 0 1px 0 rgba(255,255,255,.06);
+}
+.modes button.on{
+  box-shadow:0 0 16px rgba(245,197,66,.5),0 3px 0 #6e5212;
+}
+/* ---- the big Create button row ---- */
+#makestudio{
+  border-top:3px solid var(--gold);
+  box-shadow:0 0 34px rgba(245,197,66,.18),0 10px 30px rgba(0,0,0,.6);
+}
+#promptcreate{margin-top:10px}
+/* ---- step dots / walkthrough ---- */
+.seqlab{color:#c9bfae}
+.id{color:#8f86a3}
+a{color:var(--gold)}
+/* ---- details/summary ---- */
+details{border:1px solid #322c46;border-radius:8px;padding:8px 12px;background:#12101a}
+summary{font-weight:bold}

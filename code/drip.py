@@ -18,6 +18,7 @@ const sandbox={window:{}, console:console};
 vm.createContext(sandbox);
 vm.runInContext(fs.readFileSync('assets/synth.js','utf8'), sandbox);
 vm.runInContext(fs.readFileSync('assets/engine.js','utf8'), sandbox);
+vm.runInContext(fs.readFileSync('assets/lyrics.js','utf8'), sandbox);
 const SigData = sandbox.window.SigData;
 const [kind, from, count] = process.argv.slice(1);
 const out = [];

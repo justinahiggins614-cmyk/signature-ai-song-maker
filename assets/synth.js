@@ -418,8 +418,8 @@
   }
 
   /* ---------- full-song render: lead-in + sections + beat switch ----------
-     Every song is a FULL song: riser lead-in intro, verse/chorus arc,
-     a bridge with a real beat SWITCH, and an outro. */
+     His standard (2026-10-02): 18-bar verses, FOUR chorus breaks, bridge with a
+     real beat SWITCH, intro lead-in and outro. */
   function sectionPlan(song) {
     var rng = rngFrom("fullsong:" + song.id), keyRoot = 48 + Math.floor(rng() * 12);
     var genre = song.genre || "pop";
@@ -428,15 +428,16 @@
     if (switchGenre === genre) switchGenre = "trap";
     var sections = [
       { name: "intro", bars: 4, beat: "leadin", drums: 0.5 },
-      { name: "verse", bars: 8, beat: genre, drums: 0.9 },
-      { name: "chorus", bars: 8, beat: genre, drums: 1.0 },
-      { name: "verse2", bars: 8, beat: genre, drums: 0.95 },
-      { name: "chorus", bars: 8, beat: genre, drums: 1.0 },
-      { name: "bridge", bars: 8, beat: switchGenre, drums: 1.0, switched: true },
-      { name: "chorus", bars: 8, beat: genre, drums: 1.05 },
+      { name: "verse", bars: 18, beat: genre, drums: 0.9 },
+      { name: "chorus", bars: 12, beat: genre, drums: 1.0 },
+      { name: "verse2", bars: 18, beat: genre, drums: 0.95 },
+      { name: "chorus", bars: 12, beat: genre, drums: 1.0 },
+      { name: "bridge", bars: 12, beat: switchGenre, drums: 1.0, switched: true },
+      { name: "chorus", bars: 12, beat: genre, drums: 1.0 },
+      { name: "chorus", bars: 12, beat: genre, drums: 1.05 },
       { name: "outro", bars: 4, beat: "fadeout", drums: 0.7 }
     ];
-    var melody = melodyFor(chords, 60, rng);
+    var melody = melodyFor(chords, 104, rng);
     return { keyRoot: keyRoot, chords: chords, melody: melody, sections: sections, bpm: song.tempo || 100, genre: genre, switchGenre: switchGenre };
   }
   function renderFullSong(song, mix, fxList) {
@@ -681,7 +682,7 @@
 /* ============================================================
    SigSynth studio extension — the 5-minute full-song standard,
    custom voice profiles, placement-aware scheduling.
-   Standard: intro build-up, THREE 30-second chorus breaks,
+   Standard: intro build-up, FOUR 30-second chorus breaks (18-bar verses),
    fade out (or chosen ending). Total: exactly 5:00.
    ============================================================ */
 (function (root) {
@@ -883,8 +884,8 @@
         for (t = sec.start; t < sec.end - 0.001; t += step) {
           var ti = Math.round((t - sec.start) / step) % 16;
           var tv = vel, tt = t0 + t;
-          if (sec.kind === "build") tv *= 0.35 + 0.65 * (t / 24); /* build-up swell */
-          if (sec.kind === "ending" && ending === "fade") tv *= Math.max(0.15, 1 - (t - 285) / 15);
+          if (sec.kind === "build") tv *= 0.35 + 0.65 * (t / sections[0].end); /* build-up swell */
+          if (sec.kind === "ending" && ending === "fade") tv *= Math.max(0.15, 1 - (t - (END - 15)) / 15);
           var snOn = zoneHit(t, snareZones);
           if (st.kick[ti]) S.kick(c, dd, tt, tv);
           if (st.snare[ti] && snOn) playSnare(c, dd, tt, tv, snareKind);
@@ -964,9 +965,9 @@
       }
 
       /* lead melody in verses/choruses/jam (soft under vocals) */
-      var mti = 0, mtt = t0 + 24;
+      var mti = 0, mtt = t0 + sections[0].end;
       var leadVel = lines.length ? 0.3 : 0.7;
-      while (mtt < t0 + 285 && mti < melody.length) {
+      while (mtt < t0 + END - 15 && mti < melody.length) {
         var mn = melody[mti++];
         if (mn.midi > 0) S.tone(c, ll, mtt, mn.midi, mn.len * step * 0.9, "lead", leadVel);
         mtt += mn.len * step;
@@ -1006,25 +1007,26 @@
       }
 
       /* ending */
+      /* ending (times relative to the bar-planned song end) */
       if (ending === "funky") {
         /* cold stop + final hit */
-        fin.gain.setValueAtTime(1, t0); fin.gain.setValueAtTime(1, t0 + 296.2);
-        fin.gain.linearRampToValueAtTime(0.0001, t0 + 296.7);
-        S.kick(c, fin, t0 + 296.2, 1); S.clap(c, fin, t0 + 296.2, 0.9); S.hat(c, fin, t0 + 296.2, 0.8, true);
+        fin.gain.setValueAtTime(1, t0); fin.gain.setValueAtTime(1, t0 + END - 3.8);
+        fin.gain.linearRampToValueAtTime(0.0001, t0 + END - 3.3);
+        S.kick(c, fin, t0 + END - 3.8, 1); S.clap(c, fin, t0 + END - 3.8, 0.9); S.hat(c, fin, t0 + END - 3.8, 0.8, true);
       } else if (ending === "designed") {
         /* stab accents then fade, per the user's note */
         var eb;
         for (eb = 0; eb < 4; eb++) {
-          var ech = chords[eb % 4], et = t0 + 288 + eb * 2 * step * 4;
+          var ech = chords[eb % 4], et = t0 + END - 12 + eb * 2 * step * 4;
           S.tone(c, fin, et, ech[0] + 12, step * 2, "brass", 0.6);
           S.kick(c, fin, et, 0.9);
         }
-        fin.gain.setValueAtTime(1, t0); fin.gain.setValueAtTime(1, t0 + 294);
-        fin.gain.linearRampToValueAtTime(0.0001, t0 + 300);
+        fin.gain.setValueAtTime(1, t0); fin.gain.setValueAtTime(1, t0 + END - 6);
+        fin.gain.linearRampToValueAtTime(0.0001, t0 + END);
       } else {
         /* fade out: the standard */
-        fin.gain.setValueAtTime(1, t0); fin.gain.setValueAtTime(1, t0 + 285);
-        fin.gain.linearRampToValueAtTime(0.0001, t0 + 300);
+        fin.gain.setValueAtTime(1, t0); fin.gain.setValueAtTime(1, t0 + END - 15);
+        fin.gain.linearRampToValueAtTime(0.0001, t0 + END);
       }
     }).then(function (buf) { return S.applyFXChain(buf, fxList); });
   }
@@ -1032,7 +1034,7 @@
   function studioPlanSummary(spec) {
     var ending = spec.ending === "funky" ? "a funky cold-stop finish"
       : spec.ending === "designed" ? "your designed ending" : "a fade out";
-    return "5:00 standard — intro build-up, verse, THREE 30-second chorus breaks (0:54, 1:54, 2:54), " +
+    return "5:00 standard — intro build-up, 18-bar verses, FOUR ~30-second chorus breaks, " +
       "bridge beat-switch, out jam, and " + ending + ". " +
       (spec.lyrics ? "Full lyrics included, sung by " + voiceProfile(spec.voiceId || "").label + ". " : "Instrumental. ") +
       "Genre: " + (spec.genre || "hip-hop") + " at " + (spec.bpm || 100) + " BPM.";

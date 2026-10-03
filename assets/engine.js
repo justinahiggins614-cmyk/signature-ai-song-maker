@@ -17,26 +17,21 @@
   /* ---------- word pools (all original phrasing) ---------- */
   var TITLE_A = ["Neon", "Velvet", "Copper", "Midnight", "Amber", "Silver", "Crimson", "Golden", "Electric", "Quiet", "Paper", "Static", "Hollow", "Bright", "Distant", "Wild", "Slow", "Restless", "Patient", "Bold"];
   var TITLE_B = ["Highway", "River", "Static", "Morning", "Engine", "Lantern", "Compass", "Harbor", "Wire", "Garden", "Signal", "Horizon", "Thunder", "Meadow", "Orbit", "Flame", "Echo", "Tide", "Summit", "Drift"];
-  var LYRIC_OPEN = ["Woke up with the sunrise in my pocket", "The city hums a tune I almost know", "Dust on the dashboard, miles to go", "Your laughter lingers in the hallway", "Streetlights painting shadows on the wall", "I found a melody in the rain", "The radio static sounds like home", "Barefoot summer on a wooden floor", "We chased the daylight down the coast", "Old guitar leaning by the door"];
-  var LYRIC_MID = ["And every road keeps calling out my name", "So sing it louder than the thunder", "We are golden in the afterglow", "Hold the night, don't let it go", "The rhythm of the wheels keeps time", "Whisper secrets to the open sky", "Dance until the morning breaks", "Every heartbeat finds its rhyme", "We rise like smoke into the blue", "The chorus carries me to you"];
-  var LYRIC_END = ["And the song goes on and on", "Forever in this melody", "We will remember this refrain", "The music never fades away", "Sing it back to me again", "Underneath the same old stars", "This is where we belong", "The night is ours to keep", "Let the harmony remain", "We are the song we sing"];
-  var GENRE_LIST = S.GENRES;
-  var MOOD_LIST = S.MOODS;
+  /* ---------- rhyming lyric engine lives in assets/lyrics.js ----------
+     One theme per song, real rhyming couplets, one coherent story.
+     (His order 2026-10-02: rhyme and make sense.) */
 
-  function genSong(n) {
+  function genSong(n, themeText) {
     var rng = S.rngFrom("songrec:" + n), id = songId(n);
     var title = S.pick(rng, TITLE_A) + " " + S.pick(rng, TITLE_B);
-    var genre = S.pick(rng, GENRE_LIST), mood = S.pick(rng, MOOD_LIST);
+    var genre = S.pick(rng, S.GENRES), mood = S.pick(rng, S.MOODS);
     var tempo = 70 + Math.floor(rng() * 70), keyIx = Math.floor(rng() * 12);
     var keyName = S.noteName(48 + keyIx).replace(/[0-9-]/g, "") + (rng() < 0.7 ? " major" : " minor");
-    var v1 = S.pick(rng, LYRIC_OPEN), v2 = S.pick(rng, LYRIC_OPEN);
-    var c1 = S.pick(rng, LYRIC_MID), c2 = S.pick(rng, LYRIC_MID), e = S.pick(rng, LYRIC_END);
-    while (v2 === v1) v2 = S.pick(rng, LYRIC_OPEN);
-    while (c2 === c1) c2 = S.pick(rng, LYRIC_MID);
-    var lyrics = "[Verse 1]\n" + v1 + "\n" + v2 + "\n\n[Chorus]\n" + c1 + "\n" + c2 + "\n\n[Verse 2]\n" + v2 + "\n" + v1 + "\n\n[Chorus]\n" + c1 + "\n" + c2 + "\n\n[Outro]\n" + e;
+    var lw = root.SigData.writeLyrics ? root.SigData.writeLyrics(rng, themeText) : { lyrics: "[Verse 1]\nLa la\n\n[Chorus]\nLa la", theme: "untitled" };
+    var lyrics = lw.lyrics;
     var progBank = [[0, 5, 3, 4], [0, 4, 5, 3], [5, 3, 0, 4], [1, 4, 0, 5]][Math.floor(rng() * 4)];
     var chords = progBank.map(function (d) { return S.noteName(48 + keyIx + d).replace(/[0-9-]/g, ""); }).join(" - ");
-    var structure = "Intro (4 bars) / Verse (16) / Chorus (16) / Verse (16) / Chorus (16) / Bridge (8) / Chorus (16) / Outro (4)";
+    var structure = "Intro (4 bars) / Verse (18) / Chorus (12) / Verse (18) / Chorus (12) / Bridge (12) / Chorus (12) / Chorus (12) / Outro (4)";
     var desc = "A " + mood + " " + genre + " song at " + tempo + " BPM in " + keyName + ", written by the Signature song engine.";
     return { id: id, kind: "song", n: n, title: title, genre: genre, mood: mood, tempo: tempo, key: keyName, lyrics: lyrics, chords: chords, structure: structure, desc: desc };
   }

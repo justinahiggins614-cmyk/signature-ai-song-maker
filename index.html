@@ -7,6 +7,7 @@
 <meta name="description" content="Signature Music Studio: the full music-making studio. Sound library, studio equipment with real patch guides, AI beat maker, auto song writer, vocal studio, backup singers, vocal cleanup, and CD making. Make music on your own, via AI, or in collaboration with AI.">
 <link rel="canonical" href="https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/">
 <link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/studio-theme.css">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebSite","name":"Signature Music Studio","url":"https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/","description":"Full music-making studio: sounds, equipment, beat maker, song writer, vocal studio, CD making."}
 </script>
@@ -29,6 +30,23 @@
 <button data-mode="collab">🤝 Collaborate with AI</button>
 </div>
 <p class="seqlab" id="modeline" style="text-align:center">Mode: make it yourself — you set every control.</p>
+
+<section class="sec" id="makestudio">
+<h2>✨ Make a Song</h2>
+<p class="seqlab">Describe it. One button. The studio does the rest — full song, 18-bar verses, four chorus breaks, rhyming lyrics that make sense.</p>
+<div><label for="promptbox" style="font-size:18px;color:var(--gold)">Describe your song — make any song you can imagine…</label>
+<textarea id="promptbox" rows="3" style="width:100%" placeholder="e.g. a dark hip-hop anthem about the midnight highway, Nas type beat with a sung chorus…"></textarea></div>
+<div class="row">
+<div><label>Style</label><select id="promptstyle"><option value="">Any — surprise me</option></select></div>
+<div><label>Lyrics</label><select id="promptlyrics"><option value="ai">AI writes them (rhyming)</option><option value="typed">I'll type them</option><option value="none">Instrumental</option></select></div>
+</div>
+<p><button class="btn big" id="promptcreate">✨ Create my song</button> <span class="seqlab" id="promptinfo"></span></p>
+<div id="promptout"></div>
+<h3 style="color:var(--gold)">🔥 Explore — fresh from the studio</h3>
+<p class="seqlab">Tap ▶ on anything to hear it right here.</p>
+<div class="grid" id="exploregrid"></div>
+<p style="text-align:center"><button class="btn ghost" id="walkopen2">🎧 Want the guided path? Open the Song Walkthrough →</button></p>
+</section>
 
 <div class="finder">
 <label for="finderq" style="color:var(--violet);font-size:16px">🔎 Finder AI — describe what you're looking for…</label>
@@ -160,6 +178,7 @@
 <section class="sec" id="songs">
 <h2>📀 Song Archive</h2>
 <p>Every song fully made — lyrics, chords, structure, tempo, key — and <b>ready to play</b>: one click renders the demo mix. Marching to one million.</p>
+<p><button class="btn violet" data-walkopen>🎧 Step-by-step: make a song like these</button> <span class="seqlab">Opens the walkthrough in a popup — one easy question per screen.</span></p>
 <div class="az" id="songaz"></div>
 <div class="grid" id="songgrid"></div>
 </section>
@@ -167,6 +186,7 @@
 <section class="sec" id="beats">
 <h2>🥁 Beat Archive</h2>
 <p>A vast selection of beats — <b>every genre</b>, plus <b>vintage-era classics</b>. All beats are <b>original Signature compositions</b>: era records are original beats <i>in the style of</i> classic eras — never copies of any real song, lyrics, or melody.</p>
+<p><button class="btn violet" data-walkopen>🎧 Step-by-step: make a beat like these</button> <span class="seqlab">Opens the walkthrough in a popup — one easy question per screen.</span></p>
 <div class="row"><div><label>Style</label><select id="beatstyle"><option value="">All styles</option></select></div>
 <div><label>Search</label><input type="text" id="beatq" placeholder="Search beats…"></div></div>
 <div class="grid" id="beatgrid"></div>
@@ -177,7 +197,7 @@
 <p><b>Anything a studio does, as a process.</b> Walk the stages in order — or let the <b>AI pal</b> guide you or finish the whole project for you. Every stage opens what you need as a popup.</p>
 <div class="aipal" id="walklaunch" style="margin-bottom:14px">
 <h3>🎧 Song Walkthrough — the easy way</h3>
-<div class="say" id="walksay">New here? I'll walk you through your song one easy step at a time — genre, beat, vocals, ending — in plain words. Or tap one button and the AI finishes the whole song for you, 5 minutes with three chorus breaks.</div>
+<div class="say" id="walksay">New here? I'll walk you through your song one easy step at a time — genre, beat, vocals, ending — in plain words. Or tap one button and the AI finishes the whole song for you, 5 minutes with four chorus breaks.</div>
 <p><button class="btn" id="walkstart">🎧 Start the walkthrough</button>
 <button class="btn violet" id="walkai">🤖 AI: just finish a song for me</button></p>
 </div>
@@ -224,6 +244,7 @@
 
 <script src="assets/synth.js"></script>
 <script src="assets/engine.js"></script>
+<script src="assets/lyrics.js"></script>
 <script src="assets/app.js"></script>
 <script src="assets/app2.js"></script>
 <script src="assets/app3.js"></script>
@@ -232,5 +253,6 @@
 <script src="assets/app6.js"></script>
 <script src="assets/app6b.js"></script>
 <script src="assets/app7.js"></script>
+<script src="assets/app8.js"></script>
 </body>
 </html>

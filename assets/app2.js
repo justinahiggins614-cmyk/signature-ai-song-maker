@@ -215,7 +215,7 @@
   /* ---------- auto song writer ---------- */
   function themeToN(theme) { return 1 + (S.hashSeed("songtheme:" + theme) % 1000000); }
   window.__writeSong = function (theme, genre, mood) {
-    var n = themeToN(theme), rec = D.genSong(n);
+    var n = themeToN(theme), rec = D.genSong(n, theme);
     if (genre) rec.genre = genre; if (mood) rec.mood = mood;
     rec.title = theme.split(/\s+/).slice(0, 4).map(function (w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join(" ") || rec.title;
     return rec;
