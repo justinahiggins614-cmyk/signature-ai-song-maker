@@ -39,15 +39,20 @@ def gen(kind, start, count):
 def pack(recs, manifest):
     existing = sorted(f for f in os.listdir(RECDIR) if f.startswith("recs-c") and f.endswith(".json.gz"))
     next_c = max(int(f.split("recs-c")[1].split(".")[0]) for f in existing) + 1 if existing else 1
+    # id -> chunk map so the index points each record at its REAL chunk
+    # (2026-10-03 fix: previously every row in a batch pointed at the batch's
+    # last chunk, leaving 9,000 rows unresolvable)
+    id2chunk = {}
     for i in range(0, len(recs), CHUNK):
         block = recs[i:i + CHUNK]
         cname = "recs-c%05d.json.gz" % (next_c + i // CHUNK)
         with gzip.open(os.path.join(RECDIR, cname), "wt", encoding="utf-8") as fh:
             for r in block:
                 fh.write(json.dumps(r, ensure_ascii=False) + "\n")
+                id2chunk[r["id"]] = cname
         manifest["chunks"].append(cname)
     manifest["count"] += len(recs)
-    return manifest["chunks"][-1]
+    return id2chunk
 
 def data_size():
     total = 0
@@ -63,18 +68,18 @@ def main():
     songs = gen("song", state["song"], N)
     lib = gen("sound", state["sound"], N)
     beats = gen("beat", state.get("beat", 1), NB)
-    last_song_chunk = pack(songs, manifest)
-    last_lib_chunk = pack(lib, manifest)
-    last_beat_chunk = pack(beats, manifest)
+    last_chunks = pack(songs, manifest)
+    last_chunks.update(pack(lib, manifest))
+    last_chunks.update(pack(beats, manifest))
     json.dump(manifest, open(os.path.join(DATA, "manifest.json"), "w"))
     idx_path = os.path.join(IDXDIR, "index.json.gz")
     with gzip.open(idx_path, "at", encoding="utf-8") as fh:
         for r in songs:
-            fh.write(json.dumps([r["id"], r["title"], "song", last_song_chunk], ensure_ascii=False) + "\n")
+            fh.write(json.dumps([r["id"], r["title"], "song", last_chunks[r["id"]]], ensure_ascii=False) + "\n")
         for r in lib:
-            fh.write(json.dumps([r["id"], r["name"], "sound", last_lib_chunk], ensure_ascii=False) + "\n")
+            fh.write(json.dumps([r["id"], r["name"], "sound", last_chunks[r["id"]]], ensure_ascii=False) + "\n")
         for r in beats:
-            fh.write(json.dumps([r["id"], r["name"], "beat", last_beat_chunk], ensure_ascii=False) + "\n")
+            fh.write(json.dumps([r["id"], r["name"], "beat", last_chunks[r["id"]]], ensure_ascii=False) + "\n")
     state["song"] += N
     state["sound"] += N
     state["beat"] = state.get("beat", 1) + NB

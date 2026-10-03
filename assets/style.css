@@ -165,3 +165,9 @@ body.playerbar-pad{padding-bottom:70px}
 .recpanel .rp b{color:var(--gold);font-weight:bold;margin-right:4px}
 .aicard{background:#0d0a14;border:1px solid var(--gold);border-radius:10px;padding:12px 14px;margin:0 0 12px;font-size:13px;font-family:Arial}
 .aicard b{color:var(--gold)}
+
+/* ---- 2026-10-03: album-maker track list (P0 playback fix) ---- */
+.cdtracks{margin-top:.6rem}
+.cdtrack{display:flex;align-items:center;gap:.5rem;padding:.4rem .5rem;border:1px solid var(--line);border-radius:8px;margin:.3rem 0;background:#141a2b}
+.cdtrack.now{border-color:var(--teal);background:#182235}
+.cdtrack .id{font-size:.72rem;color:#8b93a8;margin-left:auto;white-space:nowrap}

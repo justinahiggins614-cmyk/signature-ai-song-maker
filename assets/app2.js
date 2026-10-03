@@ -223,6 +223,9 @@
     var n = themeToN(theme), rec = D.genSong(n, theme);
     if (genre) rec.genre = genre; if (mood) rec.mood = mood;
     rec.title = theme.split(/\s+/).slice(0, 4).map(function (w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join(" ") || rec.title;
+    // session registry (2026-10-03): the album maker / deep links resolve the
+    // EXACT record the AI just made, not the deterministic archive version
+    try { (window.__genSongs = window.__genSongs || {})[rec.id] = rec; window.__lastPromptRec = rec; } catch (e) {}
     return rec;
   };
   (function () {

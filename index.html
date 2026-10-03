@@ -177,6 +177,7 @@
 <p>Pick songs from the archive — the site renders each to CD-quality audio, builds a cue sheet, and packages a <b>disc image download</b> with step-by-step burning instructions.</p>
 <div class="honest">Browsers cannot drive a CD burner directly, so this page prepares the disc image; you burn it with your own burner software using the included guide. First: does your system have a CD burner? <select id="burnerq" style="width:auto;display:inline-block"><option value="">— choose —</option><option value="yes">Yes, it has a burner</option><option value="no">No burner</option><option value="dk">I don't know</option></select></div>
 <div><label>Add songs by ID (one per line, e.g. JAH-SONG-0000001)</label><textarea id="cdlist" placeholder="JAH-SONG-0000001&#10;JAH-SONG-0000042"></textarea></div>
+<p><button class="btn teal" id="cdaddlatest">➕ Add my latest AI song</button> <span class="seqlab">Made a song above? One tap puts it on the track list.</span></p>
 <p><button class="btn" id="cdrender">💿 Render my CD</button> <span class="seqlab">⚠️ Browsers can't burn a disc directly — this builds a <b>disc image</b> (.zip + cue sheet) for your own burner software.</span> <span class="seqlab" id="cdinfo"></span></p>
 <div id="cdout"></div>
 </section>

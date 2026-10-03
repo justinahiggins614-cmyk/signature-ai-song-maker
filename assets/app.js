@@ -149,21 +149,27 @@
       $("libcount").textContent = "(" + lib.toLocaleString() + " / 1,000,000)";
     }).catch(function () { $("counters").textContent = "Archive loading…"; });
   }
+  function detGen(id) {
+    // deterministic fallback: generate directly from the ID number
+    var m = /^JAH-(SONG|SOUND|GEAR|BEAT)-(\d+)$/.exec(id);
+    if (!m) return Promise.reject(new Error("bad id"));
+    var kind = m[1] === "SONG" ? "song" : m[1] === "SOUND" ? "sound" : m[1] === "BEAT" ? "beat" : "gear";
+    return Promise.resolve(D.gen(kind, parseInt(m[2], 10)));
+  }
   function findRecord(id) {
+    // 1) session registry: AI-generated songs resolve to the EXACT record the
+    //    user saw (same title/lyrics), not the deterministic archive version.
+    if (window.__genSongs && window.__genSongs[id]) return Promise.resolve(window.__genSongs[id]);
     var row = null, i;
     for (i = 0; i < IDX.length; i++) if (IDX[i][0] === id) row = IDX[i];
-    if (!row) {
-      // deterministic fallback: generate directly from the ID number
-      var m = /^JAH-(SONG|SOUND|GEAR|BEAT)-(\d+)$/.exec(id);
-      if (!m) return Promise.reject(new Error("bad id"));
-      var kind = m[1] === "SONG" ? "song" : m[1] === "SOUND" ? "sound" : m[1] === "BEAT" ? "beat" : "gear";
-      return Promise.resolve(D.gen(kind, parseInt(m[2], 10)));
-    }
+    if (!row) return detGen(id);
     return gunzip("data/records/" + row[3]).then(function (t) {
       var lines = t.split("\n"), j;
       for (j = 0; j < lines.length; j++) { if (!lines[j]) continue; var r = JSON.parse(lines[j]); if (r.id === id) return r; }
-      throw new Error("not found");
-    });
+      // chunk didn't contain the id (stale pointer) — deterministic fallback
+      // rather than a dead "not found"
+      return detGen(id);
+    }, function () { return detGen(id); });
   }
 
   /* ---------- Finder AI (keyword -> existing search -> top 5 cards, inline play) ----------

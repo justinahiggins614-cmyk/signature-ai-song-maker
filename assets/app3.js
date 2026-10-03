@@ -163,8 +163,15 @@
     $("cuwav").onclick = function () { if (cleanBuf) dl(S.bufferToWav(cleanBuf), "signature-vocal-clean.wav"); };
   })();
 
-  /* ---------- Make a CD ---------- */
+  /* ---------- Make a CD (album maker) ----------
+     2026-10-03: full album playback added (Manon's order — "doesnt play song
+     ai made after generates"). Rendered tracks stay in memory with per-track
+     Play / Prev / Next / Stop; "Add my latest AI song" bridges generate -> album.
+     AI-generated songs resolve via window.__genSongs (the exact record the AI
+     just made), so the album plays YOUR song, not a lookalike. */
   (function () {
+    var cdTracks = [], cdIx = -1, cdTimer = null;
+    function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
     function cueSheet(tracks) {
       var out = 'FILE "signature-cd.wav" WAVE\n', i;
       for (i = 0; i < tracks.length; i++) {
@@ -175,25 +182,76 @@
       return out;
     }
     function guide(has) {
-      var g = "BURNING GUIDE — Signature Music Studio disc image\n================================================\n\nYou downloaded: signature-cd.zip\n  - signature-cd.wav  (all tracks, CD-quality 44.1 kHz / 16-bit stereo)\n  - disc.cue          (cue sheet marking each track start)\n\n";
+      var g = "BURNING GUIDE \u2014 Signature Music Studio disc image\n================================================\n\nYou downloaded: signature-cd.zip\n  - signature-cd.wav  (all tracks, CD-quality 44.1 kHz / 16-bit stereo)\n  - disc.cue          (cue sheet marking each track start)\n\n";
       g += has === "yes" ? "Your system has a CD burner. Steps:\n1. Unzip signature-cd.zip.\n2. Open your burner software (e.g. ImgBurn on Windows: 'Write image file to disc' -> pick disc.cue; on Mac: use Burn or Disk Utility with the .cue).\n3. Insert a blank CD-R, burn at 8x-16x for best audio quality.\n4. Finalize the disc so it plays in any CD player.\n"
-        : has === "no" ? "No burner on this system — no problem:\n1. Keep the .wav as your master.\n2. Burn later on any computer with a CD/DVD burner using the steps above.\n3. Or upload the .wav to any online CD-printing service.\n"
-        : "Not sure about a burner:\n1. On Windows, open File Explorer > This PC — a DVD/CD RW drive means you have one.\n2. On Mac, Apple menu > About This Mac > System Report > Disc Burning.\n3. Then follow the Yes/No path above.\n";
-      g += "\nBrowsers cannot drive a CD burner directly — this package prepares everything; your burner software does the burning.\n";
+        : has === "no" ? "No burner on this system \u2014 no problem:\n1. Keep the .wav as your master.\n2. Burn later on any computer with a CD/DVD burner using the steps above.\n3. Or upload the .wav to any online CD-printing service.\n"
+        : "Not sure about a burner:\n1. On Windows, open File Explorer > This PC \u2014 a DVD/CD RW drive means you have one.\n2. On Mac, Apple menu > About This Mac > System Report > Disc Burning.\n3. Then follow the Yes/No path above.\n";
+      g += "\nBrowsers cannot drive a CD burner directly \u2014 this package prepares everything; your burner software does the burning.\n";
       return g;
     }
+    function clearTimer() { if (cdTimer) { clearTimeout(cdTimer); cdTimer = null; } }
+    function playTrack(i) {
+      if (i < 0 || i >= cdTracks.length) return;
+      try { S.unlockAudio(); } catch (e) {}
+      clearTimer();
+      cdIx = i;
+      var t = cdTracks[i];
+      try { S.setPlayerLabel("\uD83D\uDCBF CD track " + (i + 1) + "/" + cdTracks.length + " \u2014 " + t.title); } catch (e2) {}
+      var src = S.playBuffer(t.buf, "cd");
+      if (src && t.buf && t.buf.duration) {
+        cdTimer = setTimeout(function () { if (cdIx === i) playTrack(i + 1 < cdTracks.length ? i + 1 : 0); }, Math.max(500, t.buf.duration * 1000));
+      }
+      drawCdOut();
+    }
+    function stopCd() { clearTimer(); cdIx = -1; try { S.stopLive("cd"); } catch (e) {} drawCdOut(); }
+    function drawCdOut() {
+      var h = '<div class="hit"><b>\uD83D\uDCBF Your CD is ready.</b><br><span class="seqlab">' +
+        cdTracks.map(function (t) { return esc(t.title); }).join(" \u00B7 ") + "</span></div>";
+      h += '<div class="cdtracks" role="group" aria-label="CD tracks">';
+      h += '<p><button class="btn ghost" data-cd="prev" aria-label="Previous track">\u23EE</button> ' +
+        '<button class="btn ghost" data-cd="stop" aria-label="Stop">\u23F9</button> ' +
+        '<button class="btn ghost" data-cd="next" aria-label="Next track">\u23ED</button> ' +
+        '<span class="seqlab">' + (cdIx >= 0 ? "Playing track " + (cdIx + 1) + " of " + cdTracks.length : cdTracks.length + " tracks ready") + "</span></p>";
+      cdTracks.forEach(function (t, i) {
+        h += '<div class="cdtrack' + (i === cdIx ? " now" : "") + '"><button class="fplay" data-cd="play" data-i="' + i + '" aria-label="Play ' + esc(t.title) + '">' +
+          (i === cdIx ? "\u23F8 Pause track" : "\u25B6 Play") + "</button> " +
+          '<span><b>' + (i + 1) + ".</b> " + esc(t.title) + '</span> <span class="id">' + esc(t.id) + "</span></div>";
+      });
+      h += "</div>";
+      $("cdout").innerHTML = h;
+    }
+    $("cdout").addEventListener("click", function (e) {
+      var b = e.target.closest("[data-cd]"); if (!b) return;
+      var act = b.getAttribute("data-cd");
+      if (act === "play") { var i = +b.getAttribute("data-i"); if (i === cdIx) stopCd(); else playTrack(i); }
+      else if (act === "next") playTrack(cdIx + 1 < cdTracks.length ? cdIx + 1 : 0);
+      else if (act === "prev") playTrack(cdIx - 1 >= 0 ? cdIx - 1 : cdTracks.length - 1);
+      else if (act === "stop") stopCd();
+    });
+    var addLatest = $("cdaddlatest");
+    if (addLatest) addLatest.onclick = function () {
+      var rec = window.__lastPromptRec || (window.__genSongs && Object.keys(window.__genSongs).length ? window.__genSongs[Object.keys(window.__genSongs).pop()] : null);
+      if (!rec) { $("cdinfo").textContent = "No AI song generated yet this visit — make one above first."; return; }
+      var ta = $("cdlist"), cur = ta.value.split("\n").map(function (s) { return s.trim(); }).filter(Boolean);
+      if (cur.indexOf(rec.id) === -1) { cur.push(rec.id); ta.value = cur.join("\n"); }
+      $("cdinfo").textContent = "Added your latest AI song: " + rec.title + " (" + rec.id + "). Hit Render my CD.";
+      ta.focus();
+    };
     $("cdrender").onclick = function () {
       var ids = $("cdlist").value.split("\n").map(function (s) { return s.trim(); }).filter(Boolean);
       if (!ids.length) { $("cdinfo").textContent = "Add at least one song ID."; return; }
-      var b = this; b.textContent = "Rendering…"; $("cdinfo").textContent = "Rendering " + ids.length + " songs to CD quality…";
+      stopCd(); cdTracks = [];
+      var b = this; b.textContent = "Rendering\u2026"; $("cdinfo").textContent = "Rendering " + ids.length + " songs to CD quality\u2026";
       var chain = Promise.resolve(), tracks = [], start = 0;
       ids.forEach(function (id) {
         chain = chain.then(function () {
           return window.__findRecord(id).then(function (rec) {
-            if (rec.kind !== "song") throw new Error(id + " is not a song");
+            if (!rec || rec.kind !== "song") throw new Error(id + " is not a song");
             return S.renderSong(rec, 150, window.__mixOf ? window.__mixOf() : null).then(function (buf) {
-              tracks.push({ title: rec.title, buf: buf, start: start });
+              var t = { id: rec.id, title: rec.title, buf: buf, start: start };
+              tracks.push(t); cdTracks.push(t);
               start += buf.duration + 2; // 2s gap
+              $("cdinfo").textContent = "Rendered " + tracks.length + "/" + ids.length + ": " + rec.title;
             });
           });
         });
@@ -214,10 +272,10 @@
           { name: "BURNING-GUIDE.txt", data: new TextEncoder().encode(guide(has)) }
         ];
         dl(buildZip(files), "signature-cd.zip");
-        b.textContent = "💿 Render my CD";
-        $("cdinfo").textContent = "Done — signature-cd.zip: " + tracks.length + " tracks, cue sheet, burning guide.";
-        $("cdout").innerHTML = '<div class="hit"><b>Your CD is ready.</b><br><span class="seqlab">' + tracks.map(function (t) { return esc(t.title); }).join(" · ") + '</span></div>';
-      }).catch(function (e) { b.textContent = "💿 Render my CD"; $("cdinfo").textContent = "Couldn't render: " + e.message; });
+        b.textContent = "\uD83D\uDCBF Render my CD";
+        $("cdinfo").textContent = "Done \u2014 signature-cd.zip: " + tracks.length + " tracks, cue sheet, burning guide. Tap \u25B6 on any track to play it right here.";
+        drawCdOut();
+      }).catch(function (e) { b.textContent = "\uD83D\uDCBF Render my CD"; $("cdinfo").textContent = "Couldn't render: " + e.message; });
     };
   })();
 
