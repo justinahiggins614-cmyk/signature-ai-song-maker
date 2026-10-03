@@ -180,6 +180,7 @@ def main():
         "User-agent: *\nAllow: /\nSitemap: %ssitemap-index.xml\n" % BASE)
 
     build_static_catalog(rows)
+    stamp_counts(counts)
     build_music_manifest(rows, counts)
     print("site files built: %d urls, counts %s" % (len(core) + len(rows), json.dumps(counts)))
 
@@ -206,6 +207,40 @@ def build_static_catalog(rows):
     h = h.split(start)[0] + start + "\n" + body + "\n" + end + end.join(h.split(end)[1:])
     open(p, "w").write(h)
     print("static catalog table injected (%d songs, %d beats)" % (len(songs), len(beats)))
+
+def stamp_counts(counts):
+    """Re-stamp the last-known counts into index.html's raw HTML chips
+    (2026-10-03 universal loading pattern): #counters between the
+    COUNT-STAMP markers and #libcount between the LIBCOUNT-STAMP markers.
+    The drip runs this after every run so the chips never boot stale."""
+    p = os.path.join(HERE, "index.html")
+    h = open(p).read()
+    songs = counts.get("song", 0)
+    lib = counts.get("sound", 0)
+    beats = counts.get("beat", 0)
+    gear = counts.get("gear", 0)
+    body = ("\U0001F4C0 <b>%s</b> / 1,000,000 songs &nbsp;·&nbsp; "
+            "\U0001F39B️ <b>%s</b> / 1,000,000 instruments, sets &amp; packs &nbsp;·&nbsp; "
+            "\U0001F941 <b>%s</b> beats &nbsp;·&nbsp; "
+            "\U0001F39A️ <b>%s</b> equipment records" % (
+                format(songs, ","), format(lib, ","), format(beats, ","), format(gear, ",")))
+    s0, s1 = "<!-- COUNT-STAMP-START -->", "<!-- COUNT-STAMP-END -->"
+    if s0 in h and s1 in h:
+        h = h.split(s0)[0] + s0 + body + s1 + s1.join(h.split(s1)[1:])
+    else:
+        print("WARNING: COUNT-STAMP markers missing — counters not re-stamped")
+    l0, l1 = "<!-- LIBCOUNT-STAMP-START -->", "<!-- LIBCOUNT-STAMP-END -->"
+    lbody = "(%s / 1,000,000)" % format(lib, ",")
+    if l0 in h and l1 in h:
+        h = h.split(l0)[0] + l0 + lbody + l1 + l1.join(h.split(l1)[1:])
+    else:
+        print("WARNING: LIBCOUNT-STAMP markers missing — libcount not re-stamped")
+    # refresh the stamp date so the page shows when the count was published
+    import re as _re
+    h = _re.sub(r'data-stamp="\d{4}-\d{2}-\d{2}"', 'data-stamp="%s"' % TODAY, h, count=1)
+    open(p, "w").write(h)
+    print("counts re-stamped: songs=%d library=%d beats=%d gear=%d" % (songs, lib, beats, gear))
+
 
 if __name__ == "__main__":
     main()

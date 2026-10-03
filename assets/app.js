@@ -164,7 +164,16 @@
   function paintBoot() {
     var badge = { "LOADING": "⏳ LOADING", "LIVE": "🟢 LIVE", "INDEX ERROR": "🔴 INDEX ERROR", "OFFLINE": "📴 OFFLINE", "CACHED": "🟡 CACHED", "NO RECORDS": "⚪ NO RECORDS" }[BOOT.state] || BOOT.state;
     var c = $("counters");
-    if (BOOT.state === "LOADING" && !MM) c.innerHTML = '<span class="spinner"></span>Loading the archive…';
+    /* 2026-10-03: stamped last-known counts stay visible while loading — the
+       chip never boots as a bare "Loading…" when a stamped count exists. */
+    if (BOOT.state === "LOADING" && !MM) {
+      if (c.getAttribute("data-stamp") && c.getAttribute("data-booting") !== "1") {
+        c.setAttribute("data-booting", "1");
+        c.innerHTML += ' <span class="spinner" aria-hidden="true"></span><span class="seqlab">loading live…</span>';
+      } else if (!c.getAttribute("data-stamp")) {
+        c.innerHTML = '<span class="spinner"></span>Loading the archive…';
+      }
+    }
     else if (BOOT.state === "LIVE" || (BOOT.state === "CACHED" && MM)) { renderCountsFromMM(); if (BOOT.state === "CACHED") c.innerHTML += ' <span class="seqlab">(' + badge + " — " + esc(BOOT.note) + ")</span>"; }
     else if (BOOT.state === "LOADING") renderCountsFromMM();
     else c.innerHTML = badge + ' — ' + esc(BOOT.note || "The archive could not be reached.") + ' <button class="btn ghost" onclick="location.reload()">↻ Retry</button>';
@@ -451,6 +460,15 @@
     box.addEventListener("click", function (e) {
       var b = e.target.closest("[data-act]"); if (!b) return;
       var act = b.getAttribute("data-act");
+      /* 2026-10-03: honest render failure — a dead click is never acceptable. */
+      function renderFail(label) {
+        b.textContent = label;
+        try { if (S.setIdle) S.setIdle(); } catch (e4) {}
+        var n = document.createElement("span");
+        n.className = "fblocked"; n.setAttribute("role", "alert");
+        n.textContent = "Couldn't render the audio here — this browser can't do offline audio rendering. The record above is still yours to read, copy, and download.";
+        try { b.parentNode.appendChild(n); } catch (e5) {}
+      }
       if (act === "open") { window.open(location.pathname + "?" + rec.kind + "=" + rec.id, "_blank"); return; }
       if (act === "share") {
         var surl = location.origin + location.pathname + "?" + rec.kind + "=" + rec.id;
@@ -464,8 +482,8 @@
       if (act === "txt") navigator.clipboard.writeText(JSON.stringify(rec, null, 2));
       if (act === "json") navigator.clipboard.writeText(JSON.stringify(rec));
       if (act === "proj" && window.__exportProject) window.__exportProject(rec);
-      if (act === "play") { b.textContent = "Rendering…"; try { S.setPlayerLabel(rec.title || rec.id); S.setBusy("Rendering song…"); } catch (e2) {} S.renderFullSong(rec, window.__mixOf ? window.__mixOf() : null, null).then(function (buf) { S.playBuffer(buf); b.textContent = "▶ Play demo mix"; dl(S.bufferToWav(buf), rec.id + ".wav"); }); }
-      if (act === "wav") { b.textContent = "Rendering…"; S.renderFullSong(rec, window.__mixOf ? window.__mixOf() : null, null).then(function (buf) { dl(S.bufferToWav(buf), rec.id + ".wav"); b.textContent = "⬇ .wav"; }); }
+      if (act === "play") { b.textContent = "Rendering…"; try { S.setPlayerLabel(rec.title || rec.id); S.setBusy("Rendering song…"); } catch (e2) {} S.renderFullSong(rec, window.__mixOf ? window.__mixOf() : null, null).then(function (buf) { S.playBuffer(buf); b.textContent = "▶ Play demo mix"; dl(S.bufferToWav(buf), rec.id + ".wav"); }, function () { renderFail("▶ Play demo mix"); }); }
+      if (act === "wav") { b.textContent = "Rendering…"; S.renderFullSong(rec, window.__mixOf ? window.__mixOf() : null, null).then(function (buf) { dl(S.bufferToWav(buf), rec.id + ".wav"); b.textContent = "⬇ .wav"; }, function () { renderFail("⬇ .wav"); }); }
       if (act === "preview") previewSound(rec);
       if (act === "swav") renderSoundWav(rec);
       if (act === "bplay" && window.__playBeatRec) window.__playBeatRec(rec);
@@ -473,7 +491,7 @@
         b.textContent = "Rendering…";
         var pat = S.patternFor(rec.name, rec.style, rec.bpm);
         S.renderBuffer(16 * (60 / rec.bpm / 4) * 4 + 0.3, function (c, dest, t0) { S.scheduleBeat(c, dest, t0, pat, 4, 1); })
-          .then(function (buf) { dl(S.bufferToWav(buf), rec.id + ".wav"); b.textContent = "⬇ .wav"; });
+          .then(function (buf) { dl(S.bufferToWav(buf), rec.id + ".wav"); b.textContent = "⬇ .wav"; }, function () { renderFail("⬇ .wav"); });
       }
     });
   };

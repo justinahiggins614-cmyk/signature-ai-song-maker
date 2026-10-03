@@ -55,8 +55,10 @@
   function initFrontDoor() {
     var ps = $("promptstyle");
     if (ps && D.BEAT_STYLES) {
+      /* 2026-10-03: BEAT_STYLES is a string array — s.name was "undefined"
+         on every option. Value = style key, label = readable "X type beat". */
       ps.innerHTML = '<option value="">Any — surprise me</option>' + D.BEAT_STYLES.map(function (s) {
-        return '<option value="' + esc(s.name) + '">' + esc(s.name) + " type beat</option>";
+        return '<option value="' + esc(s) + '">' + esc(String(s).replace(/-/g, " ")) + " type beat</option>";
       }).join("");
     }
     var b = $("promptcreate");
@@ -418,6 +420,10 @@
       try { src = S.playBuffer(buf, liveId || LIVEID); } catch (e) { src = null; }
       if (src && label && window.__palSay) window.__palSay("Now playing: " + label + (rec.kind === "song" ? " — full 5:00." : " — 30-second beat loop."));
       return src;
+    }, function () {
+      /* 2026-10-03: honest failure — the pal's play command never dies silently */
+      if (window.__palSay) window.__palSay("Couldn't render that track here — this browser can't do offline audio rendering. The record page is still yours to read, copy, and download.");
+      return null;
     });
   }
   window.__playTrack = function (id) {
