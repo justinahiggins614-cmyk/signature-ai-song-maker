@@ -485,5 +485,26 @@
   window.__esc = esc; window.__dl = dl; window.__readAloud = readAloud; window.__S = S; window.__D = D; window.__$ = $;
   window.__getIdx = function () { return IDX; };
 
-  loadData().then(function () { route(); if (window.__initAll) window.__initAll(IDX); });
+  /* 2026-10-03: browser compatibility detection (P1) — graceful, honest.
+     Checks the three capabilities the studio needs; degrades with words,
+     never silently. */
+  function compatCheck() {
+    var missing = [];
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) missing.push("Web Audio (sound synthesis & playback)");
+    } catch (e) { missing.push("Web Audio (sound synthesis & playback)"); }
+    if (typeof DecompressionStream === "undefined") missing.push("gzip decompression (archive index — records still generate deterministically)");
+    if (!window.MediaRecorder) missing.push("MediaRecorder (mic recording — uploads still work)");
+    if (!missing.length) return;
+    var d = document.createElement("div");
+    d.className = "honest"; d.setAttribute("role", "alert");
+    d.style.margin = "10px auto"; d.style.maxWidth = "900px";
+    d.innerHTML = "<b>⚠️ This browser is missing:</b> " + esc(missing.join("; ")) +
+      ". The studio keeps working where it can — try a current Chrome, Edge, Firefox, or Safari for the full studio.";
+    var hero = document.querySelector("header.hero");
+    if (hero && hero.parentNode) hero.parentNode.insertBefore(d, hero.nextSibling);
+  }
+
+  loadData().then(function () { compatCheck(); route(); if (window.__initAll) window.__initAll(IDX); });
 })();

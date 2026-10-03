@@ -61,10 +61,26 @@
 
   /* ---------- vocal studio ---------- */
   var ownSample = null, vocalBuf = null, _recorder = null;
+  /* 2026-10-03: audio validation — duration / sample-rate / peak / clipping.
+     Honest numbers about any decoded buffer (voice sample or cleanup upload). */
+  window.__validateAudio = function (buf) {
+    if (!buf || !buf.getChannelData) return "No audio to validate.";
+    var d = buf.getChannelData(0), peak = 0, i, clip = 0;
+    for (i = 0; i < d.length; i += 7) { var a = Math.abs(d[i]); if (a > peak) peak = a; if (a >= 0.999) clip++; }
+    var db = peak > 0 ? (20 * Math.log10(peak)).toFixed(1) : "-inf";
+    return "Audio check: " + buf.duration.toFixed(1) + "s · " + buf.sampleRate + " Hz · peak " + db + " dBFS" +
+      (clip ? " · ⚠️ clipping detected (" + clip + " hot samples) — re-record quieter" : " · no clipping");
+  };
+  function voiceConsent() {
+    var c = $("vconsent");
+    if (c && !c.checked) { $("vinfo").textContent = "Please tick the voice-privacy consent box first — your sample never leaves this browser."; return false; }
+    return true;
+  }
   (function () {
     $("vrec").onclick = function () {
       var b = this;
       if (_recorder) { try { _recorder.stop(); } catch (e) {} _recorder = null; b.textContent = "🔴 Record my voice"; return; }
+      if (!voiceConsent()) return;
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { $("vinfo").textContent = "Microphone not available in this browser."; return; }
       navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
         var rec = new MediaRecorder(stream), chunks = [];
@@ -74,19 +90,23 @@
           stream.getTracks().forEach(function (t) { t.stop(); });
           _recorder = null; b.textContent = "🔴 Record my voice";
           new Blob(chunks, { type: rec.mimeType || "audio/webm" }).arrayBuffer().then(function (ab) {
-            S.ensureCtx().decodeAudioData(ab).then(function (buf) { ownSample = buf; $("vinfo").textContent = "Voice sample recorded (" + buf.duration.toFixed(1) + "s). Now press Sing it."; },
+            S.ensureCtx().decodeAudioData(ab).then(function (buf) { ownSample = buf; $("vinfo").textContent = "Voice sample recorded (" + buf.duration.toFixed(1) + "s). " + window.__validateAudio(buf) + " Now press Sing it."; },
               function () { $("vinfo").textContent = "Couldn't decode the recording."; });
           });
         };
         rec.start(); b.textContent = "⏹ Stop recording"; $("vinfo").textContent = "Recording… sing or speak a few seconds.";
       }).catch(function () { $("vinfo").textContent = "Microphone permission denied."; });
     };
-    $("vupload").onclick = function () { $("vfile").click(); };
+    $("vupload").onclick = function () { if (!voiceConsent()) return; $("vfile").click(); };
+    $("vdel").onclick = function () {
+      ownSample = null; vocalBuf = null;
+      $("vinfo").textContent = "Voice sample deleted — nothing of your voice remains on this page.";
+    };
     $("vfile").onchange = function () {
       var f = this.files[0]; if (!f) return;
       /* Gemini fix 4 (2026-10-02): 10 MB upload cap, honest words. */
       if (f.size > 10 * 1024 * 1024) { $("vinfo").textContent = "That file is over the 10 MB upload limit — pick a shorter sample."; this.value = ""; return; }
-      f.arrayBuffer().then(function (ab) { S.ensureCtx().decodeAudioData(ab).then(function (buf) { ownSample = buf; $("vinfo").textContent = "Sample loaded (" + buf.duration.toFixed(1) + "s) — stays on this device only."; }); });
+      f.arrayBuffer().then(function (ab) { S.ensureCtx().decodeAudioData(ab).then(function (buf) { ownSample = buf; $("vinfo").textContent = "Sample loaded (" + buf.duration.toFixed(1) + "s) — stays on this device only. " + window.__validateAudio(buf); }); });
     };
     function selBackups() { return Array.prototype.map.call($("vbackup").selectedOptions, function (o) { return o.value; }); }
     $("vsing").onclick = function () {
@@ -136,7 +156,7 @@
     $("cup").onclick = function () { $("cufile").click(); };
     $("cufile").onchange = function () {
       var f = this.files[0]; if (!f) return;
-      f.arrayBuffer().then(function (ab) { S.ensureCtx().decodeAudioData(ab).then(function (buf) { upBuf = buf; $("cuinfo").textContent = "Vocals loaded (" + buf.duration.toFixed(1) + "s)."; }); });
+      f.arrayBuffer().then(function (ab) { S.ensureCtx().decodeAudioData(ab).then(function (buf) { upBuf = buf; $("cuinfo").textContent = "Vocals loaded. " + window.__validateAudio(buf); }); });
     };
     $("cuclean").onclick = function () {
       try { S.unlockAudio(); } catch (e) {}
@@ -205,7 +225,7 @@
     }
     function stopCd() { clearTimer(); cdIx = -1; try { S.stopLive("cd"); } catch (e) {} drawCdOut(); }
     function drawCdOut() {
-      var h = '<div class="hit"><b>\uD83D\uDCBF Your CD is ready.</b><br><span class="seqlab">' +
+      var h = '<div class="hit"><b>\uD83D\uDCBF DISC IMAGE READY</b> \u2014 not "burned": browsers can\u2019t drive a CD burner, so this is the finished disc image (.zip + cue sheet) for your own burner software.<br><span class="seqlab">' +
         cdTracks.map(function (t) { return esc(t.title); }).join(" \u00B7 ") + "</span></div>";
       h += '<div class="cdtracks" role="group" aria-label="CD tracks">';
       h += '<p><button class="btn ghost" data-cd="prev" aria-label="Previous track">\u23EE</button> ' +

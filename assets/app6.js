@@ -121,6 +121,7 @@
     PROJ.vocal = { voice: "nova", backups: ["choir"] };
     PROJ.fx = [{ id: "glue" }, { id: "normalize" }, { id: "stage" }];
     saveProj();
+    if (window.__aiLog) window.__aiLog("auto-project", "Built '" + (PROJ.song ? PROJ.song.title : "untitled") + "' (" + genre + ", " + bpm + " BPM): beat, song, lyrics, vocal=nova+choir, fx=glue/normalize/stage. Stages 1–4 marked done.");
     for (var s = 1; s <= 4; s++) if (window.__markDoneStage) window.__markDoneStage(s);
     if (window.__gotoStage) window.__gotoStage(5);
     palSay((styleRef ? "🎯 " + styleRef.name + " type — original Signature composition, not affiliated. " : "") +

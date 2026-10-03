@@ -258,6 +258,15 @@
     $("beatplay").onclick = function () { try { S.unlockAudio(); } catch (e) {} if (beatBuf) S.playBuffer(beatBuf, "beat"); };
     $("beatstop").onclick = function () { S.stopLive("beat"); };
     $("beatwav").onclick = function () { if (beatBuf) dl(S.bufferToWav(beatBuf), "signature-beat.wav"); };
+    /* 2026-10-03: machine-readable step record — the full 16-step pattern as JSON */
+    $("beatjson").onclick = function () {
+      if (!beatPat) { $("beatinfo").textContent = "Make a beat first."; return; }
+      var rec = { format: "JAH-BEAT-PATTERN/1.0", seed: beatPat.seed, genre: beatPat.genre, bpm: beatPat.bpm,
+        bars: beatBars, steps: 16, lanes: beatPat.steps, prompt: beatPrompt || "",
+        note: "Deterministic: same seed + same tweaks = same beat. Steps are 1/0 per 16th-note." };
+      dl(new Blob([JSON.stringify(rec, null, 2)], { type: "application/json" }), "signature-beat-pattern.json");
+      $("beatinfo").textContent = "Pattern JSON downloaded — the beat's full step record.";
+    };
   })();
 
   /* ---------- auto song writer ---------- */

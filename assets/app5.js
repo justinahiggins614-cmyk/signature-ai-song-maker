@@ -47,6 +47,41 @@
   function myLibRemove(id) { myLibSave(myLib().filter(function (x) { return x.id !== id; })); }
   function myLibHas(id) { return myLib().some(function (x) { return x.id === id; }); }
   window.__myLib = myLib; window.__myLibAdd = myLibAdd; window.__myLibRemove = myLibRemove; window.__myLibHas = myLibHas;
+  /* 2026-10-03: library export/import, versioned (P1). Format JAH-MYLIB/1. */
+  window.__myLibExport = function () {
+    var payload = { format: "JAH-MYLIB/1", version: 1, exported_at: new Date().toISOString(), items: myLib() };
+    dl(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }), "signature-my-library.json");
+    return payload.items.length;
+  };
+  window.__myLibImport = function (json) {
+    var p = typeof json === "string" ? JSON.parse(json) : json;
+    if (!p || (p.format !== "JAH-MYLIB/1" && p.version !== 1 && !p.items)) throw new Error("not a Signature library file");
+    var items = p.items || p;
+    if (!Array.isArray(items)) throw new Error("not a Signature library file");
+    var l = myLib(), added = 0;
+    items.forEach(function (x) {
+      if (x && x.id && !l.some(function (y) { return y.id === x.id; })) { l.push({ kind: x.kind || "sound", id: x.id, name: x.name || x.id }); added++; }
+    });
+    myLibSave(l);
+    if (window.__renderMyLib) window.__renderMyLib();
+    return added;
+  };
+  (function () {
+    var ex = document.getElementById("libexport"), im = document.getElementById("libimport"), fi = document.getElementById("libfile");
+    if (ex) ex.onclick = function () { var n = window.__myLibExport(); ex.textContent = "⬇ Exported " + n + " items"; setTimeout(function () { ex.textContent = "⬇ Export library"; }, 2500); };
+    if (im && fi) {
+      im.onclick = function () { fi.click(); };
+      fi.onchange = function () {
+        var f = this.files[0]; if (!f) return;
+        f.text().then(function (t) {
+          try { var n = window.__myLibImport(t); im.textContent = "⬆ Imported " + n + " new"; }
+          catch (e) { im.textContent = "⬆ Import failed — not a library file"; }
+          setTimeout(function () { im.textContent = "⬆ Import library"; }, 3000);
+        });
+        this.value = "";
+      };
+    }
+  })();
 
   /* ---------- pop-open record card (sounds, gear, beats, songs) ---------- */
   function libBtn(kind, id, name) {

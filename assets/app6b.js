@@ -259,6 +259,61 @@
   }
 
   function saveProjSafe() { try { localStorage.setItem(PKEY, JSON.stringify(PROJ, function (k, v) { return k === "micBuf" ? null : v; })); } catch (e) {} }
+  /* 2026-10-03: project snapshots + undo/redo + "Saved locally" label (P1).
+     Every save pushes the pre-save state onto the undo stack (cap 30). */
+  var UNDO = [], REDO = [];
+  function projJSON() { try { return JSON.stringify(PROJ, function (k, v) { return k === "micBuf" ? null : v; }); } catch (e) { return "{}"; } }
+  function projLoad(json) {
+    try {
+      var p = JSON.parse(json); if (!p || typeof p.stage === "undefined") return;
+      // mutate in place: other closures hold a reference to this same object
+      var k; for (k in PROJ) { if (Object.prototype.hasOwnProperty.call(PROJ, k)) delete PROJ[k]; }
+      for (k in p) { if (Object.prototype.hasOwnProperty.call(p, k)) PROJ[k] = p[k]; }
+      _saveProjSafe();
+    } catch (e) {}
+  }
+  var _saveProjSafe = saveProjSafe;
+  saveProjSafe = function () {
+    UNDO.push(projJSON()); if (UNDO.length > 30) UNDO.shift(); REDO = [];
+    _saveProjSafe();
+    var el = document.getElementById("projsaved");
+    if (el) el.textContent = "💾 Saved locally " + new Date().toLocaleTimeString();
+  };
+  window.__projUndo = function () {
+    if (!UNDO.length) return "Nothing to undo.";
+    REDO.push(projJSON()); projLoad(UNDO.pop());
+    if (window.__gotoStage) window.__gotoStage(PROJ.stage || 1);
+    return "Undone — project rolled back one step.";
+  };
+  window.__projRedo = function () {
+    if (!REDO.length) return "Nothing to redo.";
+    UNDO.push(projJSON()); projLoad(REDO.pop());
+    if (window.__gotoStage) window.__gotoStage(PROJ.stage || 1);
+    return "Redone.";
+  };
+  /* snapshots: named, timestamped, restorable */
+  var SKEY = "sigstudio.snaps.v1";
+  function snaps() { try { return JSON.parse(localStorage.getItem(SKEY) || "[]"); } catch (e) { return []; } }
+  function snapsSave(l) { try { localStorage.setItem(SKEY, JSON.stringify(l)); } catch (e) {} }
+  window.__projSnapshot = function (name) {
+    var l = snaps();
+    l.push({ name: name || ("Snapshot " + (l.length + 1)), at: new Date().toISOString(), data: projJSON() });
+    snapsSave(l); return l.length;
+  };
+  window.__projSnapshots = snaps;
+  window.__projRestoreSnap = function (i) {
+    var l = snaps(); if (!l[i]) return "Snapshot not found.";
+    UNDO.push(projJSON()); projLoad(l[i].data);
+    if (window.__gotoStage) window.__gotoStage(PROJ.stage || 1);
+    return "Restored '" + l[i].name + "'.";
+  };
+  /* AI action log — "show me what AI changed" + rollback */
+  var AILOG = [];
+  window.__aiLog = function (action, detail) {
+    AILOG.push({ t: new Date().toISOString(), action: action, detail: detail || "" });
+    if (AILOG.length > 100) AILOG.shift();
+  };
+  window.__aiLogList = function () { return AILOG.slice(); };
 
   /* ----- tagged CD build (album/artist/track order in the cue sheet) ----- */
   function buildTaggedCD() {
@@ -352,6 +407,34 @@
   Array.prototype.forEach.call(document.querySelectorAll("#stagebtns button"), function (b) {
     b.onclick = function () { gotoStage(+b.getAttribute("data-stage")); };
   });
+  /* project toolbar: undo / redo / snapshots / AI change log */
+  function projMsg(t) { var el = $("projsaved"); if (el) el.textContent = t; }
+  var _pu = $("projundo"); if (_pu) _pu.onclick = function () { projMsg("💾 " + window.__projUndo()); };
+  var _pr = $("projredo"); if (_pr) _pr.onclick = function () { projMsg("💾 " + window.__projRedo()); };
+  var _ps = $("projsnap"); if (_ps) _ps.onclick = function () {
+    var n = window.__projSnapshot();
+    var l = window.__projSnapshots();
+    projMsg("📸 Snapshot " + n + " saved (" + l.length + " total) — snapshots live in this browser.");
+  };
+  var _pl = $("projlog"); if (_pl) _pl.onclick = function () {
+    var log = window.__aiLogList ? window.__aiLogList() : [];
+    var snaps = window.__projSnapshots ? window.__projSnapshots() : [];
+    var h = "<h4>🧾 What the AI changed</h4>";
+    h += log.length ? "<ul>" + log.map(function (e) {
+      return "<li><b>" + esc(e.action) + "</b> <span class='seqlab'>" + esc(e.t) + "</span><br>" + esc(e.detail) + "</li>";
+    }).join("") + "</ul>" : "<p class='seqlab'>The AI hasn't changed anything yet this visit.</p>";
+    h += "<h4>📸 Project snapshots</h4>";
+    h += snaps.length ? "<ul>" + snaps.map(function (s, i) {
+      return "<li>" + esc(s.name) + " <span class='seqlab'>" + esc(s.at) + "</span> <button class='btn ghost' data-snap='" + i + "'>Restore</button></li>";
+    }).join("") + "</ul>" : "<p class='seqlab'>No snapshots yet — hit 📸 Snapshot to freeze this project.</p>";
+    h += "<p><button class='btn ghost' id='ailogundo'>↩ Undo last change</button></p>";
+    var body = openModal("Project history", h, true);
+    body.addEventListener("click", function (e) {
+      var s = e.target.closest("[data-snap]");
+      if (s) { projMsg("💾 " + window.__projRestoreSnap(+s.getAttribute("data-snap"))); closeModal(); return; }
+      if (e.target.closest("#ailogundo")) { projMsg("💾 " + window.__projUndo()); closeModal(); }
+    });
+  };
   $("palgo").onclick = function () { window.__palSay(palAnswer($("palq").value)); $("palq").value = ""; };
   $("palq").addEventListener("keydown", function (e) { if (e.key === "Enter") { window.__palSay(palAnswer($("palq").value)); $("palq").value = ""; } });
   $("palauto").onclick = function () { window.__autoProject($("palq").value || "a great song"); };

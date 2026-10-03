@@ -115,7 +115,8 @@
 <p><button class="btn" id="beatmake">🤖 AI: Make my beat</button>
 <button class="btn ghost" id="beatplay">▶ Play</button>
 <button class="btn ghost" id="beatstop">⏹ Stop</button>
-<button class="btn teal" id="beatwav">⬇ Download .wav</button></p>
+<button class="btn teal" id="beatwav">⬇ Download .wav</button>
+<button class="btn ghost" id="beatjson">⬇ Pattern JSON</button></p>
 <canvas class="wave" id="beatwave" width="900" height="90"></canvas>
 <div id="patterngrid" style="margin-top:10px"></div>
 <p class="seqlab">Track lanes — click any step to toggle it. The beat re-renders with your edit (still deterministic from the seed + your tweaks).</p>
@@ -146,11 +147,12 @@
 <div><label>Genre (shapes the melody)</label><select id="vgenre"><option value="">Any — surprise me</option></select></div>
 <div><label>Backup singers</label><select id="vbackup" multiple size="3"><option value="soprano">Soprano section</option><option value="alto">Alto section</option><option value="tenor">Tenor section</option><option value="bass">Bass section</option><option value="choir">Choir stack</option><option value="adlibs">Ad-libs</option></select></div>
 </div>
-<p><button class="btn" id="vrec">🔴 Record my voice</button>
+<p><label style="display:block;margin:.4rem 0"><input type="checkbox" id="vconsent" style="width:auto;display:inline-block"> I understand my voice sample stays <b>in this browser only</b> — never uploaded, never shared — and I can delete it anytime.</label><button class="btn" id="vrec">🔴 Record my voice</button>
 <button class="btn ghost" id="vupload">⬆ Upload sample</button><input type="file" id="vfile" accept="audio/*" style="display:none">
 <button class="btn violet" id="vsing">🎤 Sing it</button>
 <button class="btn ghost" id="vplay">▶ Play</button>
-<button class="btn teal" id="vwav">⬇ Download .wav</button></p>
+<button class="btn teal" id="vwav">⬇ Download .wav</button>
+<button class="btn ghost" id="vdel">🗑 Delete my voice sample</button></p>
 <div class="honest" id="voiceprivacy"><b>🔒 Your voice, your device.</b> Recording and uploads are accepted as wav, mp3, webm or ogg (whatever your browser can decode), up to <b>10&nbsp;MB</b>. Your sample is decoded <b>in this browser's memory only — it is never uploaded anywhere and never leaves your device</b>. It is replaced when you record or upload a new sample, and it is gone when you reload or close the page.</div>
 <p class="seqlab" id="vinfo"></p>
 </section>
@@ -214,6 +216,7 @@
 <section class="sec" id="session">
 <details class="dropbox" id="sessiondrop">
 <summary class="dropbox-sum"><h2 style="display:inline">🎛️ Studio Session — make a song step by step</h2> <span class="seqlab">optional — tap to open the step-by-step guide</span></summary>
+<p class="projbar"><button class="btn ghost" id="projundo">↩ Undo</button> <button class="btn ghost" id="projredo">↪ Redo</button> <button class="btn ghost" id="projsnap">📸 Snapshot</button> <button class="btn ghost" id="projlog">🧾 What did the AI change?</button> <span class="seqlab" id="projsaved">💾 Project autosaves locally</span></p>
 <p><b>Anything a studio does, as a process.</b> Walk the stages in order — or let the <b>AI pal</b> guide you or finish the whole project for you. Every stage opens what you need as a popup.</p>
 <div class="aipal" id="walklaunch" style="margin-bottom:14px">
 <h3>🎧 Song Walkthrough — the easy way</h3>
@@ -245,6 +248,7 @@
 </div>
 <div class="stagepane" id="stagepane"></div>
 <h3 style="color:var(--gold)">💾 My Library — your showpiece shelf</h3>
+<p><button class="btn ghost" id="libexport">⬇ Export library</button> <button class="btn ghost" id="libimport">⬆ Import library</button><input type="file" id="libfile" accept="application/json" style="display:none"> <span class="seqlab">Versioned JSON — your shelf, portable.</span></p>
 <p class="seqlab">Every sound you save lives here, ready to use in any session. Stored on your device.</p>
 <div class="mylib-grid" id="mylibgrid"></div>
 </details>

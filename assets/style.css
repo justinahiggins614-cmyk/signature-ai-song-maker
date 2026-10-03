@@ -179,3 +179,7 @@ summary.dropbox-sum{cursor:pointer;list-style:none;display:flex;align-items:base
 summary.dropbox-sum::-webkit-details-marker{display:none}
 summary.dropbox-sum::before{content:"▸";color:var(--gold);font-size:1.1rem}
 details.dropbox[open] summary.dropbox-sum::before{content:"▾"}
+
+/* ---- 2026-10-03: project toolbar (P1) ---- */
+.projbar{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;margin:.5rem 0}
+.projbar .seqlab{margin-left:auto}
