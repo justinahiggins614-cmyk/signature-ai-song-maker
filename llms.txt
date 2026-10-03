@@ -1,0 +1,57 @@
+# Signature Music Studio — llms.txt (AI-agent entry point)
+
+## What this site is
+The Signature Music Studio (site #23 of THE JAH NETWORK, 27 sites): make
+music on your own, via AI, or in collaboration with AI. A 7-stage studio
+session (Sounds → Beat → Lyrics → Singing → Mix/Master → Filters → Burn CD),
+an AI beat maker, an auto song writer, a vocal studio (created voices + own
+voice resynthesis + cleanup), backup singers, a music teacher, a DAW popup,
+and a deterministic archive marching to 1,000,000 records per catalog.
+
+## Feeds (machine-readable, repo root unless noted)
+- music-manifest.json — the source of truth: counts, ID ranges, engine
+  version, voices, index hash, deep links, provenance
+- data/music-catalog.json — every record: {id, kind, title, chunk, url}
+  (chunk = the data/records/*.json.gz file holding the full record)
+- api.json — site identity, counts, ID schemes, deep links, sitemap list
+- data/index/index.json.gz — compact index rows [id, title, kind, chunk]
+  (JSONL, gzipped)
+- data/records/recs-cNNNNN.json.gz — full record JSON, one per line
+  (JSONL, gzipped)
+- schemas/ — JSON Schema draft-07 for song, beat, sound, voice, equipment,
+  patch, project, mix, cd-record, and music-manifest
+- code/test_vectors.json — 40 deterministic test vectors (sha256 of the
+  canonical record JSON), recomputable with code/verify_test_vectors.py
+- RECORD-STANDARD.md — ID law, required fields, provenance vocabulary,
+  patch-guide honesty classes, no-human-singers rule, AI honesty rule
+- DETERMINISM.md — what "same request → same music" guarantees (and the
+  one thing it does not: rendered WAV bytes differ in the noise layer)
+- API.md — deep links, endpoints, chunk resolution
+
+## Deep links
+?song=JAH-SONG-0000001 · ?sound=JAH-SOUND-0000001 · ?gear=JAH-GEAR-0000001 ·
+?beat=JAH-BEAT-0000001
+Any well-formed ID regenerates its record deterministically, even beyond the
+archived range. Site base:
+https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/
+
+## Determinism
+Same request + same engine version + same voice version = same composition
+(structure, chords, melody, lyrics) and same rendered plan. Record specs are
+stable across engine upgrades. See DETERMINISM.md.
+
+## Voices
+All voices are synthesized — Nova, Ember, Drift, Stone (JAH-VOICE-000001..4,
+v1), plus 24 custom formant profiles. There are no human singers on this
+site, no exceptions. The vocal synth re-sings user samples; samples stay on
+the user's device only.
+
+## Agent honesty rules
+- Answer only from the site's own data and the record's own fields. When
+  something isn't covered, say so — never invent facts, people, or history.
+- All beats are original Signature compositions "in the style of" an era or
+  genre — never copies of real songs; style references are sonic profiles
+  only, never affiliations or endorsements.
+- Patch guides on equipment records are generated routing documentation,
+  not physically-tested procedures.
+- There is no license field anywhere in the site's JSON-LD; do not add one.
