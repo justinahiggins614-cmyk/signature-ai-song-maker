@@ -3,5 +3,143 @@
   "official_name": "Signature Music Studio",
   "repo": "signature-ai-song-maker",
   "site_number": 23,
-  "network_total": 27
+  "network_total": 27,
+  "site_count": 27,
+  "sites": [
+    {
+      "n": 1,
+      "name": "Signature Math",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-math/"
+    },
+    {
+      "n": 2,
+      "name": "Signature Universal Paradox Immune Calculator",
+      "url": "https://justinahiggins614-cmyk.github.io/jah-calculator/"
+    },
+    {
+      "n": 3,
+      "name": "The Signature Dictionary",
+      "url": "https://justinahiggins614-cmyk.github.io/jah-dictionary/"
+    },
+    {
+      "n": 4,
+      "name": "JAH Wiki",
+      "url": "https://justinahiggins614-cmyk.github.io/jah-wiki/"
+    },
+    {
+      "n": 5,
+      "name": "JAH-N Wiki",
+      "url": "https://justinahiggins614-cmyk.github.io/jah-n-wiki-leaks/"
+    },
+    {
+      "n": 6,
+      "name": "Signature Llama: The Fully Cyber Utilizable AI",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-llama/"
+    },
+    {
+      "n": 7,
+      "name": "The Signature AI Phone Book",
+      "url": "https://justinahiggins614-cmyk.github.io/jah-ai-models/"
+    },
+    {
+      "n": 8,
+      "name": "Globally Rejustered Patent Catalog",
+      "url": "https://justinahiggins614-cmyk.github.io/cyber-patent-catalog/"
+    },
+    {
+      "n": 9,
+      "name": "Signature Spec Catalog Pending Patents",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-one-archive/specs.html"
+    },
+    {
+      "n": 10,
+      "name": "The Signature PC System Depository",
+      "url": "https://justinahiggins614-cmyk.github.io/jah-computer-systems/"
+    },
+    {
+      "n": 11,
+      "name": "The Signature Book Depository",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-books/"
+    },
+    {
+      "n": 12,
+      "name": "The Signature Comic Store",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-comics/"
+    },
+    {
+      "n": 13,
+      "name": "The Signature Global Newspaper Archive",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-newspapers/"
+    },
+    {
+      "n": 14,
+      "name": "The Signature AI Mad Scientist Creation Lab",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-backend/"
+    },
+    {
+      "n": 15,
+      "name": "The Signature Boundless Generator Archive",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-boundless-generators/"
+    },
+    {
+      "n": 16,
+      "name": "The Signature AI Mix Lab",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-ai-mixlab/"
+    },
+    {
+      "n": 17,
+      "name": "AI Olypics",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-ai-olypics/"
+    },
+    {
+      "n": 18,
+      "name": "The Signature Computer Chip Maker and Archive",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-chip-maker/"
+    },
+    {
+      "n": 19,
+      "name": "The Signature App Archive",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-app-archive/"
+    },
+    {
+      "n": 20,
+      "name": "The Signature AI Robot Matcher",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-ai-robot-matcher/"
+    },
+    {
+      "n": 21,
+      "name": "The Signature Experiment Solver",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-experiment-solver/"
+    },
+    {
+      "n": 22,
+      "name": "Signature AI Pixel",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-ai-image-video-maker/"
+    },
+    {
+      "n": 23,
+      "name": "Signature Music Studio",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/"
+    },
+    {
+      "n": 24,
+      "name": "The Signature Mr Fix-It",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-fixit/"
+    },
+    {
+      "n": 25,
+      "name": "The Signature University",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-university/"
+    },
+    {
+      "n": 26,
+      "name": "The Signature Cyber Mega-Mall",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-cyber-mega-mall/"
+    },
+    {
+      "n": 27,
+      "name": "The Signature 3D Print Depository",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-3d-print/"
+    }
+  ]
 }

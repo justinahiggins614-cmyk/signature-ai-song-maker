@@ -60,23 +60,24 @@
       .then(function (ab) { return new Response(new Blob([ab]).stream().pipeThrough(new DecompressionStream("gzip"))).text(); });
   }
 
-  /* ---------- 25-site JAH Network nav ---------- */
+  /* ---------- 27-site JAH Network nav ---------- */
   var NAV = [
-    ["The Signature AI Phone Book", "jah-ai-models"], ["Calculator", "jah-calculator"], ["Dictionary", "jah-dictionary"],
-    ["JAH Wiki", "jah-wiki"], ["JAH-N Wiki", "jah-n-wiki-leaks"], ["Patent Catalog", "cyber-patent-catalog"],
-    ["Spec Catalog", "signature-one-archive/specs.html"], ["Signature Llama", "signature-llama"], ["PC Depository", "jah-computer-systems"],
-    ["Cyber Mega-Mall", "signature-cyber-mega-mall"], ["Signature University", "signature-university"], ["Book Depository", "signature-books"],
-    ["Comic Store", "signature-comics"], ["Global Newspaper Archive", "signature-newspapers"], ["3D Print Depository", "signature-3d-print"],
-    ["Mad Scientist Lab", "signature-backend"], ["Boundless Generator Archive", "signature-boundless-generators"], ["AI Mix Lab", "signature-ai-mixlab"],
-    ["AI Olypics", "signature-ai-olypics"], ["Chip Maker and Archive", "signature-chip-maker"], ["App Archive", "signature-app-archive"],
-    ["AI Robot Matcher", "signature-ai-robot-matcher"], ["Experiment Solver", "signature-experiment-solver"], ["Signature AI Pixel", "signature-ai-image-video-maker"]
+    ["Signature Math", "signature-math"], ["Signature Universal Paradox Immune Calculator", "jah-calculator"], ["The Signature Dictionary", "jah-dictionary"],
+    ["JAH Wiki", "jah-wiki"], ["JAH-N Wiki", "jah-n-wiki-leaks"], ["Signature Llama: The Fully Cyber Utilizable AI", "signature-llama"],
+    ["The Signature AI Phone Book", "jah-ai-models"], ["Globally Rejustered Patent Catalog", "cyber-patent-catalog"], ["Signature Spec Catalog Pending Patents", "signature-one-archive/specs.html"],
+    ["The Signature PC System Depository", "jah-computer-systems"], ["The Signature Book Depository", "signature-books"], ["The Signature Comic Store", "signature-comics"],
+    ["The Signature Global Newspaper Archive", "signature-newspapers"], ["The Signature AI Mad Scientist Creation Lab", "signature-backend"], ["The Signature Boundless Generator Archive", "signature-boundless-generators"],
+    ["The Signature AI Mix Lab", "signature-ai-mixlab"], ["AI Olypics", "signature-ai-olypics"], ["The Signature Computer Chip Maker and Archive", "signature-chip-maker"],
+    ["The Signature App Archive", "signature-app-archive"], ["The Signature AI Robot Matcher", "signature-ai-robot-matcher"], ["The Signature Experiment Solver", "signature-experiment-solver"],
+    ["Signature AI Pixel", "signature-ai-image-video-maker"], ["The Signature Mr Fix-It", "signature-fixit"], ["The Signature University", "signature-university"],
+    ["The Signature Cyber Mega-Mall", "signature-cyber-mega-mall"], ["The Signature 3D Print Depository", "signature-3d-print"]
   ];
   function buildNav(el, selfIx) {
     var h = "<b>THE JAH NETWORK</b> ", i;
     for (i = 0; i < NAV.length; i++) {
       h += '<a href="https://justinahiggins614-cmyk.github.io/' + NAV[i][1] + '/">' + (i + 1) + " " + esc(NAV[i][0]) + "</a>";
     }
-    h += '<span class="here">25 Signature Music Studio — YOU ARE HERE</span>';
+    h += '<span class="here">23 Signature Music Studio — YOU ARE HERE</span>';
     el.innerHTML = h;
   }
   buildNav($("jahnet")); buildNav($("jahnet2"));
