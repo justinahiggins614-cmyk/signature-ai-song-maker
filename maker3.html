@@ -54,6 +54,35 @@
 input.txt,select.txt{background:#14121b;color:#e8dcc0;border:1px solid #3a3350;border-radius:6px;padding:.4rem .6rem}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
 @media(max-width:900px){.grid2{grid-template-columns:1fr}.grid16{grid-template-columns:44px repeat(16,minmax(0,1fr))}.lanehead .tname{min-width:6.5rem}}
+/* ---- studio lab additions (full-studio build, 2026-10-04) ---- */
+.addtrack{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin:.5rem 0 .2rem}
+.piano{display:flex;gap:2px;align-items:flex-start;margin:.5rem 0;user-select:none;-webkit-user-select:none}
+.pkey{width:44px;height:120px;background:#f5f0e6;border:1px solid #8a8578;border-radius:0 0 6px 6px;cursor:pointer;color:#4a463c;font-size:.68rem;display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px;font-family:inherit}
+.pkey.black{width:30px;height:78px;background:#14121b;color:#e8dcc0;margin:0 -16px;z-index:2;border-color:#000}
+.pkey.hit{background:var(--gold);color:#221}
+.pads{display:grid;grid-template-columns:repeat(3,minmax(90px,1fr));gap:.5rem;margin:.5rem 0;max-width:560px}
+.pad{height:64px;border:1px solid #4a4266;background:#1a1724;color:#e8dcc0;border-radius:10px;cursor:pointer;font-size:.95rem;font-family:inherit}
+.pad small{display:block;font-size:.72rem;color:#b9aede}
+.pad.hit{background:linear-gradient(180deg,#f7cd5a,#b98a1e);color:#221}
+.pad.hit small{color:#4a3c10}
+.rollwrap{overflow:auto;border:1px solid #2e2a3d;border-radius:8px;background:#0a0910;padding:.5rem;margin-top:.5rem}
+.rollgrid{display:grid;gap:2px}
+.rollcell{width:26px;height:20px;background:#14121b;border:1px solid #2a2536;border-radius:3px;cursor:pointer;padding:0}
+.rollcell.on{background:linear-gradient(180deg,#f7cd5a,#b98a1e);border-color:#f7cd5a}
+.rollcell.bk{background:#1d1929}
+.fxrow{display:flex;gap:.9rem;flex-wrap:wrap;align-items:flex-end;margin:.5rem 0}
+.fxctl{text-align:center;min-width:96px}
+.fxctl label{display:block;font-size:.82rem;margin-bottom:.2rem}
+.fxctl input[type=range]{width:96px}
+.looprow{display:flex;gap:.5rem;align-items:center;padding:.45rem .2rem;border-bottom:1px solid #221e30;flex-wrap:wrap}
+.looprow .lname{flex:1;min-width:11rem}
+.looprow .lcat{font-size:.78rem;color:#b9aede}
+.ideacard{border:1px solid #3a3350;border-radius:10px;padding:.7rem;background:#14121b;margin:.5rem 0}
+.cliprow{display:flex;gap:.5rem;align-items:center;padding:.35rem 0;border-bottom:1px solid #221e30;flex-wrap:wrap}
+.cliprow .cname{flex:1;min-width:10rem}
+.notechip{display:inline-block;background:#1a1724;border:1px solid #4a4266;border-radius:5px;padding:.1rem .45rem;margin:2px;font-size:.8rem}
+.audlane{padding:.4rem .2rem}
+.checkline{display:flex;gap:.5rem;align-items:center;font-size:.92rem}
 </style>
 </head>
 <body>
@@ -87,7 +116,20 @@ input.txt,select.txt{background:#14121b;color:#e8dcc0;border:1px solid #3a3350;b
 
 <section class="sec" id="sectracks">
   <h2>&#127909; Track lanes</h2>
-  <p class="hintline">M = mute, S = solo. Drums: tap steps on/off. Pitched tracks: tap a bar block to switch that bar off/on. The little &#9654; previews one track.</p>
+  <p class="hintline">M = mute, S = solo. Drums: tap steps on/off. Pitched tracks: tap a bar block to switch that bar off/on. The little &#9654; previews one track. Add as many extra tracks as you like &mdash; they all play in sync.</p>
+  <div class="addtrack">
+    <button class="btn" id="btnaddtrack" type="button">&#10133; Add track</button>
+    <select class="txt" id="newtracktype" aria-label="New track type">
+      <option value="drums">&#129345; Drums</option>
+      <option value="bass">&#127928; Bass</option>
+      <option value="chords">&#127929; Chords</option>
+      <option value="lead">&#127889; Lead</option>
+      <option value="vocal">&#127908; Vocal</option>
+      <option value="audio">&#128266; Audio clips</option>
+    </select>
+    <input class="txt" id="newtrackname" type="text" size="18" placeholder="name it (optional)" aria-label="New track name">
+    <span class="hintline" id="addtracknote"></span>
+  </div>
   <div id="lanes"></div>
 </section>
 
@@ -122,11 +164,153 @@ input.txt,select.txt{background:#14121b;color:#e8dcc0;border:1px solid #3a3350;b
 </section>
 </div>
 
+<section class="sec" id="sectemplates">
+  <h2>&#128640; Starter templates</h2>
+  <p class="hintline">One tap loads a working song you can press <b>Play</b> on right away. Every template is built fresh by the Signature engine &mdash; same tap, same song, every time.</p>
+  <div id="tmplbtns" class="transport"></div>
+  <p class="hintline" id="tmplnote"></p>
+</section>
+
+<section class="sec" id="secbeats">
+  <h2>&#129345; Beat maker</h2>
+  <p class="hintline">Tap squares on/off to build your own drum beat. Press Play to hear it loop. 16 steps = 1 bar; the darker left edges mark the 4 beats.</p>
+  <div class="transport">
+    <button class="btn big" id="bm-play" type="button">&#9654; Play beat</button>
+    <button class="btn ghost" id="bm-stop" type="button">&#9632; Stop</button>
+    <button class="btn ghost" id="bm-clear" type="button">Clear</button>
+    <button class="btn ghost" id="bm-song" type="button">&#129345; Put on Drums track</button>
+    <label class="hintline" for="bm-bpm">Tempo <input class="txt" id="bm-bpm" type="number" min="60" max="200" value="100" style="width:4rem"> BPM</label>
+  </div>
+  <div id="bm-grid"></div>
+</section>
+
+<section class="sec" id="secinst">
+  <h2>&#127929; Playable instruments</h2>
+  <p class="hintline">Tap the keys and pads &mdash; everything plays live in your browser. Piano keys also work with your computer keyboard (A&ndash;K).</p>
+  <h3>Piano &nbsp;<select class="txt" id="inst-voice" aria-label="Piano sound"></select></h3>
+  <div class="piano" id="piano" role="group" aria-label="Piano keyboard"></div>
+  <h3>Drum pads</h3>
+  <div class="pads" id="drumpads" role="group" aria-label="Drum pads"></div>
+  <h3>Bass keys <span class="hintline">(deep bass voice)</span></h3>
+  <div class="piano" id="basskeys" role="group" aria-label="Bass keyboard"></div>
+</section>
+
+<section class="sec" id="secroll">
+  <h2>&#127932; Note writer (piano roll)</h2>
+  <p class="hintline">Click a square to place a note. Drag a note left/right to move it, up/down to change its pitch. Click a note without moving to remove it. 16 steps = 1 bar.</p>
+  <div class="transport">
+    <button class="btn" id="roll-play" type="button">&#9654; Play my notes</button>
+    <button class="btn ghost" id="roll-stop" type="button">&#9632; Stop</button>
+    <button class="btn ghost" id="roll-clear" type="button">Clear</button>
+    <button class="btn ghost" id="roll-song" type="button">&#127929; Put on Lead track</button>
+    <label class="hintline" for="roll-voice">Sound <select class="txt" id="roll-voice"></select></label>
+  </div>
+  <div class="rollwrap"><div class="rollgrid" id="roll" role="group" aria-label="Piano roll note grid"></div></div>
+</section>
+
+<section class="sec" id="secloops">
+  <h2>&#128257; Loop library <span class="hintline">original &amp; royalty-free</span></h2>
+  <p class="hintline">Every loop here is an <b>original Signature loop</b> &mdash; synthesized fresh in your browser by the Signature engine. Free to use in your songs: no royalties, no samples from anywhere else.</p>
+  <div id="loopcats" class="transport"></div>
+  <div id="looplist"></div>
+</section>
+
+<section class="sec" id="secidea">
+  <h2>&#128161; AI idea starter</h2>
+  <p class="hintline">Type a few words about the vibe you want. The studio helper turns them into a real song idea &mdash; same words, same idea, every time.</p>
+  <p><input class="txt" id="ideaq" type="text" size="40" placeholder="Try &quot;dark trap banger&quot; or &quot;happy pop song&quot;" aria-label="Describe the vibe you want">
+  <button class="btn" id="ideago" type="button">&#10024; Get my idea</button>
+  <button class="btn ghost" id="ideasurprise" type="button">&#127922; Surprise me</button></p>
+  <div id="idearesult"></div>
+</section>
+
+<section class="sec" id="secfx">
+  <h2>&#127908; Sound effects (FX)</h2>
+  <p class="hintline">Plain-language effects for each track and the master. They shape the sound when you press Play and in your WAV/MP3 exports.</p>
+  <p><label class="hintline" for="fx-track">Track:</label>
+  <select class="txt" id="fx-track"></select>
+  <button class="btn ghost" id="fx-reset" type="button">Reset this track&rsquo;s FX</button></p>
+  <div class="fxrow" id="fx-track-ctls"></div>
+  <h3>Master</h3>
+  <div class="fxrow" id="fx-master-ctls"></div>
+  <p class="hintline">Room echo uses a room sound built fresh in your browser (a generated impulse). The limiter keeps the master from clipping.</p>
+</section>
+
+<section class="sec" id="secupload">
+  <h2>&#128228; Your audio</h2>
+  <p class="hintline">Add your own recordings to the song. Files stay in your browser &mdash; nothing is uploaded anywhere.</p>
+  <p><input type="file" id="up-file" accept="audio/*" multiple aria-label="Choose audio files">
+  <button class="btn" id="up-add" type="button">&#10133; Add to a new Audio track</button></p>
+  <p class="hintline">Works best with WAV, MP3, OGG or M4A files your browser can play. Very long files may take a moment to load.</p>
+  <h3>&#127908; Record with your mic</h3>
+  <p class="hintline">Your browser will ask for microphone permission. Recording happens on your device &mdash; audio never leaves this page.</p>
+  <div class="transport">
+    <button class="btn" id="mic-rec" type="button">&#128308; Record</button>
+    <button class="btn ghost" id="mic-stop" type="button" disabled>&#9632; Stop &amp; keep</button>
+    <button class="btn ghost" id="mic-play" type="button" disabled>&#9654; Play it</button>
+    <button class="btn ghost" id="mic-track" type="button" disabled>&#10133; Put on an Audio track</button>
+  </div>
+  <p class="hintline" id="mic-status">Mic idle.</p>
+  <h3>Clips on this page</h3>
+  <div id="cliplist"><p class="hintline">No clips yet &mdash; upload a file or record with your mic.</p></div>
+</section>
+
+<section class="sec" id="seca2m">
+  <h2>&#127925; Audio &rarr; notes (audio-to-MIDI)</h2>
+  <p class="hintline">Turn a recording into a note list. <b>Works best on single-note lines</b> (one note at a time &mdash; humming, a flute line, a bass line). Chords and full mixes will confuse it &mdash; that&rsquo;s normal for this kind of tool.</p>
+  <div class="transport">
+    <button class="btn" id="a2m-filebtn" type="button">&#128196; Pick an audio file</button>
+    <button class="btn ghost" id="a2m-micbtn" type="button">&#127908; Use my mic recording</button>
+    <button class="btn ghost" id="a2m-midi" type="button" disabled>&#11015; Download .mid</button>
+    <button class="btn ghost" id="a2m-lead" type="button" disabled>&#127929; Put notes on Lead track</button>
+  </div>
+  <input type="file" id="a2m-pick" accept="audio/*" style="display:none" aria-label="Pick an audio file for note detection">
+  <div id="a2m-out"></div>
+</section>
+
+<section class="sec" id="secvoice">
+  <h2>&#127908; Voice tools</h2>
+  <div class="grid2">
+    <div>
+      <h3>&#128263; Vocal remover (center-channel)</h3>
+      <p class="hintline">Removes sound panned to the center of a stereo file (where lead vocals usually sit). Karaoke-style DSP &mdash; <b>not</b> AI stem separation.</p>
+      <p><select class="txt" id="vr-clip" aria-label="Clip for vocal remover"></select>
+      <button class="btn" id="vr-go" type="button">Remove center vocals</button></p>
+      <div class="transport"><button class="btn ghost" id="vr-play" type="button" disabled>&#9654; Play result</button> <button class="btn ghost" id="vr-track" type="button" disabled>&#10133; Put on an Audio track</button></div>
+      <p class="hintline">Works best on studio stereo mixes. Mono files and hard-panned vocals won&rsquo;t change much &mdash; that&rsquo;s how center-channel removal works.</p>
+    </div>
+    <div>
+      <h3>&#128483; Voice effect (pitch + formant)</h3>
+      <p class="hintline">A voice effect that shifts pitch and voice character &mdash; chipmunk to deep giant. Just an effect, applied in your browser.</p>
+      <p><select class="txt" id="vx-clip" aria-label="Clip for voice effect"></select></p>
+      <div class="fxrow">
+        <div class="fxctl"><label for="vx-pitch">Pitch</label><input type="range" id="vx-pitch" min="-12" max="12" value="0"><div class="fval" id="vx-pitch-v">0 st</div></div>
+        <div class="fxctl"><label for="vx-form">Voice body</label><input type="range" id="vx-form" min="-6" max="6" value="0"><div class="fval" id="vx-form-v">0</div></div>
+      </div>
+      <div class="transport"><button class="btn" id="vx-go" type="button">Apply voice effect</button> <button class="btn ghost" id="vx-play" type="button" disabled>&#9654; Play result</button> <button class="btn ghost" id="vx-track" type="button" disabled>&#10133; Put on an Audio track</button></div>
+      <p class="hintline">Pitch shifting also changes the speed a little &mdash; that&rsquo;s how this simple effect works.</p>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="secmaster">
+  <h2>&#10024; Master my mix</h2>
+  <p class="hintline">One tap runs your mix through a <b>mastering chain preset</b> &mdash; warm EQ, gentle glue compressor, limiter, normalize. It&rsquo;s a fixed recipe, not magic: it polishes a good mix, it can&rsquo;t fix a bad one.</p>
+  <div class="transport">
+    <button class="btn big" id="mast-go" type="button">&#10024; Master my mix</button>
+    <button class="btn ghost" id="mast-play" type="button" disabled>&#9654; Play mastered</button>
+    <button class="btn ghost" id="mast-wav" type="button" disabled>&#11015; Mastered WAV</button>
+    <button class="btn ghost" id="mast-mp3" type="button" disabled>&#11015; Mastered MP3</button>
+  </div>
+  <p class="hintline" id="mast-status">Not mastered yet.</p>
+</section>
+
 <section class="sec" id="secexport">
   <h2>&#128190; Export &amp; projects</h2>
   <p>
     <button class="btn" id="btnexpwav" type="button">&#11015; Download .wav (full mix)</button>
     <button class="btn ghost" id="btnexpmp3" type="button">&#11015; Download .mp3</button>
+    <button class="btn ghost" id="btnexpmidi" type="button">&#11015; Download .mid (MIDI notes)</button>
     <button class="btn ghost" id="btnexpjson" type="button">&#11015; Pattern JSON</button>
   </p>
   <p><input class="txt" id="projname" type="text" size="28" placeholder="project name" aria-label="Project name">
@@ -135,7 +319,7 @@ input.txt,select.txt{background:#14121b;color:#e8dcc0;border:1px solid #3a3350;b
   <p class="honest" id="status" aria-live="polite">Ready.</p>
 </section>
 
-<p class="honest"><b>Honest notes.</b> All music on this page is synthesized in your browser with Web Audio &mdash; drums, instruments and the four built-in created voices (Nova, Ember, Drift, Stone; all synthesized, no human singers). Nothing is uploaded. MP3 export needs an encoder that browsers don&rsquo;t ship &mdash; the page tells you plainly and offers WAV instead. Every sound, pattern and arrangement is deterministic: same description + same tweaks = same music. All content is original Signature material.</p>
+<p class="honest"><b>Honest notes.</b> All music on this page is synthesized in your browser with Web Audio &mdash; drums, instruments and the four built-in created voices (Nova, Ember, Drift, Stone; all synthesized, no human singers). Nothing is uploaded. MP3 export uses the open-source MP3 encoder bundled with this page (lamejs) &mdash; the WAV is the same full mix, uncompressed. Every sound, pattern and arrangement is deterministic: same description + same tweaks = same music. All content is original Signature material.</p>
 
 </main>
 <nav class="jahnet" aria-label="JAH Network (footer)" style="border:none;background:none"><div class="wrap" id="jahnet2" style="justify-content:center"></div></nav>
@@ -361,9 +545,12 @@ function leadBarsFor(chords, seed, nonce) {
   }
   return bars;
 }
-/* Build one track's material. Pure — no DOM, no audio. */
-function buildTrack(name, seed, genre, bpm, chords, nonce) {
-  var t = { mute: false, solo: false, vol: 1, pan: 0, src: "ai", varn: nonce, barOn: [1, 1, 1, 1] }, b, ch;
+/* Build one track's material. Pure — no DOM, no audio.
+   id: unique track id (defaults to the type for the 5 base tracks). */
+function buildTrack(name, seed, genre, bpm, chords, nonce, idOverride) {
+  var t = { id: idOverride || name, name: TRACK_PLAIN[name] || name, type: name,
+            mute: false, solo: false, vol: 1, pan: 0, src: "ai", varn: nonce, barOn: [1, 1, 1, 1] }, b, ch;
+  if (name === "audio") { t.clips = []; t.src = "you"; return t; }
   if (name === "drums") {
     var p = S.patternFor("m3:" + seed + ":drums:" + nonce, genre, bpm);
     t.steps = p.steps; t.accentLane = null;
@@ -380,6 +567,72 @@ function buildTrack(name, seed, genre, bpm, chords, nonce) {
   }
   return t;
 }
+/* ---------- FX defaults + track helpers (multi-track model) ---------- */
+function defaultTrackFx() { return { reverb: 0, delay: 0, chorus: 0, eqLow: 0, eqMid: 0, eqHigh: 0, comp: 0 }; }
+function defaultFx() {
+  var f = { tracks: {}, master: { limiter: 1, eqLow: 0, eqMid: 0, eqHigh: 0 } }, i;
+  for (i = 0; i < TRACKS.length; i++) f.tracks[TRACKS[i]] = defaultTrackFx();
+  return f;
+}
+function trackLabel(id) {
+  var t = ARR && ARR.tracks ? ARR.tracks[id] : null;
+  if (t && t.id !== t.type) return t.name;
+  return TRACK_LABEL[id] || (t ? t.name : id);
+}
+function leadTrack(arr) {
+  var ids = arr.trackOrder || TRACKS, i;
+  for (i = 0; i < ids.length; i++) { var t = arr.tracks[ids[i]]; if (t && t.type === "lead") return t; }
+  return null;
+}
+var trackSeq = 100;
+function addTrack(type, name) {
+  var id = "trk" + (trackSeq++), t;
+  if (type === "audio") {
+    t = buildTrack("audio", ARR.seed, ARR.genre, ARR.bpm, currentChords(ARR), 0, id);
+    t.name = name || ("Audio " + id);
+  } else {
+    t = buildTrack(type, ARR.seed, ARR.genre, ARR.bpm, currentChords(ARR), 0, id);
+    t.name = name || ((TRACK_PLAIN[type] || type) + " " + id.replace("trk", ""));
+  }
+  t.src = "you";
+  ARR.tracks[id] = t; ARR.trackOrder.push(id);
+  if (ARR.fx && !ARR.fx.tracks[id]) ARR.fx.tracks[id] = defaultTrackFx();
+  return t;
+}
+function removeTrack(id) {
+  if (TRACKS.indexOf(id) >= 0) return false;
+  if (!ARR.tracks[id]) return false;
+  delete ARR.tracks[id];
+  if (ARR.fx) delete ARR.fx.tracks[id];
+  ARR.trackOrder = ARR.trackOrder.filter(function (x) { return x !== id; });
+  return true;
+}
+/* Keep uploaded-audio tracks when an arrangement is rebuilt. Pure. */
+function carryAudio(fromArr, toArr) {
+  if (!fromArr || !toArr || fromArr === toArr) return toArr;
+  var ids = fromArr.trackOrder || [], i;
+  for (i = 0; i < ids.length; i++) {
+    var t = fromArr.tracks[ids[i]];
+    if (t && t.type === "audio") {
+      toArr.tracks[t.id] = t; toArr.trackOrder.push(t.id);
+      if (toArr.fx && !toArr.fx.tracks[t.id]) toArr.fx.tracks[t.id] = defaultTrackFx();
+    }
+  }
+  return toArr;
+}
+/* Migrate older saved projects to the multi-track + FX model. Pure. */
+function migrateArr(a) {
+  var i, id;
+  if (!a.trackOrder) a.trackOrder = TRACKS.slice();
+  for (i = 0; i < a.trackOrder.length; i++) {
+    id = a.trackOrder[i];
+    var t = a.tracks[id];
+    if (t && !t.id) { t.id = id; t.type = id; t.name = TRACK_PLAIN[id] || id; }
+  }
+  if (!a.fx) a.fx = defaultFx();
+  for (i = 0; i < a.trackOrder.length; i++) { id = a.trackOrder[i]; if (!a.fx.tracks[id]) a.fx.tracks[id] = defaultTrackFx(); }
+  return a;
+}
 /* The AI arranger: description -> full deterministic arrangement. */
 function buildArrangement(desc) {
   var seed = String(desc == null ? "" : desc).replace(/^\s+|\s+$/g, "") || "my song";
@@ -392,6 +645,7 @@ function buildArrangement(desc) {
     seed: seed, desc: seed, genre: genre, mood: mood, bpm: bpm,
     keyRoot: keyRoot, keyName: S.noteName(keyRoot).replace(/[0-9-]/g, ""),
     sections: fullSections(), tracks: {},
+    trackOrder: TRACKS.slice(), fx: defaultFx(),
     aiNote: "Arranged by the built-in helper from your description."
   };
   var i;
@@ -399,16 +653,19 @@ function buildArrangement(desc) {
   return arr;
 }
 /* AI: write one part again (variation #n). Keeps mixer settings + voice choice. */
-function reRollTrack(arr, name) {
-  var old = arr.tracks[name];
+function reRollTrack(arr, id) {
+  var old = arr.tracks[id];
+  if (!old || old.type === "audio") return old;
+  var name = old.type;
   var nonce = (old.varn || 0) + 1;
   var chords = currentChords(arr);
-  var t = buildTrack(name, arr.seed, arr.genre, arr.bpm, chords, nonce);
+  var t = buildTrack(name, arr.seed, arr.genre, arr.bpm, chords, nonce, id);
+  t.name = old.name;
   t.mute = old.mute; t.solo = old.solo; t.vol = old.vol; t.pan = old.pan;
   if (old.voice && TRACK_VOICES[name].indexOf(old.voice) >= 0) t.voice = old.voice;
   t.barOn = old.barOn && old.barOn.length === 4 ? old.barOn.slice() : [1, 1, 1, 1];
   t.src = "ai"; t.varn = nonce;
-  arr.tracks[name] = t;
+  arr.tracks[id] = t;
   return t;
 }
 function currentChords(arr) { return S.chordsFor(arr.keyRoot, arr.genre, S.rngFrom("m3:" + arr.seed)); }
@@ -424,80 +681,159 @@ function toggleBar(arr, track, barIx) {
   arr.tracks[track].src = "you";
   return b[barIx];
 }
-function trackEmpty(name, t) {
-  var i, j;
-  if (name === "drums") {
+function trackEmpty(id, t) {
+  var i, j, type = t.type || id;
+  if (type === "drums") {
     for (i = 0; i < DRUM_LANES.length; i++) for (j = 0; j < 16; j++) if (t.steps[DRUM_LANES[i]][j]) return false;
     return true;
   }
-  if (name === "vocal") return !t.voice;
+  if (type === "audio") return !(t.clips && t.clips.length);
+  if (type === "vocal") return !t.voice;
   for (i = 0; i < 4; i++) if (t.barOn[i]) {
-    if (name === "lead") { for (j = 0; j < 4; j++) if (t.bars[i][j]) return false; }
+    if (type === "lead") { for (j = 0; j < 4; j++) if (t.bars[i][j]) return false; }
     else return false;
   }
   return true;
 }
 /* Mute/solo/volume -> per-track gain+pan. Pure. */
 function mixOf(arr) {
-  var anySolo = false, i;
-  for (i = 0; i < TRACKS.length; i++) if (arr.tracks[TRACKS[i]].solo) anySolo = true;
+  var anySolo = false, i, ids = arr.trackOrder || TRACKS;
+  for (i = 0; i < ids.length; i++) if (arr.tracks[ids[i]].solo) anySolo = true;
   var m = { master: 1 };
-  for (i = 0; i < TRACKS.length; i++) {
-    var n = TRACKS[i], t = arr.tracks[n];
+  for (i = 0; i < ids.length; i++) {
+    var id = ids[i], t = arr.tracks[id];
     var aud = t.mute ? 0 : (anySolo ? (t.solo ? 1 : 0) : 1);
-    m[n] = { v: Math.round(aud * t.vol * 1000) / 1000, pan: t.pan || 0 };
+    m[id] = { v: Math.round(aud * t.vol * 1000) / 1000, pan: t.pan || 0 };
   }
   return m;
 }
 
 /* ================= offline multitrack render (the honest engine) ================= */
+/* Generated-impulse reverb: same deterministic recipe as the synth core. */
+function impulseBuf(c, seconds, decay) {
+  var rate = c.sampleRate, len = Math.max(1, Math.floor(rate * seconds)), buf = c.createBuffer(2, len, rate), ch, i;
+  var rng = S.rngFrom("m3impulse:" + seconds + ":" + decay);
+  for (ch = 0; ch < 2; ch++) { var d = buf.getChannelData(ch); for (i = 0; i < len; i++) d[i] = (rng() * 2 - 1) * Math.pow(1 - i / len, decay); }
+  return buf;
+}
+/* Per-track FX insert: 3-band EQ -> compressor -> parallel reverb/delay/chorus sends. Real WebAudio nodes. */
+function fxInsert(c, t0, bpm, fx) {
+  fx = fx || {};
+  var input = c.createGain();
+  var low = c.createBiquadFilter(); low.type = "lowshelf"; low.frequency.value = 220; low.gain.value = fx.eqLow || 0;
+  var mid = c.createBiquadFilter(); mid.type = "peaking"; mid.frequency.value = 1200; mid.Q.value = 0.8; mid.gain.value = fx.eqMid || 0;
+  var high = c.createBiquadFilter(); high.type = "highshelf"; high.frequency.value = 5200; high.gain.value = fx.eqHigh || 0;
+  var comp = c.createDynamicsCompressor(), ca = Math.max(0, Math.min(1, (fx.comp || 0) / 100));
+  comp.threshold.value = -6 - 24 * (1 - ca); comp.ratio.value = 1 + 11 * ca;
+  comp.attack.value = 0.008; comp.release.value = 0.2;
+  input.connect(low); low.connect(mid); mid.connect(high); high.connect(comp);
+  var out = c.createGain(); comp.connect(out);
+  if ((fx.reverb || 0) > 0.5) {
+    var rs = c.createGain(); rs.gain.value = (fx.reverb / 100) * 0.9;
+    var cv = c.createConvolver(); cv.buffer = impulseBuf(c, 1.8, 2.6);
+    comp.connect(rs); rs.connect(cv); cv.connect(out);
+  }
+  if ((fx.delay || 0) > 0.5) {
+    var ds = c.createGain(); ds.gain.value = (fx.delay / 100) * 0.8;
+    var dl = c.createDelay(2); dl.delayTime.value = (60 / bpm) * 0.75;
+    var fb = c.createGain(); fb.gain.value = 0.35;
+    comp.connect(ds); ds.connect(dl); dl.connect(fb); fb.connect(dl); dl.connect(out);
+  }
+  if ((fx.chorus || 0) > 0.5) {
+    var cs = c.createGain(); cs.gain.value = (fx.chorus / 100) * 0.7;
+    var cd = c.createDelay(0.06); cd.delayTime.value = 0.018;
+    var lfo = c.createOscillator(); lfo.frequency.value = 1.4;
+    var lg = c.createGain(); lg.gain.value = 0.006;
+    lfo.connect(lg); lg.connect(cd.delayTime);
+    comp.connect(cs); cs.connect(cd); cd.connect(out);
+    try { lfo.start(t0); lfo.stop(t0 + 7200); } catch (e) {}
+  }
+  return { input: input, output: out };
+}
 function renderArr(arr, mix) {
   var bpm = arr.bpm, step = 60 / bpm / 4, bsec = 4 * 60 / bpm;
   var tb = totalBars(arr), dur = tb * bsec + 2;
+  var ids = arr.trackOrder || TRACKS;
   return S.renderBuffer(dur, function (c, dest, t0) {
+    /* master chain: gain -> master EQ -> limiter -> out */
+    var mfx = (arr.fx && arr.fx.master) || {};
+    var masterIn = c.createGain();
+    var ml = c.createBiquadFilter(); ml.type = "lowshelf"; ml.frequency.value = 120; ml.gain.value = mfx.eqLow || 0;
+    var mm = c.createBiquadFilter(); mm.type = "peaking"; mm.frequency.value = 1500; mm.Q.value = 0.7; mm.gain.value = mfx.eqMid || 0;
+    var mh = c.createBiquadFilter(); mh.type = "highshelf"; mh.frequency.value = 8000; mh.gain.value = mfx.eqHigh || 0;
+    masterIn.connect(ml); ml.connect(mm); mm.connect(mh);
+    if (mfx.limiter) {
+      var lim = c.createDynamicsCompressor();
+      lim.threshold.value = -1.5; lim.knee.value = 0; lim.ratio.value = 20; lim.attack.value = 0.002; lim.release.value = 0.1;
+      mh.connect(lim); lim.connect(dest);
+    } else { mh.connect(dest); }
     var ch = {}, i;
-    for (i = 0; i < TRACKS.length; i++) {
-      var n = TRACKS[i], g = c.createGain();
-      g.gain.value = (mix && mix[n] && mix[n].v != null) ? mix[n].v : 1;
-      var pan = (mix && mix[n] && mix[n].pan != null) ? mix[n].pan : 0, out = g;
-      if (c.createStereoPanner) { var sp = c.createStereoPanner(); sp.pan.value = Math.max(-1, Math.min(1, pan)); g.connect(sp); out = sp; }
-      out.connect(dest); ch[n] = g;
+    for (i = 0; i < ids.length; i++) {
+      var id = ids[i], g = c.createGain();
+      g.gain.value = (mix && mix[id] && mix[id].v != null) ? mix[id].v : 1;
+      var ins = fxInsert(c, t0, bpm, arr.fx && arr.fx.tracks ? arr.fx.tracks[id] : null);
+      var pan = (mix && mix[id] && mix[id].pan != null) ? mix[id].pan : 0, pout = ins.output;
+      g.connect(ins.input);
+      if (c.createStereoPanner) { var sp = c.createStereoPanner(); sp.pan.value = Math.max(-1, Math.min(1, pan)); pout.connect(sp); pout = sp; }
+      pout.connect(masterIn);
+      ch[id] = g;
     }
     var s, b, gb = 0, t = t0;
-    var voice = shimFindVoice(arr.tracks.vocal.voice);
+    var leadT = leadTrack(arr), vId = null;
+    for (i = 0; i < ids.length; i++) if (arr.tracks[ids[i]] && arr.tracks[ids[i]].type === "vocal") { vId = ids[i]; break; }
+    var voice = vId ? shimFindVoice(arr.tracks[vId].voice) : null;
     for (s = 0; s < arr.sections.length; s++) {
       var sec = arr.sections[s], sv = (sec.vol != null ? sec.vol : 1);
       for (b = 0; b < sec.bars; b++, gb++) {
-        var bt = t + b * bsec, bi = gb % 4, k;
-        /* drums */
-        var dst = arr.tracks.drums, st = dst.steps;
-        for (k = 0; k < 16; k++) {
-          var ht = bt + k * step, vv = sv * (dst.accentLane && st[dst.accentLane][k] ? 1.15 : 1);
-          if (st.kick[k]) S.kick(c, ch.drums, ht, vv);
-          if (st.snare[k]) S.snare(c, ch.drums, ht, vv);
-          if (st.hat[k]) S.hat(c, ch.drums, ht, vv * 0.9, k % 4 === 3);
-          if (st.clap[k]) S.clap(c, ch.drums, ht, vv);
-          if (st.tom[k]) S.tom(c, ch.drums, ht, vv, 50);
-          if (st.shaker[k]) S.shaker(c, ch.drums, ht, vv);
-        }
-        /* bass */
-        if (arr.tracks.bass.barOn[bi]) {
-          var bn = arr.tracks.bass.bars[bi];
-          for (k = 0; k < bn.length; k++) if (bn[k] > 0) S.tone(c, ch.bass, bt + k * (60 / bpm), bn[k], (60 / bpm) * 0.92, arr.tracks.bass.voice, 0.9);
-        }
-        /* chords */
-        if (arr.tracks.chords.barOn[bi]) {
-          var cn = arr.tracks.chords.bars[bi];
-          for (k = 0; k < cn.length; k++) if (cn[k] > 0) S.tone(c, ch.chords, bt, cn[k], bsec * 0.95, arr.tracks.chords.voice, 0.5);
-        }
-        /* lead + vocal (vocal sings the lead line an octave down) */
-        if (arr.tracks.lead.barOn[bi]) {
-          var lb = arr.tracks.lead.bars[bi];
-          for (k = 0; k < lb.length; k++) {
-            var cell = lb[k];
-            if (cell && cell.midi > 0) {
-              S.tone(c, ch.lead, bt + k * step, cell.midi, cell.len * step * 0.92, arr.tracks.lead.voice, 0.75);
-              if (voice && arr.tracks.vocal.barOn[bi]) S.singNote(c, ch.vocal, bt + k * step, cell.midi + (arr.tracks.vocal.oct || -12), cell.len * step * 0.92, voice, 0.8);
+        var bt = t + b * bsec, bi = gb % 4, k, id2, tr;
+        for (i = 0; i < ids.length; i++) {
+          id2 = ids[i]; tr = arr.tracks[id2]; if (!tr) continue;
+          var type = tr.type || id2;
+          if (type === "drums") {
+            var st = tr.steps;
+            for (k = 0; k < 16; k++) {
+              var ht = bt + k * step, vv = sv * (tr.accentLane && st[tr.accentLane][k] ? 1.15 : 1);
+              if (st.kick[k]) S.kick(c, ch[id2], ht, vv);
+              if (st.snare[k]) S.snare(c, ch[id2], ht, vv);
+              if (st.hat[k]) S.hat(c, ch[id2], ht, vv * 0.9, k % 4 === 3);
+              if (st.clap[k]) S.clap(c, ch[id2], ht, vv);
+              if (st.tom[k]) S.tom(c, ch[id2], ht, vv, 50);
+              if (st.shaker[k]) S.shaker(c, ch[id2], ht, vv);
+            }
+          } else if (type === "bass") {
+            if (tr.barOn[bi]) {
+              var bn = tr.bars[bi];
+              for (k = 0; k < bn.length; k++) if (bn[k] > 0) S.tone(c, ch[id2], bt + k * (60 / bpm), bn[k], (60 / bpm) * 0.92, tr.voice, 0.9 * sv);
+            }
+          } else if (type === "chords") {
+            if (tr.barOn[bi]) {
+              var cn = tr.bars[bi];
+              for (k = 0; k < cn.length; k++) if (cn[k] > 0) S.tone(c, ch[id2], bt, cn[k], bsec * 0.95, tr.voice, 0.5 * sv);
+            }
+          } else if (type === "lead") {
+            if (tr.barOn[bi]) {
+              var lb = tr.bars[bi];
+              for (k = 0; k < lb.length; k++) {
+                var cell = lb[k];
+                if (cell && cell.midi > 0) S.tone(c, ch[id2], bt + k * step, cell.midi, cell.len * step * 0.92, tr.voice, 0.75 * sv);
+              }
+            }
+          } else if (type === "vocal") {
+            if (voice && leadT && tr.barOn[bi] && leadT.barOn[bi]) {
+              var vlb = leadT.bars[bi];
+              for (k = 0; k < vlb.length; k++) {
+                var vc = vlb[k];
+                if (vc && vc.midi > 0) S.singNote(c, ch[id2], bt + k * step, vc.midi + (tr.oct || -12), vc.len * step * 0.92, voice, 0.8 * sv);
+              }
+            }
+          } else if (type === "audio") {
+            var clips = tr.clips || [];
+            for (k = 0; k < clips.length; k++) {
+              var clip = clips[k];
+              if (clip.startBar === gb) {
+                var buf = W.__m3getClip ? W.__m3getClip(clip.key) : null;
+                if (buf) { var asrc = c.createBufferSource(); asrc.buffer = buf; asrc.connect(ch[id2]); asrc.start(bt); }
+              }
             }
           }
         }
@@ -515,10 +851,11 @@ function status(msg) { var s = $("status"); if (s) s.textContent = msg; }
 function seedLabel() { return "m3:" + ARR.seed + " | " + ARR.genre + " " + ARR.mood + " | " + ARR.bpm + " BPM | key " + ARR.keyName; }
 function syncSeed() { var s = $("seedline"); if (s) s.textContent = seedLabel(); }
 function aiChoices() {
-  var parts = [], i;
-  for (i = 0; i < TRACKS.length; i++) {
-    var n = TRACKS[i], t = ARR.tracks[n];
-    parts.push(TRACK_PLAIN[n] + " " + (t.src === "ai" ? "ai#" + t.varn : "your edit") + (t.mute ? " (muted)" : ""));
+  var parts = [], i, ids = ARR.trackOrder || TRACKS;
+  for (i = 0; i < ids.length; i++) {
+    var id = ids[i], t = ARR.tracks[id]; if (!t) continue;
+    var lbl = (TRACK_LABEL[id] ? TRACK_PLAIN[id] : t.name) || id;
+    parts.push(lbl + " " + (t.src === "ai" ? "ai#" + t.varn : "your edit") + (t.mute ? " (muted)" : ""));
   }
   var secs = ARR.sections.map(function (x) { return x.name + " " + x.bars; }).join(" \u00B7 ");
   var box = $("aichoices");
@@ -528,13 +865,15 @@ function aiChoices() {
 }
 
 /* ================= track lanes ================= */
-function voiceSelect(name, cur) {
+function voiceSelect(id) {
+  var t = ARR.tracks[id], type = t.type || id, cur = t.voice;
   var vwrap = el("span");
-  if (name === "drums") { vwrap.appendChild(el("span", "hintline", "Standard kit")); return vwrap; }
+  if (type === "drums") { vwrap.appendChild(el("span", "hintline", "Standard kit")); return vwrap; }
+  if (type === "audio") { vwrap.appendChild(el("span", "hintline", "your clips")); return vwrap; }
   var sel = DOC.createElement("select");
-  sel.setAttribute("id", "i-" + name);
-  sel.setAttribute("aria-label", TRACK_PLAIN[name] + " sound");
-  var opts = TRACK_VOICES[name], i;
+  sel.setAttribute("id", "i-" + id);
+  sel.setAttribute("aria-label", (t.name || type) + " sound");
+  var opts = TRACK_VOICES[type] || [], i;
   for (i = 0; i < opts.length; i++) {
     var o = DOC.createElement("option");
     o.setAttribute("value", opts[i]); o.value = opts[i]; o.textContent = VOICE_NAMES[opts[i]] || opts[i];
@@ -548,73 +887,109 @@ function voiceSelect(name, cur) {
 function buildLanes() {
   var box = $("lanes"); if (!box) return;
   box.innerHTML = "";
-  var i;
-  for (i = 0; i < TRACKS.length; i++) (function (name) {
-    var t = ARR.tracks[name];
-    var lane = el("div", "lane card"); lane.setAttribute("id", "lane-" + name);
+  var i, ids = ARR.trackOrder || TRACKS;
+  for (i = 0; i < ids.length; i++) (function (id) {
+    var t = ARR.tracks[id]; if (!t) return;
+    var type = t.type || id, plain = t.name || TRACK_PLAIN[type] || id;
+    var lane = el("div", "lane card"); lane.setAttribute("id", "lane-" + id);
     var head = el("div", "lanehead"); lane.appendChild(head);
-    head.appendChild(el("span", "tname", TRACK_LABEL[name]));
-    var mb = el("button", "tbtn" + (t.mute ? " on-m" : ""), "M"); mb.setAttribute("id", "m-" + name); mb.setAttribute("type", "button"); mb.setAttribute("title", "Mute"); mb.setAttribute("aria-label", "Mute " + TRACK_PLAIN[name]);
-    var sb = el("button", "tbtn" + (t.solo ? " on-s" : ""), "S"); sb.setAttribute("id", "s-" + name); sb.setAttribute("type", "button"); sb.setAttribute("title", "Solo"); sb.setAttribute("aria-label", "Solo " + TRACK_PLAIN[name]);
-    var vol = DOC.createElement("input"); vol.setAttribute("type", "range"); vol.setAttribute("id", "v-" + name);
+    head.appendChild(el("span", "tname", trackLabel(id)));
+    var mb = el("button", "tbtn" + (t.mute ? " on-m" : ""), "M"); mb.setAttribute("id", "m-" + id); mb.setAttribute("type", "button"); mb.setAttribute("title", "Mute"); mb.setAttribute("aria-label", "Mute " + plain);
+    var sb = el("button", "tbtn" + (t.solo ? " on-s" : ""), "S"); sb.setAttribute("id", "s-" + id); sb.setAttribute("type", "button"); sb.setAttribute("title", "Solo"); sb.setAttribute("aria-label", "Solo " + plain);
+    var vol = DOC.createElement("input"); vol.setAttribute("type", "range"); vol.setAttribute("id", "v-" + id);
     vol.setAttribute("min", "0"); vol.setAttribute("max", "100"); vol.value = String(Math.round(t.vol * 100));
-    vol.setAttribute("aria-label", TRACK_PLAIN[name] + " volume");
-    var ai = el("button", "btn ghost", "\uD83E\uDD16 AI: write this part"); ai.setAttribute("id", "a-" + name); ai.setAttribute("type", "button");
-    var pv = el("button", "btn ghost", "\u25B6"); pv.setAttribute("id", "p-" + name); pv.setAttribute("type", "button"); pv.setAttribute("title", "Preview this track"); pv.setAttribute("aria-label", "Preview " + TRACK_PLAIN[name]);
+    vol.setAttribute("aria-label", plain + " volume");
+    var pv = el("button", "btn ghost", "\u25B6"); pv.setAttribute("id", "p-" + id); pv.setAttribute("type", "button"); pv.setAttribute("title", "Preview this track"); pv.setAttribute("aria-label", "Preview " + plain);
     head.appendChild(mb); head.appendChild(sb); head.appendChild(vol);
-    head.appendChild(voiceSelect(name, t.voice));
-    head.appendChild(ai); head.appendChild(pv);
-    var body = el("div"); body.setAttribute("id", "grid-" + name); lane.appendChild(body);
+    head.appendChild(voiceSelect(id));
+    if (type !== "audio") {
+      var ai = el("button", "btn ghost", "\uD83E\uDD16 AI: write this part"); ai.setAttribute("id", "a-" + id); ai.setAttribute("type", "button");
+      head.appendChild(ai);
+      on(ai, "click", function () { Studio.unlock(); reRollTrack(ARR, id); refreshLane(id); syncMixer(); aiChoices(); status("AI wrote a new " + plain + " part (variation #" + ARR.tracks[id].varn + ")."); });
+    } else {
+      head.appendChild(el("span", "hintline", "add clips in the Your audio section below"));
+    }
+    head.appendChild(pv);
+    if (TRACKS.indexOf(id) < 0) {
+      var del = el("button", "tbtn", "\u2715"); del.setAttribute("id", "x-" + id); del.setAttribute("type", "button");
+      del.setAttribute("title", "Remove this track"); del.setAttribute("aria-label", "Remove track " + plain);
+      head.appendChild(del);
+      on(del, "click", function () { if (removeTrack(id)) { buildLanes(); buildMixer(); aiChoices(); if (W.__m3fxRefresh) W.__m3fxRefresh(); status("Removed track \u201C" + plain + "\u201D."); } });
+    }
+    var body = el("div"); body.setAttribute("id", "grid-" + id); lane.appendChild(body);
     box.appendChild(lane);
     on(mb, "click", function () { Studio.unlock(); t.mute = !t.mute; mb.setAttribute("class", "tbtn" + (t.mute ? " on-m" : "")); syncMixer(); aiChoices(); });
     on(sb, "click", function () { Studio.unlock(); t.solo = !t.solo; sb.setAttribute("class", "tbtn" + (t.solo ? " on-s" : "")); syncMixer(); aiChoices(); });
     on(vol, "input", function () { t.vol = (parseInt(vol.value, 10) || 0) / 100; syncMixer(); });
     var vsel = head.querySelector("select");
-    if (vsel) on(vsel, "change", function () { t.voice = vsel.value; t.src = "you"; aiChoices(); status(TRACK_PLAIN[name] + " sound: " + (VOICE_NAMES[t.voice] || t.voice)); });
-    on(ai, "click", function () { Studio.unlock(); reRollTrack(ARR, name); refreshLane(name); syncMixer(); aiChoices(); status("AI wrote a new " + TRACK_PLAIN[name] + " part (variation #" + ARR.tracks[name].varn + ")."); });
-    on(pv, "click", function () { previewTrack(name); });
-    renderLaneBody(name);
-  })(TRACKS[i]);
+    if (vsel) on(vsel, "change", function () { t.voice = vsel.value; t.src = "you"; aiChoices(); status(plain + " sound: " + (VOICE_NAMES[t.voice] || t.voice)); });
+    on(pv, "click", function () { previewTrack(id); });
+    renderLaneBody(id);
+  })(ids[i]);
 }
-function refreshLane(name) {
-  var t = ARR.tracks[name];
-  var mb = $("m-" + name), sb = $("s-" + name), vol = $("v-" + name);
+function refreshLane(id) {
+  var t = ARR.tracks[id]; if (!t) return;
+  var mb = $("m-" + id), sb = $("s-" + id), vol = $("v-" + id);
   if (mb) mb.setAttribute("class", "tbtn" + (t.mute ? " on-m" : ""));
   if (sb) sb.setAttribute("class", "tbtn" + (t.solo ? " on-s" : ""));
   if (vol) vol.value = String(Math.round(t.vol * 100));
-  var lane = $("lane-" + name);
+  var lane = $("lane-" + id);
   if (lane) { var vsel = lane.querySelector("select"); if (vsel && t.voice) vsel.value = t.voice; }
-  renderLaneBody(name);
+  renderLaneBody(id);
 }
-function renderLaneBody(name) {
-  var body = $("grid-" + name); if (!body) return;
-  var t = ARR.tracks[name], i, k;
+function renderLaneBody(id) {
+  var body = $("grid-" + id); if (!body) return;
+  var t = ARR.tracks[id]; if (!t) return;
+  var type = t.type || id, i, k;
   body.innerHTML = "";
-  if (name === "drums") {
+  if (type === "drums") {
     for (i = 0; i < DRUM_LANES.length; i++) (function (lane, li) {
       var lab = el("span", "llab", DRUM_NAMES[lane]); body.appendChild(lab);
       for (k = 0; k < 16; k++) (function (st) {
         var c = el("button", "stepcell" + (t.steps[lane][st] ? " on" : "") + (st % 4 === 0 ? " beat4" : ""));
-        c.setAttribute("type", "button"); c.setAttribute("data-t", name); c.setAttribute("data-l", lane); c.setAttribute("data-s", String(st));
+        c.setAttribute("type", "button"); c.setAttribute("data-t", id); c.setAttribute("data-l", lane); c.setAttribute("data-s", String(st));
         c.setAttribute("aria-label", DRUM_NAMES[lane] + " step " + (st + 1));
-        on(c, "click", function () { Studio.unlock(); var v = toggleStep(ARR, name, lane, st); c.setAttribute("class", "stepcell" + (v ? " on" : "") + (st % 4 === 0 ? " beat4" : "")); aiChoices(); });
+        on(c, "click", function () { Studio.unlock(); var v = toggleStep(ARR, id, lane, st); c.setAttribute("class", "stepcell" + (v ? " on" : "") + (st % 4 === 0 ? " beat4" : "")); aiChoices(); });
         body.appendChild(c);
       })(k);
     })(DRUM_LANES[i], i);
+  } else if (type === "audio") {
+    var wrap = el("div", "audlane"); body.appendChild(wrap);
+    var clips = t.clips || [];
+    if (!clips.length) wrap.appendChild(el("p", "hintline", "No clips yet — upload a file or record with your mic in the \u201CYour audio\u201D section below, then press \u201CPut on an Audio track\u201D."));
+    for (i = 0; i < clips.length; i++) (function (clip) {
+      var row = el("div", "cliprow");
+      var nm = W.__m3clipName ? W.__m3clipName(clip.key) : clip.key;
+      row.appendChild(el("span", "cname", nm + " "));
+      var barLab = el("span", "hintline", "starts at bar "); row.appendChild(barLab);
+      var binp = DOC.createElement("input");
+      binp.setAttribute("type", "number"); binp.setAttribute("min", "0"); binp.setAttribute("max", String(totalBars(ARR)));
+      binp.setAttribute("value", String(clip.startBar || 0)); binp.setAttribute("class", "txt"); binp.style.width = "4rem";
+      binp.setAttribute("aria-label", "Clip start bar");
+      on(binp, "change", function () { var v = parseInt(binp.value, 10); clip.startBar = isNaN(v) ? 0 : Math.max(0, Math.min(totalBars(ARR), v)); status("Clip starts at bar " + (clip.startBar + 1) + "."); });
+      row.appendChild(binp);
+      var pv = el("button", "tbtn", "\u25B6"); pv.setAttribute("type", "button"); pv.setAttribute("aria-label", "Play clip");
+      on(pv, "click", function () { Studio.unlock(); if (W.__m3clipPlay) W.__m3clipPlay(clip.key); });
+      var rm = el("button", "tbtn", "\u2715"); rm.setAttribute("type", "button"); rm.setAttribute("aria-label", "Remove clip from track");
+      on(rm, "click", function () { t.clips = t.clips.filter(function (x) { return x !== clip; }); renderLaneBody(id); status("Clip removed from this track (still in your clip list below)."); });
+      row.appendChild(pv); row.appendChild(rm);
+      wrap.appendChild(row);
+    })(clips[i]);
   } else {
-    var wrap = el("div", "barblocks"); body.appendChild(wrap);
+    var wrap2 = el("div", "barblocks"); body.appendChild(wrap2);
+    var lt = leadTrack(ARR);
     for (i = 0; i < 4; i++) (function (bi) {
       var bb = el("div", "barblock" + (t.barOn[bi] ? "" : " off"));
-      bb.setAttribute("data-t", name); bb.setAttribute("data-b", String(bi));
+      bb.setAttribute("data-t", id); bb.setAttribute("data-b", String(bi));
       bb.appendChild(el("div", "btag", "Bar " + (bi + 1)));
       var notes;
-      if (name === "bass" || name === "chords") notes = t.bars[bi];
-      else if (name === "lead") notes = t.bars[bi].filter(function (x) { return x; }).map(function (x) { return x.midi; });
-      else notes = (ARR.tracks.lead.bars[bi].filter(function (x) { return x; }).map(function (x) { return x.midi + (t.oct || -12); }));
-      for (k = 0; k < notes.length; k++) bb.appendChild(el("span", "barnote" + (name === "bass" ? " b" : name === "chords" ? " c" : ""), S.noteName(notes[k])));
+      if (type === "bass" || type === "chords") notes = t.bars[bi];
+      else if (type === "lead") notes = t.bars[bi].filter(function (x) { return x; }).map(function (x) { return x.midi; });
+      else notes = lt ? lt.bars[bi].filter(function (x) { return x; }).map(function (x) { return x.midi + (t.oct || -12); }) : [];
+      for (k = 0; k < notes.length; k++) bb.appendChild(el("span", "barnote" + (type === "bass" ? " b" : type === "chords" ? " c" : ""), S.noteName(notes[k])));
       bb.setAttribute("title", "Tap to switch bar " + (bi + 1) + " " + (t.barOn[bi] ? "off" : "on"));
-      on(bb, "click", function () { Studio.unlock(); var v = toggleBar(ARR, name, bi); bb.setAttribute("class", "barblock" + (v ? "" : " off")); bb.setAttribute("title", "Tap to switch bar " + (bi + 1) + " " + (v ? "off" : "on")); aiChoices(); });
-      wrap.appendChild(bb);
+      on(bb, "click", function () { Studio.unlock(); var v = toggleBar(ARR, id, bi); bb.setAttribute("class", "barblock" + (v ? "" : " off")); bb.setAttribute("title", "Tap to switch bar " + (bi + 1) + " " + (v ? "off" : "on")); aiChoices(); });
+      wrap2.appendChild(bb);
     })(i);
   }
 }
@@ -622,30 +997,30 @@ function renderLaneBody(name) {
 function buildMixer() {
   var box = $("mixer"); if (!box) return;
   box.innerHTML = "";
-  var i;
-  for (i = 0; i < TRACKS.length; i++) (function (name) {
-    var t = ARR.tracks[name];
+  var i, ids = ARR.trackOrder || TRACKS;
+  for (i = 0; i < ids.length; i++) (function (id) {
+    var t = ARR.tracks[id]; if (!t) return;
     var ch = el("div", "chan");
-    ch.appendChild(el("label", "", TRACK_LABEL[name]));
-    var f = DOC.createElement("input"); f.setAttribute("type", "range"); f.setAttribute("id", "f-" + name);
+    ch.appendChild(el("label", "", trackLabel(id)));
+    var f = DOC.createElement("input"); f.setAttribute("type", "range"); f.setAttribute("id", "f-" + id);
     f.setAttribute("min", "0"); f.setAttribute("max", "100"); f.value = String(Math.round(t.vol * 100));
-    f.setAttribute("aria-label", TRACK_PLAIN[name] + " fader");
-    var fv = el("div", "fval", Math.round(t.vol * 100) + ""); fv.setAttribute("id", "fv-" + name);
-    var pl = el("label", "hintline", "Pan"); pl.setAttribute("for", "pan-" + name);
-    var p = DOC.createElement("input"); p.setAttribute("type", "range"); p.setAttribute("id", "pan-" + name);
+    f.setAttribute("aria-label", (t.name || id) + " fader");
+    var fv = el("div", "fval", Math.round(t.vol * 100) + ""); fv.setAttribute("id", "fv-" + id);
+    var pl = el("label", "hintline", "Pan"); pl.setAttribute("for", "pan-" + id);
+    var p = DOC.createElement("input"); p.setAttribute("type", "range"); p.setAttribute("id", "pan-" + id);
     p.setAttribute("min", "-50"); p.setAttribute("max", "50"); p.value = String(Math.round((t.pan || 0) * 50));
-    p.setAttribute("aria-label", TRACK_PLAIN[name] + " pan");
+    p.setAttribute("aria-label", (t.name || id) + " pan");
     ch.appendChild(f); ch.appendChild(fv); ch.appendChild(pl); ch.appendChild(p);
     box.appendChild(ch);
-    on(f, "input", function () { t.vol = (parseInt(f.value, 10) || 0) / 100; fv.textContent = f.value; var v = $("v-" + name); if (v) v.value = f.value; });
+    on(f, "input", function () { t.vol = (parseInt(f.value, 10) || 0) / 100; fv.textContent = f.value; var v = $("v-" + id); if (v) v.value = f.value; });
     on(p, "input", function () { t.pan = (parseInt(p.value, 10) || 0) / 50; });
-  })(TRACKS[i]);
+  })(ids[i]);
 }
 function syncMixer() {
-  var i;
-  for (i = 0; i < TRACKS.length; i++) {
-    var name = TRACKS[i], t = ARR.tracks[name];
-    var f = $("f-" + name), fv = $("fv-" + name), p = $("pan-" + name);
+  var i, ids = ARR.trackOrder || TRACKS;
+  for (i = 0; i < ids.length; i++) {
+    var id = ids[i], t = ARR.tracks[id]; if (!t) continue;
+    var f = $("f-" + id), fv = $("fv-" + id), p = $("pan-" + id);
     if (f) f.value = String(Math.round(t.vol * 100));
     if (fv) fv.textContent = String(Math.round(t.vol * 100));
     if (p) p.value = String(Math.round((t.pan || 0) * 50));
@@ -702,14 +1077,14 @@ function playAll() {
     status("Couldn't render: " + (err && err.message ? err.message : err) + " (sound needs a real browser \u2014 try it on your device).");
   });
 }
-function previewTrack(name) {
+function previewTrack(id) {
   Studio.unlock();
-  status("Rendering " + TRACK_PLAIN[name] + " preview\u2026");
-  var mix = { master: 1 }, i;
-  for (i = 0; i < TRACKS.length; i++) mix[TRACKS[i]] = { v: TRACKS[i] === name ? 1 : 0, pan: 0 };
-  var slim = { seed: ARR.seed, desc: ARR.desc, genre: ARR.genre, mood: ARR.mood, bpm: ARR.bpm, keyRoot: ARR.keyRoot, keyName: ARR.keyName, tracks: ARR.tracks, sections: [{ name: "Preview", bars: 8, vol: 1 }] };
+  status("Rendering " + (ARR.tracks[id] ? ARR.tracks[id].name : id) + " preview\u2026");
+  var mix = { master: 1 }, i, ids = ARR.trackOrder || TRACKS;
+  for (i = 0; i < ids.length; i++) mix[ids[i]] = { v: ids[i] === id ? 1 : 0, pan: 0 };
+  var slim = { seed: ARR.seed, desc: ARR.desc, genre: ARR.genre, mood: ARR.mood, bpm: ARR.bpm, keyRoot: ARR.keyRoot, keyName: ARR.keyName, tracks: ARR.tracks, trackOrder: ids, fx: ARR.fx, sections: [{ name: "Preview", bars: 8, vol: 1 }] };
   Studio.renderSongBuffer(slim, mix).then(function (buf) {
-    try { S.playBuffer(buf, "m3"); status("Previewing " + TRACK_PLAIN[name] + "."); }
+    try { S.playBuffer(buf, "m3"); status("Previewing " + (ARR.tracks[id] ? ARR.tracks[id].name : id) + "."); }
     catch (e) { status("Couldn't play the preview: " + e.message); }
   }, function (err) { status("Couldn't render the preview: " + (err && err.message ? err.message : err) + "."); });
 }
@@ -784,7 +1159,7 @@ function aiAnswer(q) {
   if (/finish|complete/.test(s)) return "Press \u201CFinish my song\u201D and I'll fill any empty tracks and expand the arrangement to the full intro\u2013verse\u2013chorus\u2013bridge\u2013outro form, keeping your edits.";
   if (/tip|idea|stuck/.test(s)) { var t = AITIPS[tipIx % AITIPS.length]; tipIx++; return t; }
   if (/mix|volume|loud/.test(s)) return "Use the mixer faders per track \u2014 drums usually sit at 80\u2013100, bass at 90\u2013100, and the vocal a touch above the lead. Mute/solo are in each lane header.";
-  if (/export|wav|mp3|download/.test(s)) return "Export the full mix as WAV (uncompressed, same as you hear), grab the Pattern JSON to share the arrangement, or save the project to come back later. MP3 needs an encoder browsers don't ship \u2014 that's why the button says so honestly.";
+  if (/export|wav|mp3|download/.test(s)) return "Export the full mix as WAV (uncompressed, same as you hear), as MP3 (encoded right here in your browser), or as MIDI notes — grab the Pattern JSON to share the arrangement, or save the project to come back later.";
   if (/voice|sing/.test(s)) return "The Vocal track sings your lead line with one of four built-in created voices \u2014 Nova, Ember, Drift, Stone. All synthesized in your browser, no human singers, nothing uploaded.";
   return "I'm the built-in studio helper \u2014 I arrange, finish and explain right here in your browser (no cloud, nothing leaves your device). Try \u201Cgive me a tip\u201D, or press \u201CAI: Arrange for me\u201D above.";
 }
@@ -811,17 +1186,18 @@ function hostSay(text) {
 function doArrange() {
   Studio.unlock();
   var desc = $("aidesc") ? $("aidesc").value : "my song";
-  ARR = buildArrangement(desc);
+  ARR = carryAudio(ARR, buildArrangement(desc));
   buildLanes(); buildMixer(); syncEditors(); syncSeed(); aiChoices();
   hostSay("Arranged \u201C" + ARR.desc + "\u201D \u2014 " + ARR.genre + ", " + ARR.bpm + " BPM, key " + ARR.keyName + ", " + totalBars(ARR) + " bars. Every part is editable: tap steps, switch bars, change sounds, move faders.");
   status("Arranged \u201C" + ARR.desc + "\u201D. Press \u25B6 Play all.");
 }
 function doFinish() {
   Studio.unlock();
-  var done = [], i;
-  for (i = 0; i < TRACKS.length; i++) {
-    var n = TRACKS[i];
-    if (trackEmpty(n, ARR.tracks[n])) { reRollTrack(ARR, n); done.push(TRACK_PLAIN[n]); }
+  var done = [], i, ids = ARR.trackOrder || TRACKS;
+  for (i = 0; i < ids.length; i++) {
+    var id = ids[i], t = ARR.tracks[id];
+    if (!t || t.type === "audio") continue;
+    if (trackEmpty(id, t)) { reRollTrack(ARR, id); done.push(t.name || id); }
   }
   if (totalBars(ARR) < 16 || ARR.sections.length < 3) { ARR.sections = fullSections(); done.push("full arrangement"); }
   ARR.aiNote = "Finished by the helper: " + (done.length ? done.join(", ") + " completed." : "nothing was missing.");
@@ -882,7 +1258,7 @@ function renderProjects() {
     var del = el("button", "tbtn", "Delete"); del.setAttribute("type", "button");
     on(load, "click", function () {
       var rec = Studio.myProjects.get(p.name);
-      if (rec && rec.arr) { ARR = rec.arr; if ($("aidesc")) $("aidesc").value = ARR.desc || ""; buildLanes(); buildMixer(); syncEditors(); syncSeed(); aiChoices(); status("Loaded \u201C" + p.name + "\u201D."); }
+      if (rec && rec.arr) { ARR = migrateArr(rec.arr); if ($("aidesc")) $("aidesc").value = ARR.desc || ""; buildLanes(); buildMixer(); syncEditors(); syncSeed(); aiChoices(); status("Loaded \u201C" + p.name + "\u201D."); }
     });
     on(del, "click", function () { Studio.myProjects.remove(p.name); renderProjects(); status("Deleted \u201C" + p.name + "\u201D."); });
     row.appendChild(load); row.appendChild(del);
@@ -942,7 +1318,7 @@ function boot() {
     if (m) desc = decodeURIComponent(m[1].replace(/\+/g, " "));
   } catch (e) {}
   if ($("aidesc")) $("aidesc").value = desc;
-  ARR = buildArrangement(desc);
+  ARR = migrateArr(buildArrangement(desc));
   buildLanes(); buildMixer(); bindEditors(); syncEditors(); syncSeed(); aiChoices();
   buildAI();
   on($("btnarrange"), "click", doArrange);
@@ -964,12 +1340,1305 @@ W.__m3 = {
   buildArrangement: buildArrangement, buildTrack: buildTrack, reRollTrack: reRollTrack,
   mixOf: mixOf, toggleStep: toggleStep, toggleBar: toggleBar, trackEmpty: trackEmpty,
   searchLibrary: searchLibrary, currentChords: currentChords, totalBars: totalBars,
-  getArr: function () { return ARR; }, setArr: function (a) { ARR = a; },
-  Studio: function () { return Studio; }, TRACKS: TRACKS
+  addTrack: addTrack, removeTrack: removeTrack, migrateArr: migrateArr, leadTrack: leadTrack,
+  carryAudio: carryAudio,
+  trackLabel: trackLabel, defaultFx: defaultFx, defaultTrackFx: defaultTrackFx,
+  buildLanes: buildLanes, buildMixer: buildMixer, syncSeed: syncSeed, aiChoices: aiChoices,
+  syncEditors: syncEditors, refreshLane: refreshLane, renderLaneBody: renderLaneBody,
+  renderArr: renderArr, impulseBuf: impulseBuf, fxInsert: fxInsert,
+  hostSay: hostSay, status: status, el: el, on: on, esc: esc,
+  getArr: function () { return ARR; }, setArr: function (a) { ARR = migrateArr(a); },
+  Studio: function () { return Studio; }, TRACKS: TRACKS, TRACK_PLAIN: TRACK_PLAIN,
+  VOICE_NAMES: VOICE_NAMES, TRACK_VOICES: TRACK_VOICES, DRUM_LANES: DRUM_LANES,
+  SigSynth: function () { return S; }, SigData: function () { return D; }
 };
 if (DOC.readyState === "complete" || DOC.readyState === "interactive") boot();
 else on(DOC, "DOMContentLoaded", boot);
 })(typeof window !== "undefined" ? window : this);
+</script>
+<script id="m3lab">
+/* ============================================================
+   Song Maker Option 3 — Studio Lab (script 2 of maker3.html).
+   The full-studio feature build: starter templates, beat maker,
+   playable instruments, piano roll, original loop library, AI idea
+   starter, per-track FX suite, audio upload + mic recording,
+   audio-to-MIDI, voice tools, one-tap mastering, MIDI export,
+   and extra AI host ideas. ES5-safe. Depends on script 1's
+   window.__m3 hooks + window.SigSynth + window.SigData.
+   Everything is synthesized or user-provided. Nothing uploaded.
+   ============================================================ */
+(function (W) {
+"use strict";
+var DOC = W.document;
+function $(id) { return DOC.getElementById(id); }
+function el(tag, cls, text) {
+  var e = DOC.createElement(tag);
+  if (cls) e.setAttribute("class", cls);
+  if (text != null) e.textContent = String(text);
+  return e;
+}
+function on(elm, ev, fn) { if (elm && elm.addEventListener) elm.addEventListener(ev, fn); }
+function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+var M = W.__m3 || {};
+var S = W.SigSynth, D = W.SigData;
+function Studio() { return M.Studio ? M.Studio() : null; }
+function ARR() { return M.getArr ? M.getArr() : null; }
+function status(m) { if (M.status) M.status(m); }
+function hasAll() { return !!(M && M.getArr && S && D && S.patternFor && S.renderBuffer); }
+function trackType(id) { var a = ARR(), t = a && a.tracks ? a.tracks[id] : null; return t ? (t.type || id) : id; }
+function firstTrackOf(type) {
+  var a = ARR(); if (!a) return null;
+  var ids = a.trackOrder || [], i;
+  for (i = 0; i < ids.length; i++) { var t = a.tracks[ids[i]]; if (t && (t.type || ids[i]) === type) return t; }
+  return null;
+}
+function slug(s) { return String(s == null ? "" : s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40) || "song"; }
+
+/* ================= clip store (uploaded / recorded / processed audio) ================= */
+var CLIPS = {}, clipSeq = 1;
+function addClip(name, buffer) {
+  var key = "clip" + (clipSeq++);
+  CLIPS[key] = { key: key, name: String(name || "clip"), buffer: buffer, seconds: buffer.duration || 0 };
+  refreshClipUI();
+  return key;
+}
+function clipKeys() { var k, out = []; for (k in CLIPS) if (CLIPS.hasOwnProperty(k)) out.push(k); return out; }
+W.__m3getClip = function (key) { var c = CLIPS[key]; return c ? c.buffer : null; };
+W.__m3clipName = function (key) { var c = CLIPS[key]; return c ? c.name : key; };
+W.__m3clipPlay = function (key) {
+  var b = W.__m3getClip(key);
+  if (b) { try { if (Studio()) Studio().unlock(); S.playBuffer(b, "m3clip"); } catch (e) { status("Couldn't play that clip: " + e.message); } }
+  else status("That clip's audio isn't loaded right now.");
+};
+
+/* ================= shared live bus (beat maker, roll, instruments) ================= */
+var liveBus = null;
+function bus() {
+  var c = S.ensureCtx ? S.ensureCtx() : null;
+  if (!c) return null;
+  if (!liveBus) { liveBus = c.createGain(); liveBus.gain.value = 0.9; liveBus.connect(c.destination); }
+  return liveBus;
+}
+
+/* ================= 12. guided templates ================= */
+var TEMPLATES = [
+  { id: "firstbeat", label: "\uD83E\uDD41 First beat", desc: "my first beat", genre: "hip-hop", bpm: 92, mood: "driving", key: 45,
+    voices: { bass: "sub", chords: "keys", lead: "pluck", vocal: "nova" }, note: "Drums + bass starter. Press Play." },
+  { id: "popsong", label: "\uD83C\uDFA4 Pop song", desc: "my pop song", genre: "pop", bpm: 104, mood: "bright", key: 48,
+    voices: { bass: "bass", chords: "epiano", lead: "lead", vocal: "ember" }, note: "Full-band pop with a singing vocal." },
+  { id: "lofi", label: "\uD83C\uDF19 Lofi groove", desc: "lofi groove", genre: "lofi", bpm: 76, mood: "chill", key: 43,
+    voices: { bass: "sub", chords: "epiano", lead: "flute", vocal: "drift" }, note: "Dusty lofi for late nights." },
+  { id: "trap", label: "\uD83D\uDD25 Trap starter", desc: "trap starter", genre: "trap", bpm: 140, mood: "dark", key: 41,
+    voices: { bass: "sub", chords: "pad", lead: "lead", vocal: "stone" }, note: "Dark trap with rolling hats." }
+];
+function loadTemplate(tp) {
+  if (!hasAll()) return;
+  Studio().unlock();
+  var a = M.buildArrangement(tp.desc);
+  a.genre = tp.genre; a.bpm = tp.bpm; a.mood = tp.mood; a.keyRoot = tp.key;
+  a.keyName = S.noteName(tp.key).replace(/[0-9-]/g, "");
+  var chords = M.currentChords(a);
+  var dt = M.buildTrack("drums", a.seed, a.genre, a.bpm, chords, 0, "drums");
+  a.tracks.drums = dt;
+  var ids = ["bass", "chords", "lead", "vocal"], i, v;
+  for (i = 0; i < ids.length; i++) { v = tp.voices[ids[i]]; if (v && a.tracks[ids[i]]) a.tracks[ids[i]].voice = v; }
+  a.aiNote = "Starter template \u201C" + tp.label + "\u201D \u2014 press Play.";
+  M.setArr(M.carryAudio(ARR(), a));
+  M.buildLanes(); M.buildMixer(); M.syncEditors(); M.syncSeed(); M.aiChoices();
+  if (W.__m3fxRefresh) W.__m3fxRefresh();
+  M.hostSay("Loaded the " + tp.label + " template (" + tp.genre + ", " + tp.bpm + " BPM). Press \u25B6 Play all.");
+  status("Template loaded: " + tp.label + ". Press \u25B6 Play all.");
+  var tn = $("tmplnote"); if (tn) tn.textContent = tp.note + " Same tap, same song, every time.";
+}
+function buildTemplates() {
+  var box = $("tmplbtns"); if (!box) return;
+  box.innerHTML = "";
+  for (var i = 0; i < TEMPLATES.length; i++) (function (tp) {
+    var b = el("button", "btn", tp.label); b.setAttribute("type", "button");
+    on(b, "click", function () { loadTemplate(tp); });
+    box.appendChild(b); box.appendChild(DOC.createTextNode(" "));
+  })(TEMPLATES[i]);
+}
+
+/* ================= 4. beat maker (16-step sequencer) ================= */
+var BM_LANES = ["kick", "snare", "hat", "clap", "tom", "shaker"];
+var BM_NAMES = { kick: "Kick", snare: "Snare", hat: "Hat", clap: "Clap", tom: "Tom", shaker: "Shaker" };
+var BM = { steps: null, cells: null, playing: false, timer: 0, step: 0, nextT: 0, lit: -1 };
+function bmEmpty() {
+  var o = {}, i, k;
+  for (i = 0; i < BM_LANES.length; i++) { o[BM_LANES[i]] = []; for (k = 0; k < 16; k++) o[BM_LANES[i]].push(0); }
+  return o;
+}
+function bmSeed() {
+  var p = S.patternFor("beatmaker:starter", "hip-hop", 100), o = bmEmpty(), i, k, l;
+  for (i = 0; i < BM_LANES.length; i++) { l = BM_LANES[i]; for (k = 0; k < 16; k++) o[l][k] = p.steps[l][k] ? 1 : 0; }
+  return o;
+}
+function bmBpm() { var b = $("bm-bpm"); var v = b ? parseInt(b.value, 10) : 100; return Math.max(60, Math.min(200, isNaN(v) ? 100 : v)); }
+function buildBeatMaker() {
+  var box = $("bm-grid"); if (!box) return;
+  box.innerHTML = "";
+  BM.steps = bmSeed(); BM.cells = {};
+  var grid = el("div", "grid16"); box.appendChild(grid);
+  var i, k;
+  for (i = 0; i < BM_LANES.length; i++) (function (lane) {
+    BM.cells[lane] = [];
+    grid.appendChild(el("span", "llab", BM_NAMES[lane]));
+    for (k = 0; k < 16; k++) (function (st) {
+      var c = el("button", "stepcell" + (BM.steps[lane][st] ? " on" : "") + (st % 4 === 0 ? " beat4" : ""));
+      c.setAttribute("type", "button"); c.setAttribute("aria-label", BM_NAMES[lane] + " step " + (st + 1));
+      on(c, "click", function () {
+        if (Studio()) Studio().unlock();
+        BM.steps[lane][st] = BM.steps[lane][st] ? 0 : 1;
+        c.setAttribute("class", "stepcell" + (BM.steps[lane][st] ? " on" : "") + (st % 4 === 0 ? " beat4" : ""));
+      });
+      BM.cells[lane].push(c);
+      grid.appendChild(c);
+    })(k);
+  })(BM_LANES[i]);
+}
+function bmLight(st) {
+  var i, l;
+  if (BM.lit >= 0) for (i = 0; i < BM_LANES.length; i++) {
+    l = BM_LANES[i];
+    BM.cells[l][BM.lit].setAttribute("class", "stepcell" + (BM.steps[l][BM.lit] ? " on" : "") + (BM.lit % 4 === 0 ? " beat4" : ""));
+  }
+  BM.lit = st;
+  if (st >= 0) for (i = 0; i < BM_LANES.length; i++) {
+    l = BM_LANES[i];
+    var c = BM.cells[l][st];
+    c.setAttribute("class", "stepcell" + (BM.steps[l][st] ? " on" : "") + (st % 4 === 0 ? " beat4" : "") + " on-s");
+  }
+}
+function bmSchedule(st, t) {
+  var c = S.ensureCtx(), d = bus(); if (!c || !d) return;
+  var v = 0.95;
+  if (BM.steps.kick[st]) S.kick(c, d, t, v);
+  if (BM.steps.snare[st]) S.snare(c, d, t, v);
+  if (BM.steps.hat[st]) S.hat(c, d, t, v * 0.9, st % 4 === 3);
+  if (BM.steps.clap[st]) S.clap(c, d, t, v);
+  if (BM.steps.tom[st]) S.tom(c, d, t, v, 50);
+  if (BM.steps.shaker[st]) S.shaker(c, d, t, v);
+}
+function bmTick() {
+  if (!BM.playing) return;
+  var c = S.ensureCtx(); if (!c) { bmStop(true); return; }
+  var spb = 60 / bmBpm() / 4;
+  while (BM.nextT < c.currentTime + 0.15) {
+    bmSchedule(BM.step, BM.nextT);
+    BM.nextT += spb; BM.step = (BM.step + 1) % 16; bmLight(BM.step);
+  }
+  BM.timer = setTimeout(bmTick, 30);
+}
+function bmPlay() {
+  if (!hasAll()) return;
+  Studio().unlock();
+  var c = S.ensureCtx(); if (!c) { status("Audio isn't available in this browser."); return; }
+  bmStop(true);
+  BM.playing = true; BM.step = 0; BM.nextT = c.currentTime + 0.06;
+  bmTick();
+  status("Playing your beat at " + bmBpm() + " BPM.");
+}
+function bmStop(silent) {
+  BM.playing = false;
+  if (BM.timer) { clearTimeout(BM.timer); BM.timer = 0; }
+  bmLight(-1);
+  if (!silent) status("Beat stopped.");
+}
+function bmToSong() {
+  var t = firstTrackOf("drums");
+  if (!t) { status("Add a Drums track first (Track lanes \u2192 Add track)."); return; }
+  var i, k, l;
+  for (i = 0; i < BM_LANES.length; i++) { l = BM_LANES[i]; for (k = 0; k < 16; k++) t.steps[l][k] = BM.steps[l][k]; }
+  t.src = "you";
+  M.renderLaneBody(t.id); M.aiChoices();
+  status("Your beat is now the \u201C" + t.name + "\u201D pattern. Press \u25B6 Play all to hear it in the song.");
+}
+function bindBeatMaker() {
+  on($("bm-play"), "click", bmPlay);
+  on($("bm-stop"), "click", function () { bmStop(); });
+  on($("bm-clear"), "click", function () { bmStop(true); BM.steps = bmEmpty(); buildBeatMaker(); status("Beat cleared — tap squares to build a new one."); });
+  on($("bm-song"), "click", bmToSong);
+}
+
+/* ================= 3. playable virtual instruments ================= */
+var INST_VOICES = ["keys", "epiano", "marimba", "pad", "strings", "lead", "pluck", "flute", "brass", "sub", "bass"];
+function instVoice() { var s = $("inst-voice"); return s && s.value ? s.value : "keys"; }
+function buildVoiceSelect(selId, voices, def) {
+  var s = $(selId); if (!s) return;
+  s.innerHTML = "";
+  for (var i = 0; i < voices.length; i++) {
+    var o = DOC.createElement("option");
+    o.value = voices[i]; o.textContent = (M.VOICE_NAMES && M.VOICE_NAMES[voices[i]]) || voices[i];
+    if (voices[i] === def) o.setAttribute("selected", "selected");
+    s.appendChild(o);
+  }
+  s.value = def;
+}
+/* keys: array of {midi, black} in order; black keys overlay via negative margins */
+function keySeq(startMidi, count) {
+  var out = [], m, pc;
+  for (m = startMidi; m < startMidi + count; m++) {
+    pc = m % 12;
+    out.push({ midi: m, black: (pc === 1 || pc === 3 || pc === 6 || pc === 8 || pc === 10) });
+  }
+  return out;
+}
+function hitKey(keyEl, midi, voice, dur) {
+  if (!hasAll()) return;
+  Studio().unlock();
+  try { S.playTone(midi, dur || 1.2, voice); } catch (e) { status("Couldn't play that note: " + e.message); return; }
+  if (keyEl && keyEl.classList) {
+    keyEl.classList.add("hit");
+    setTimeout(function () { try { keyEl.classList.remove("hit"); } catch (e2) {} }, 160);
+  }
+}
+function buildPiano(boxId, startMidi, count, voiceFn, dur) {
+  var box = $(boxId); if (!box) return;
+  box.innerHTML = "";
+  var keys = keySeq(startMidi, count), i;
+  for (i = 0; i < keys.length; i++) (function (k) {
+    var b = el("button", "pkey" + (k.black ? " black" : ""), S.noteName(k.midi).replace(/[0-9-]/g, ""));
+    b.setAttribute("type", "button"); b.setAttribute("aria-label", "Play " + S.noteName(k.midi));
+    var down = function (ev) { if (ev && ev.preventDefault) ev.preventDefault(); hitKey(b, k.midi, voiceFn(), dur); };
+    on(b, "mousedown", down);
+    on(b, "touchstart", down);
+    box.appendChild(b);
+  })(keys[i]);
+}
+function buildDrumPads() {
+  var box = $("drumpads"); if (!box) return;
+  box.innerHTML = "";
+  var lanes = [["kick", "Kick", "boom"], ["snare", "Snare", "crack"], ["hat", "Hat", "tick"], ["clap", "Clap", "snap"], ["tom", "Tom", "low boom"], ["shaker", "Shaker", "shhk"]];
+  for (var i = 0; i < lanes.length; i++) (function (lane, label, sub) {
+    var p = el("button", "pad", label);
+    p.setAttribute("type", "button"); p.setAttribute("aria-label", "Play " + label);
+    p.appendChild(el("small", "", sub));
+    var hit = function (ev) {
+      if (ev && ev.preventDefault) ev.preventDefault();
+      if (!hasAll()) return;
+      Studio().unlock();
+      try {
+        if (lane === "tom" || lane === "shaker") {
+          var c = S.ensureCtx(), d = bus(); if (!c || !d) return;
+          if (lane === "tom") S.tom(c, d, c.currentTime + 0.01, 1, 50); else S.shaker(c, d, c.currentTime + 0.01, 1);
+        } else S.playDrum(lane);
+      } catch (e) { status("Couldn't play that pad: " + e.message); return; }
+      if (p.classList) { p.classList.add("hit"); setTimeout(function () { try { p.classList.remove("hit"); } catch (e2) {} }, 140); }
+    };
+    on(p, "mousedown", hit);
+    on(p, "touchstart", hit);
+    box.appendChild(p);
+  })(lanes[i][0], lanes[i][1], lanes[i][2]);
+}
+var KEYMAP = { a: 0, w: 1, s: 2, e: 3, d: 4, f: 5, t: 6, g: 7, y: 8, h: 9, u: 10, j: 11, k: 12 };
+function bindInstKeys() {
+  buildVoiceSelect("inst-voice", INST_VOICES, "keys");
+  buildVoiceSelect("roll-voice", ["lead", "pluck", "flute", "brass", "marimba", "keys", "epiano", "sub", "bass"], "lead");
+  buildPiano("piano", 60, 24, instVoice, 1.4);
+  buildPiano("basskeys", 36, 12, function () { return "sub"; }, 1.0);
+  buildDrumPads();
+  on(DOC, "keydown", function (ev) {
+    if (!ev || !ev.key) return;
+    var tag = ev.target && ev.target.tagName ? ev.target.tagName : "";
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+    var off = KEYMAP[ev.key.toLowerCase()];
+    if (off == null) return;
+    hitKey(null, 60 + off, instVoice(), 1.0);
+  });
+}
+
+/* ================= 5. MIDI piano roll (note writer) ================= */
+var ROLL = { notes: [], voice: "lead", playing: false, timer: 0, step: 0, nextT: 0 };
+var ROLL_LO = 60, ROLL_HI = 83; /* C4..B5 */
+function rollVoice() { var s = $("roll-voice"); return s && s.value ? s.value : "lead"; }
+function rollNoteAt(step, midi) {
+  for (var i = 0; i < ROLL.notes.length; i++) if (ROLL.notes[i].step === step && ROLL.notes[i].midi === midi) return ROLL.notes[i];
+  return null;
+}
+function buildRoll() {
+  var box = $("roll"); if (!box) return;
+  box.innerHTML = "";
+  var rows = ROLL_HI - ROLL_LO + 1;
+  box.style.gridTemplateColumns = "3.2rem repeat(16, 26px)";
+  var dragNote = null, dragMoved = false;
+  function paint() {
+    var cells = box.querySelectorAll ? box.querySelectorAll(".rollcell") : [];
+    var i;
+    for (i = 0; i < cells.length; i++) {
+      var st = parseInt(cells[i].getAttribute("data-s"), 10), md = parseInt(cells[i].getAttribute("data-m"), 10);
+      var onN = rollNoteAt(st, md);
+      cells[i].setAttribute("class", "rollcell" + (onN ? " on" : "") + (st % 4 === 0 ? " bk" : ""));
+    }
+  }
+  var m;
+  for (m = ROLL_HI; m >= ROLL_LO; m--) (function (midi) {
+    var lab = el("span", "llab", S.noteName(midi).replace(/[0-9-]/g, ""));
+    box.appendChild(lab);
+    for (var st = 0; st < 16; st++) (function (step) {
+      var c = el("button", "rollcell" + (rollNoteAt(step, midi) ? " on" : "") + (step % 4 === 0 ? " bk" : ""));
+      c.setAttribute("type", "button");
+      c.setAttribute("data-s", String(step)); c.setAttribute("data-m", String(midi));
+      c.setAttribute("aria-label", S.noteName(midi) + " step " + (step + 1));
+      on(c, "mousedown", function (ev) {
+        if (ev && ev.preventDefault) ev.preventDefault();
+        if (Studio()) Studio().unlock();
+        var n = rollNoteAt(step, midi);
+        if (n) { dragNote = n; dragMoved = false; }
+        else { ROLL.notes.push({ step: step, midi: midi }); paint(); }
+      });
+      on(c, "mousemove", function () {
+        if (dragNote) {
+          if (dragNote.step !== step || dragNote.midi !== midi) {
+            dragNote.step = step; dragNote.midi = midi; dragMoved = true; paint();
+          }
+        }
+      });
+      box.appendChild(c);
+    })(st);
+  })(m);
+  on(DOC, "mouseup", function () {
+    if (dragNote && !dragMoved) {
+      ROLL.notes = ROLL.notes.filter(function (n) { return n !== dragNote; });
+      paint();
+    }
+    dragNote = null;
+  });
+  ROLL.paint = paint;
+  paint();
+}
+function rollTick() {
+  if (!ROLL.playing) return;
+  var c = S.ensureCtx(); if (!c) { rollStop(true); return; }
+  var spb = 60 / (ARR() ? ARR().bpm : 100) / 4, d = bus(), v = ROLL.voice = rollVoice();
+  while (ROLL.nextT < c.currentTime + 0.15) {
+    var st = ROLL.step, t = ROLL.nextT, i;
+    for (i = 0; i < ROLL.notes.length; i++) {
+      var n = ROLL.notes[i];
+      if (n.step === st && d) { try { S.tone(c, d, t, n.midi, spb * 0.92, v, 0.85); } catch (e) {} }
+    }
+    ROLL.nextT += spb; ROLL.step = (ROLL.step + 1) % 16;
+  }
+  ROLL.timer = setTimeout(rollTick, 30);
+}
+function rollPlay() {
+  if (!hasAll()) return;
+  Studio().unlock();
+  var c = S.ensureCtx(); if (!c) { status("Audio isn't available in this browser."); return; }
+  if (!ROLL.notes.length) { status("Place some notes first — click squares in the grid."); return; }
+  rollStop(true);
+  ROLL.playing = true; ROLL.step = 0; ROLL.nextT = c.currentTime + 0.06;
+  rollTick();
+  status("Playing your " + ROLL.notes.length + " notes.");
+}
+function rollStop(silent) {
+  ROLL.playing = false;
+  if (ROLL.timer) { clearTimeout(ROLL.timer); ROLL.timer = 0; }
+  if (!silent) status("Notes stopped.");
+}
+function rollToSong() {
+  if (!ROLL.notes.length) { status("Place some notes first — click squares in the grid."); return; }
+  var t = firstTrackOf("lead");
+  if (!t) { status("Add a Lead track first (Track lanes \u2192 Add track)."); return; }
+  var b, k;
+  t.bars = [];
+  for (b = 0; b < 4; b++) { t.bars.push([null, null, null, null]); }
+  for (var i = 0; i < ROLL.notes.length; i++) {
+    var n = ROLL.notes[i], bar = Math.floor(n.step / 4), cell = n.step % 4;
+    t.bars[bar][cell] = { midi: n.midi, len: 1 };
+  }
+  t.barOn = [1, 1, 1, 1]; t.src = "you";
+  M.renderLaneBody(t.id); M.aiChoices();
+  status("Your notes are now the \u201C" + t.name + "\u201D lead line. Press \u25B6 Play all to hear them in the song.");
+}
+function bindRoll() {
+  on($("roll-play"), "click", rollPlay);
+  on($("roll-stop"), "click", function () { rollStop(); });
+  on($("roll-clear"), "click", function () { rollStop(true); ROLL.notes = []; buildRoll(); status("Notes cleared."); });
+  on($("roll-song"), "click", rollToSong);
+}
+
+/* ================= 2. royalty-free original loop library ================= */
+var LOOPS = [
+  { id: "loop-drums-1", name: "Boom Bap Pocket", cat: "drums", kind: "drums", seed: "sigloop:boombap", genre: "hip-hop" },
+  { id: "loop-drums-2", name: "Four Floor Drive", cat: "drums", kind: "drums", seed: "sigloop:fourfloor", genre: "house" },
+  { id: "loop-drums-3", name: "Trap Hats", cat: "drums", kind: "drums", seed: "sigloop:traphats", genre: "trap" },
+  { id: "loop-drums-4", name: "Lofi Dust", cat: "drums", kind: "drums", seed: "sigloop:lofidust", genre: "lofi" },
+  { id: "loop-bass-1", name: "Sub Roller", cat: "bass", kind: "bass", seed: "sigloop:subroller", genre: "hip-hop" },
+  { id: "loop-bass-2", name: "Funk Fingers", cat: "bass", kind: "bass", seed: "sigloop:funkfingers", genre: "funk" },
+  { id: "loop-bass-3", name: "Deep Pulse", cat: "bass", kind: "bass", seed: "sigloop:deeppulse", genre: "techno" },
+  { id: "loop-bass-4", name: "Bounce Line", cat: "bass", kind: "bass", seed: "sigloop:bounce", genre: "pop" },
+  { id: "loop-mel-1", name: "Neon Keys", cat: "melodic", kind: "melodic", seed: "sigloop:neonkeys", genre: "pop" },
+  { id: "loop-mel-2", name: "Sunset Pluck", cat: "melodic", kind: "melodic", seed: "sigloop:sunsetpluck", genre: "lofi" },
+  { id: "loop-mel-3", name: "Velvet Pad", cat: "melodic", kind: "melodic", seed: "sigloop:velvetpad", genre: "ambient" },
+  { id: "loop-mel-4", name: "Starlight Lead", cat: "melodic", kind: "melodic", seed: "sigloop:starlight", genre: "trap" }
+];
+var LOOP_CACHE = {};
+/* Deterministic: same loop id -> same notes, every visit. Pure. */
+function buildLoop(def) {
+  if (LOOP_CACHE[def.id]) return LOOP_CACHE[def.id];
+  var lp, rng, chords, s, notes;
+  if (def.kind === "drums") {
+    var p = S.patternFor(def.seed, def.genre, 100);
+    lp = { kind: "drums", steps: p.steps };
+  } else if (def.kind === "bass") {
+    rng = S.rngFrom("sigloop:" + def.seed);
+    chords = S.chordsFor(45, def.genre, rng);
+    notes = [];
+    for (s = 0; s < 16; s++) {
+      var root = chords[Math.floor(s / 4) % 4][0] - 12, midi = 0;
+      if (s % 4 === 0) midi = root;
+      else if (rng() < 0.32) midi = root + (rng() < 0.5 ? 7 : 12);
+      if (midi > 0) notes.push({ step: s, midi: midi });
+    }
+    lp = { kind: "bass", notes: notes };
+  } else {
+    rng = S.rngFrom("sigloop:" + def.seed);
+    chords = S.chordsFor(48, def.genre, rng);
+    var mel = S.melodyFor(chords, 4, rng);
+    notes = [];
+    for (s = 0; s < 16; s++) if (mel[s] && mel[s].midi > 0) notes.push({ step: s, midi: mel[s].midi });
+    lp = { kind: "melodic", notes: notes };
+  }
+  LOOP_CACHE[def.id] = lp;
+  return lp;
+}
+function previewLoop(def) {
+  if (!hasAll()) return;
+  Studio().unlock();
+  status("Playing loop \u201C" + def.name + "\u201D\u2026");
+  var lp = buildLoop(def), bpm = 100, bsec = 4 * 60 / bpm, dur = 2 * bsec + 0.4;
+  S.renderBuffer(dur, function (c, dest, t0) {
+    var b, k;
+    if (lp.kind === "drums") {
+      S.scheduleBeat(c, dest, t0, { steps: lp.steps, bpm: bpm }, 2, 1);
+    } else {
+      var voice = lp.kind === "bass" ? "sub" : "lead", step = 60 / bpm / 4;
+      for (b = 0; b < 2; b++) for (k = 0; k < lp.notes.length; k++) {
+        var n = lp.notes[k];
+        S.tone(c, dest, t0 + b * bsec + n.step * step, n.midi, step * 3.4, voice, 0.85);
+      }
+    }
+  }).then(function (buf) {
+    try { S.playBuffer(buf, "m3loop"); } catch (e) { status("Couldn't play the loop: " + e.message); }
+  }, function (err) { status("Couldn't render the loop: " + (err && err.message ? err.message : err)); });
+}
+function dropLoop(def) {
+  if (!hasAll()) return;
+  var lp = buildLoop(def), t, b, k, s;
+  if (def.kind === "drums") {
+    t = firstTrackOf("drums");
+    if (!t) { status("Add a Drums track first (Track lanes \u2192 Add track)."); return; }
+    var lanes = ["kick", "snare", "hat", "clap", "tom", "shaker"];
+    for (var i = 0; i < lanes.length; i++) { var l = lanes[i]; for (k = 0; k < 16; k++) t.steps[l][k] = lp.steps[l][k] ? 1 : 0; }
+    t.src = "you"; M.renderLaneBody(t.id); M.aiChoices();
+    status("\u201C" + def.name + "\u201D is now the \u201C" + t.name + "\u201D drum pattern.");
+  } else if (def.kind === "bass") {
+    t = firstTrackOf("bass");
+    if (!t) { status("Add a Bass track first (Track lanes \u2192 Add track)."); return; }
+    t.bars = [];
+    for (b = 0; b < 4; b++) { var bar = []; for (k = 0; k < 4; k++) {
+      s = b * 4 + k; var hit = null;
+      for (var n = 0; n < lp.notes.length; n++) if (lp.notes[n].step === s) hit = lp.notes[n].midi;
+      bar.push(hit || 0);
+    } t.bars.push(bar); }
+    t.barOn = [1, 1, 1, 1]; t.src = "you";
+    M.renderLaneBody(t.id); M.aiChoices();
+    status("\u201C" + def.name + "\u201D is now the \u201C" + t.name + "\u201D bass line.");
+  } else {
+    t = firstTrackOf("lead");
+    if (!t) { status("Add a Lead track first (Track lanes \u2192 Add track)."); return; }
+    t.bars = [];
+    for (b = 0; b < 4; b++) { var bar2 = []; for (k = 0; k < 4; k++) {
+      s = b * 4 + k; var hit2 = null;
+      for (var n2 = 0; n2 < lp.notes.length; n2++) if (lp.notes[n2].step === s) hit2 = lp.notes[n2].midi;
+      bar2.push(hit2 ? { midi: hit2, len: 1 } : null);
+    } t.bars.push(bar2); }
+    t.barOn = [1, 1, 1, 1]; t.src = "you";
+    M.renderLaneBody(t.id); M.aiChoices();
+    status("\u201C" + def.name + "\u201D is now the \u201C" + t.name + "\u201D melody.");
+  }
+}
+var LOOPCAT = "all";
+function buildLoops() {
+  var cats = $("loopcats"); if (cats) {
+    cats.innerHTML = "";
+    var defs = [["all", "\u2728 All"], ["drums", "\uD83E\uDD41 Drums"], ["bass", "\uD83C\uDFB8 Bass"], ["melodic", "\uD83C\uDFB5 Melodic"]];
+    for (var i = 0; i < defs.length; i++) (function (cid, clab) {
+      var b = el("button", "btn" + (LOOPCAT === cid ? "" : " ghost"), clab); b.setAttribute("type", "button");
+      on(b, "click", function () { LOOPCAT = cid; buildLoops(); });
+      cats.appendChild(b); cats.appendChild(DOC.createTextNode(" "));
+    })(defs[i][0], defs[i][1]);
+  }
+  var box = $("looplist"); if (!box) return;
+  box.innerHTML = "";
+  for (var j = 0; j < LOOPS.length; j++) (function (def) {
+    if (LOOPCAT !== "all" && def.cat !== LOOPCAT) return;
+    var row = el("div", "looprow");
+    var lp = buildLoop(def);
+    var count = def.kind === "drums" ? "drum pattern" : lp.notes.length + " notes";
+    row.appendChild(el("span", "lname", "\uD83D\uDD01 " + def.name + " "));
+    row.appendChild(el("span", "lcat", def.cat + " \u00B7 " + count + " \u00B7 original"));
+    var pv = el("button", "tbtn", "\u25B6"); pv.setAttribute("type", "button"); pv.setAttribute("aria-label", "Preview " + def.name);
+    var drop = el("button", "btn ghost", "Put on " + (def.kind === "drums" ? "Drums" : def.kind === "bass" ? "Bass" : "Lead") + " track");
+    drop.setAttribute("type", "button");
+    on(pv, "click", function () { previewLoop(def); });
+    on(drop, "click", function () { dropLoop(def); });
+    row.appendChild(pv); row.appendChild(drop);
+    box.appendChild(row);
+  })(LOOPS[j]);
+  if (!box.children.length) box.appendChild(el("p", "hintline", "No loops in this shelf yet."));
+}
+
+/* ================= 7. AI idea starter ================= */
+var GENRE_WORDS = {
+  "trap": ["trap", "dark", "drill", "hard", "banger", "808"],
+  "hip-hop": ["hip", "hop", "rap", "boom", "bap", "freestyle"],
+  "pop": ["pop", "happy", "fun", "summer", "bright", "party", "dance"],
+  "lofi": ["lofi", "chill", "rain", "coffee", "study", "night", "sleepy"],
+  "house": ["house", "club", "edm"],
+  "techno": ["techno", "rave"],
+  "rock": ["rock", "guitar", "loud", "band"],
+  "jazz": ["jazz", "smooth", "sax"],
+  "ambient": ["ambient", "dream", "space", "calm", "float"],
+  "funk": ["funk", "groove", "disco"],
+  "reggae": ["reggae", "island", "beach"],
+  "drum-and-bass": ["dnb", "drum", "jungle"]
+};
+var MOOD_WORDS = {
+  "dark": ["dark", "midnight", "evil", "hard", "angry"],
+  "bright": ["bright", "happy", "sunny", "fun", "joy"],
+  "chill": ["chill", "calm", "relax", "sleep", "soft"],
+  "epic": ["epic", "big", "huge", "anthem", "power"],
+  "smooth": ["smooth", "silk", "easy"],
+  "driving": ["driving", "fast", "run", "energy"],
+  "dreamy": ["dream", "dreamy", "float", "cloud"],
+  "gritty": ["gritty", "raw", "street"]
+};
+var GENRE_BPM = { "hip-hop": 92, "trap": 140, "pop": 104, "rock": 120, "lofi": 76, "house": 124, "techno": 132, "jazz": 96, "ambient": 80, "drum-and-bass": 174, "reggae": 90, "funk": 100 };
+/* Deterministic: same words -> same idea, every time. Pure. */
+function ideaFromPrompt(prompt) {
+  var p = String(prompt || "").toLowerCase().replace(/[^a-z0-9 ]/g, " ");
+  var words = p.split(/ +/), i, w, g;
+  function score(bank) {
+    var sc = {}, k;
+    for (k in bank) sc[k] = 0;
+    for (i = 0; i < words.length; i++) {
+      w = words[i]; if (!w) continue;
+      for (k in bank) {
+        var list = bank[k], j;
+        for (j = 0; j < list.length; j++) if (w === list[j] || w.indexOf(list[j]) === 0 || list[j].indexOf(w) === 0) sc[k] += 2;
+      }
+    }
+    var best = null, bv = -1;
+    for (k in sc) if (sc[k] > bv) { bv = sc[k]; best = k; }
+    return { key: best, hits: bv };
+  }
+  var gs = score(GENRE_WORDS), ms = score(MOOD_WORDS);
+  var genre = gs.hits > 0 ? gs.key : "hip-hop";
+  var mood = ms.hits > 0 ? ms.key : "chill";
+  var bpm = GENRE_BPM[genre] || 100;
+  if (/\b(slow|slower|sleepy|calm|soft)\b/.test(p)) bpm -= 14;
+  if (/\b(fast|faster|hype|energy|wild|crazy)\b/.test(p)) bpm += 12;
+  bpm = Math.max(60, Math.min(180, bpm));
+  var n = 1 + (S.hashSeed("m3idea:" + p) % 200000);
+  var beat = D.genBeat(n);
+  beat.style = genre; beat.bpm = bpm;
+  beat.name = "Signature " + mood + " " + genre.replace(/-/g, " ") + " idea";
+  beat.desc = "An ORIGINAL Signature beat idea in " + genre + " at " + bpm + " BPM (" + mood + " mood), dreamed up from your words \u201C" + String(prompt || "").slice(0, 60) + "\u201D. Same words, same idea, every time.";
+  var song = D.genSong(n, p);
+  return { prompt: String(prompt || ""), genre: genre, mood: mood, bpm: bpm, beat: beat, song: song };
+}
+function previewIdea(idea) {
+  if (!hasAll()) return;
+  Studio().unlock();
+  status("Playing your idea\u2026");
+  var bpm = idea.bpm, bsec = 4 * 60 / bpm, dur = 4 * bsec + 0.4;
+  var pat = S.patternFor("m3idea:" + idea.prompt, idea.genre, bpm);
+  S.renderBuffer(dur, function (c, dest, t0) {
+    S.scheduleBeat(c, dest, t0, pat, 4, 1);
+  }).then(function (buf) {
+    try { S.playBuffer(buf, "m3idea"); status("That's your idea: " + idea.beat.name + "."); }
+    catch (e) { status("Couldn't play the idea: " + e.message); }
+  }, function (err) { status("Couldn't render the idea: " + (err && err.message ? err.message : err)); });
+}
+function loadIdea(idea) {
+  if (!hasAll()) return;
+  Studio().unlock();
+  var a = M.buildArrangement(idea.prompt);
+  a.genre = idea.genre; a.bpm = idea.bpm; a.mood = idea.mood;
+  var chords = M.currentChords(a);
+  a.tracks.drums = M.buildTrack("drums", a.seed, a.genre, a.bpm, chords, 0, "drums");
+  a.aiNote = "Idea from your words: \u201C" + idea.prompt + "\u201D.";
+  M.setArr(M.carryAudio(ARR(), a));
+  M.buildLanes(); M.buildMixer(); M.syncEditors(); M.syncSeed(); M.aiChoices();
+  if (W.__m3fxRefresh) W.__m3fxRefresh();
+  M.hostSay("Here's your idea: " + idea.beat.name + " \u2014 " + idea.genre + ", " + idea.bpm + " BPM, " + idea.mood + " mood. I loaded it as your song; press \u25B6 Play all, then tweak anything you like.");
+  status("Idea loaded: " + idea.beat.name + ".");
+}
+function showIdea(idea) {
+  var box = $("idearesult"); if (!box) return;
+  box.innerHTML = "";
+  var card = el("div", "ideacard");
+  card.appendChild(el("h3", "", "\u2728 " + idea.beat.name));
+  card.appendChild(el("p", "", idea.beat.desc));
+  card.appendChild(el("p", "hintline", "Archive song twin: " + idea.song.title + " (" + idea.song.id + ") \u2014 same engine, same words."));
+  var row = el("p"); card.appendChild(row);
+  var pv = el("button", "btn", "\u25B6 Preview the beat"); pv.setAttribute("type", "button");
+  var ld = el("button", "btn ghost", "\uD83C\uDFB5 Load as my song"); ld.setAttribute("type", "button");
+  on(pv, "click", function () { previewIdea(idea); });
+  on(ld, "click", function () { loadIdea(idea); });
+  row.appendChild(pv); row.appendChild(DOC.createTextNode(" ")); row.appendChild(ld);
+  box.appendChild(card);
+}
+var SURPRISES = ["dark trap banger", "happy pop song", "rainy lofi night", "epic space ambient", "funky disco groove", "smooth jazz evening", "hard rock anthem", "beachy reggae day"];
+function bindIdea() {
+  function go(q) {
+    if (!hasAll()) return;
+    q = String(q == null ? ($("ideaq") ? $("ideaq").value : "") : q).replace(/^\s+|\s+$/g, "");
+    if (!q) { status("Type a few words first — like \u201Cdark trap banger\u201D."); return; }
+    showIdea(ideaFromPrompt(q));
+    status("Idea ready — preview it or load it as your song.");
+  }
+  on($("ideago"), "click", function () { go(); });
+  on($("ideaq"), "keydown", function (ev) { if (ev.key === "Enter") go(); });
+  on($("ideasurprise"), "click", function () {
+    var q = SURPRISES[Math.floor(Math.random() * SURPRISES.length)];
+    if ($("ideaq")) $("ideaq").value = q;
+    go(q);
+  });
+}
+
+/* ================= 6. FX suite (per-track + master, plain language) ================= */
+var FX_TRACK_DEFS = [
+  { k: "reverb", label: "Room echo", min: 0, max: 100, unit: "%", hint: "how big the room sounds" },
+  { k: "delay", label: "Echo", min: 0, max: 100, unit: "%", hint: "repeating echo (tempo-synced)" },
+  { k: "chorus", label: "Shimmer", min: 0, max: 100, unit: "%", hint: "wide sparkly chorus" },
+  { k: "eqLow", label: "Bass", min: -12, max: 12, unit: " dB", hint: "low-end tone" },
+  { k: "eqMid", label: "Middle", min: -12, max: 12, unit: " dB", hint: "midrange tone" },
+  { k: "eqHigh", label: "Treble", min: -12, max: 12, unit: " dB", hint: "brightness" },
+  { k: "comp", label: "Glue", min: 0, max: 100, unit: "%", hint: "compressor that glues the sound" }
+];
+var FX_MASTER_DEFS = [
+  { k: "eqLow", label: "Bass", min: -12, max: 12, unit: " dB" },
+  { k: "eqMid", label: "Middle", min: -12, max: 12, unit: " dB" },
+  { k: "eqHigh", label: "Treble", min: -12, max: 12, unit: " dB" }
+];
+function fxValStr(def, v) { return v + def.unit; }
+function syncFxTrackList() {
+  var sel = $("fx-track"); if (!sel || !hasAll()) return;
+  var a = ARR(), ids = a.trackOrder || [], cur = sel.value;
+  sel.innerHTML = "";
+  for (var i = 0; i < ids.length; i++) {
+    var t = a.tracks[ids[i]]; if (!t) continue;
+    var o = DOC.createElement("option");
+    o.value = ids[i]; o.textContent = M.trackLabel(ids[i]) + " (" + (t.type || ids[i]) + ")";
+    sel.appendChild(o);
+  }
+  if (cur) { for (var j = 0; j < sel.options.length; j++) if (sel.options[j].value === cur) { sel.selectedIndex = j; break; } }
+}
+function renderFxControls() {
+  var tc = $("fx-track-ctls"); if (!tc || !hasAll()) return;
+  var sel = $("fx-track"), id = sel ? sel.value : null, a = ARR();
+  tc.innerHTML = "";
+  if (!id || !a.tracks[id]) { tc.appendChild(el("p", "hintline", "Pick a track above.")); return; }
+  if (!a.fx.tracks[id]) a.fx.tracks[id] = M.defaultTrackFx();
+  var fx = a.fx.tracks[id];
+  for (var i = 0; i < FX_TRACK_DEFS.length; i++) (function (def) {
+    var wrap = el("div", "fxctl");
+    wrap.appendChild(el("label", "", def.label));
+    var r = DOC.createElement("input");
+    r.setAttribute("type", "range"); r.setAttribute("min", String(def.min)); r.setAttribute("max", String(def.max));
+    r.value = String(fx[def.k] || 0);
+    r.setAttribute("aria-label", M.trackLabel(id) + " " + def.label + (def.hint ? " — " + def.hint : ""));
+    var v = el("div", "fval", fxValStr(def, fx[def.k] || 0));
+    wrap.appendChild(r); wrap.appendChild(v);
+    wrap.appendChild(el("div", "hintline", def.hint));
+    on(r, "input", function () {
+      fx[def.k] = parseInt(r.value, 10) || 0;
+      v.textContent = fxValStr(def, fx[def.k]);
+    });
+    on(r, "change", function () { status(def.label + " set on \u201C" + M.trackLabel(id) + "\u201D — press \u25B6 Play all to hear it."); });
+    tc.appendChild(wrap);
+  })(FX_TRACK_DEFS[i]);
+}
+function renderFxMaster() {
+  var mc = $("fx-master-ctls"); if (!mc || !hasAll()) return;
+  mc.innerHTML = "";
+  var mf = ARR().fx.master;
+  var lim = el("div", "fxctl checkline");
+  var cb = DOC.createElement("input");
+  cb.setAttribute("type", "checkbox"); cb.setAttribute("id", "fx-limiter");
+  if (mf.limiter) cb.setAttribute("checked", "checked");
+  cb.setAttribute("aria-label", "Master limiter — keeps the mix from clipping");
+  var lb = el("label", "", "Limiter on"); lb.setAttribute("for", "fx-limiter");
+  lim.appendChild(cb); lim.appendChild(lb);
+  lim.appendChild(el("span", "hintline", "keeps the master from clipping"));
+  on(cb, "change", function () { mf.limiter = cb.checked ? 1 : 0; status("Master limiter " + (mf.limiter ? "on" : "off") + "."); });
+  mc.appendChild(lim);
+  for (var i = 0; i < FX_MASTER_DEFS.length; i++) (function (def) {
+    var wrap = el("div", "fxctl");
+    wrap.appendChild(el("label", "", "Master " + def.label));
+    var r = DOC.createElement("input");
+    r.setAttribute("type", "range"); r.setAttribute("min", String(def.min)); r.setAttribute("max", String(def.max));
+    r.value = String(mf[def.k] || 0);
+    r.setAttribute("aria-label", "Master " + def.label);
+    var v = el("div", "fval", fxValStr(def, mf[def.k] || 0));
+    on(r, "input", function () { mf[def.k] = parseInt(r.value, 10) || 0; v.textContent = fxValStr(def, mf[def.k]); });
+    wrap.appendChild(r); wrap.appendChild(v);
+    mc.appendChild(wrap);
+  })(FX_MASTER_DEFS[i]);
+}
+function bindFx() {
+  on($("fx-track"), "change", renderFxControls);
+  on($("fx-track"), "focus", function () { syncFxTrackList(); renderFxControls(); });
+  on($("fx-reset"), "click", function () {
+    var sel = $("fx-track"), id = sel ? sel.value : null;
+    if (!id) return;
+    ARR().fx.tracks[id] = M.defaultTrackFx();
+    renderFxControls();
+    status("FX reset on \u201C" + M.trackLabel(id) + "\u201D.");
+  });
+}
+W.__m3fxRefresh = function () { syncFxTrackList(); renderFxControls(); renderFxMaster(); };
+
+/* ================= 9/10. audio upload + live mic recording ================= */
+function readFileBuffer(file, done) {
+  try {
+    var fr = new W.FileReader();
+    fr.onload = function () {
+      var c = S.ensureCtx();
+      if (!c || !c.decodeAudioData) { status("This browser can't decode audio files."); return; }
+      c.decodeAudioData(fr.result, function (buf) { done(buf); }, function () {
+        status("Couldn't read \u201C" + file.name + "\u201D — try a WAV or MP3 file.");
+      });
+    };
+    fr.onerror = function () { status("Couldn't read \u201C" + file.name + "\u201D."); };
+    fr.readAsArrayBuffer(file);
+  } catch (e) { status("Couldn't read that file: " + e.message); }
+}
+function shortName(n) { n = String(n || "audio").replace(/\.[a-z0-9]+$/i, ""); return n.length > 24 ? n.slice(0, 24) + "\u2026" : n; }
+function clipToNewTrack(key) {
+  if (!hasAll()) return null;
+  var t = M.addTrack("audio", shortName(W.__m3clipName(key)));
+  t.clips.push({ key: key, startBar: 0 });
+  M.buildLanes(); M.buildMixer(); M.aiChoices();
+  if (W.__m3fxRefresh) W.__m3fxRefresh();
+  return t;
+}
+function bindUpload() {
+  on($("up-add"), "click", function () {
+    if (!hasAll()) return;
+    var inp = $("up-file"), files = inp ? inp.files : null;
+    if (!files || !files.length) { status("Choose an audio file first (the \u201CChoose file\u201D button)."); return; }
+    Studio().unlock();
+    var n = files.length, done = 0;
+    status("Loading " + n + " file" + (n > 1 ? "s" : "") + "\u2026");
+    for (var i = 0; i < files.length; i++) (function (f) {
+      readFileBuffer(f, function (buf) {
+        var key = addClip(f.name, buf);
+        var t = clipToNewTrack(key);
+        done++;
+        status("Added \u201C" + shortName(f.name) + "\u201D to track \u201C" + t.name + "\u201D (" + done + "/" + n + "). Press \u25B6 Play all.");
+      });
+    })(files[i]);
+  });
+}
+var MIC = { rec: null, chunks: [], stream: null, lastKey: null, n: 0 };
+function micSet(rid, dis) { var b = $(rid); if (b) b.disabled = !!dis; }
+function micStatus(m) { var s = $("mic-status"); if (s) s.textContent = m; }
+function bindMic() {
+  on($("mic-rec"), "click", function () {
+    if (!hasAll()) return;
+    var nav = W.navigator || {};
+    if (!nav.mediaDevices || !nav.mediaDevices.getUserMedia) { status("This browser can't use the mic."); micStatus("Mic not available in this browser."); return; }
+    Studio().unlock();
+    nav.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+      MIC.stream = stream; MIC.chunks = [];
+      var mr;
+      try { mr = new W.MediaRecorder(stream); } catch (e) { status("Couldn't start recording: " + e.message); return; }
+      MIC.rec = mr;
+      mr.ondataavailable = function (ev) { if (ev.data && ev.data.size) MIC.chunks.push(ev.data); };
+      mr.onstop = function () {
+        try { stream.getTracks().forEach(function (tr) { tr.stop(); }); } catch (e2) {}
+        var blob = new W.Blob(MIC.chunks, { type: (mr.mimeType || "audio/webm") });
+        var fr = new W.FileReader();
+        fr.onload = function () {
+          var c = S.ensureCtx();
+          if (!c || !c.decodeAudioData) { status("This browser can't decode the recording."); return; }
+          c.decodeAudioData(fr.result, function (buf) {
+            MIC.n++;
+            MIC.lastKey = addClip("Mic take " + MIC.n, buf);
+            micSet("mic-play", false); micSet("mic-track", false);
+            micStatus("Kept \u201CMic take " + MIC.n + "\u201D (" + buf.duration.toFixed(1) + "s).");
+            status("Mic take " + MIC.n + " kept. Play it, or put it on an Audio track.");
+          }, function () { status("Couldn't read the recording — try again."); });
+        };
+        fr.readAsArrayBuffer(blob);
+        micSet("mic-rec", false); micSet("mic-stop", true);
+        micStatus("Mic idle.");
+      };
+      mr.start();
+      micSet("mic-rec", true); micSet("mic-stop", false);
+      micSet("mic-play", true); micSet("mic-track", true);
+      micStatus("Recording\u2026 speak or sing now, then press \u201CStop & keep\u201D.");
+    }, function (err) {
+      micStatus("Mic blocked.");
+      status("Mic blocked: " + (err && err.message ? err.message : err) + " — allow the mic in the browser's site settings to record.");
+    });
+  });
+  on($("mic-stop"), "click", function () { if (MIC.rec && MIC.rec.state !== "inactive") MIC.rec.stop(); });
+  on($("mic-play"), "click", function () { if (MIC.lastKey) W.__m3clipPlay(MIC.lastKey); });
+  on($("mic-track"), "click", function () {
+    if (!MIC.lastKey) { status("Record something first."); return; }
+    var t = clipToNewTrack(MIC.lastKey);
+    status("Mic take is now on track \u201C" + t.name + "\u201D. Press \u25B6 Play all.");
+  });
+}
+function refreshClipUI() {
+  var box = $("cliplist"); if (!box) return;
+  box.innerHTML = "";
+  var keys = clipKeys();
+  if (!keys.length) { box.appendChild(el("p", "hintline", "No clips yet \u2014 upload a file or record with your mic.")); return; }
+  for (var i = 0; i < keys.length; i++) (function (key) {
+    var c = CLIPS[key];
+    var row = el("div", "cliprow");
+    row.appendChild(el("span", "cname", "\uD83C\uDFB5 " + c.name + " "));
+    row.appendChild(el("span", "hintline", c.seconds.toFixed(1) + "s "));
+    var pv = el("button", "tbtn", "\u25B6"); pv.setAttribute("type", "button"); pv.setAttribute("aria-label", "Play " + c.name);
+    var tr = el("button", "btn ghost", "\u2795 Audio track"); tr.setAttribute("type", "button");
+    var del = el("button", "tbtn", "\u2715"); del.setAttribute("type", "button"); del.setAttribute("aria-label", "Delete " + c.name);
+    on(pv, "click", function () { W.__m3clipPlay(key); });
+    on(tr, "click", function () {
+      var t = clipToNewTrack(key);
+      status("\u201C" + c.name + "\u201D is now on track \u201C" + t.name + "\u201D. Press \u25B6 Play all.");
+    });
+    on(del, "click", function () {
+      delete CLIPS[key];
+      if (MIC.lastKey === key) { MIC.lastKey = null; micSet("mic-play", true); micSet("mic-track", true); }
+      refreshClipUI(); refreshVoiceSelects();
+      status("Deleted clip \u201C" + c.name + "\u201D.");
+    });
+    row.appendChild(pv); row.appendChild(tr); row.appendChild(del);
+    box.appendChild(row);
+  })(keys[i]);
+  refreshVoiceSelects();
+}
+
+/* ================= 8. audio-to-MIDI (autocorrelation pitch tracking) ================= */
+var A2M = { notes: [], name: "" };
+/* Frame-based pitch tracking. Pure logic; works best on single-note lines. */
+function analyzeBuffer(buf) {
+  var sr = buf.sampleRate, d = buf.getChannelData(0);
+  var frame = 2048, hop = 1024, notes = [], cur = null, st;
+  for (st = 0; st + frame <= d.length; st += hop) {
+    var slice = d.subarray(st, st + frame);
+    var f = S.detectPitch({ getChannelData: function () { return slice; } }, sr);
+    var midi = f > 0 ? S.nearestMidi(f) : -1;
+    var t = st / sr;
+    if (midi > 0 && cur && cur.midi === midi && t - cur.end < 0.18) { cur.end = t + frame / sr; }
+    else {
+      if (cur) notes.push(cur);
+      cur = midi > 0 ? { midi: midi, start: t, end: t + frame / sr } : null;
+    }
+  }
+  if (cur) notes.push(cur);
+  return notes.filter(function (n) { return n.end - n.start >= 0.09; })
+    .map(function (n) { return { midi: n.midi, start: n.start, dur: n.end - n.start }; });
+}
+function a2mAnalyze(buf, name) {
+  status("Listening for notes in \u201C" + name + "\u201D\u2026");
+  setTimeout(function () {
+    try {
+      var notes = analyzeBuffer(buf);
+      A2M.notes = notes; A2M.name = name;
+      var box = $("a2m-out"); box.innerHTML = "";
+      if (!notes.length) {
+        box.appendChild(el("p", "hintline", "No clear single notes found. This tool works best on one note at a time (humming, a flute line, a bass line) \u2014 chords and full mixes confuse it."));
+      } else {
+        box.appendChild(el("p", "", "Found " + notes.length + " notes in \u201C" + name + "\u201D:"));
+        var p = el("p", "");
+        for (var i = 0; i < Math.min(notes.length, 48); i++) p.appendChild(el("span", "notechip", S.noteName(notes[i].midi)));
+        if (notes.length > 48) p.appendChild(el("span", "hintline", "\u2026and " + (notes.length - 48) + " more"));
+        box.appendChild(p);
+        box.appendChild(el("p", "hintline", "Notes are snapped to the nearest half-step. Download the .mid or put them on your Lead track (snapped to quarter beats)."));
+      }
+      var has = notes.length > 0;
+      var mb = $("a2m-midi"), lb = $("a2m-lead");
+      if (mb) mb.disabled = !has;
+      if (lb) lb.disabled = !has;
+      status(has ? "Found " + notes.length + " notes." : "No clear notes found — try a single-note line.");
+    } catch (e) { status("Couldn't analyze that audio: " + e.message); }
+  }, 30);
+}
+function bindA2m() {
+  on($("a2m-filebtn"), "click", function () { var p = $("a2m-pick"); if (p) p.click(); });
+  on($("a2m-pick"), "change", function () {
+    var p = $("a2m-pick"), f = p && p.files ? p.files[0] : null;
+    if (!f) return;
+    Studio().unlock();
+    readFileBuffer(f, function (buf) { a2mAnalyze(buf, f.name); });
+    p.value = "";
+  });
+  on($("a2m-micbtn"), "click", function () {
+    if (!MIC.lastKey) { status("Record with your mic first (Your audio section above)."); return; }
+    var b = W.__m3getClip(MIC.lastKey);
+    if (b) a2mAnalyze(b, W.__m3clipName(MIC.lastKey));
+  });
+  on($("a2m-midi"), "click", function () {
+    if (!A2M.notes.length) return;
+    var evs = A2M.notes.map(function (n) {
+      var tick = Math.round(n.start * 480 * (ARR().bpm / 60));
+      return { tick: tick, midi: n.midi, dur: Math.max(60, Math.round(n.dur * 480 * (ARR().bpm / 60))), ch: 0, vel: 92 };
+    });
+    var bytes = midiFileBytes(evs, ARR().bpm);
+    Studio().download(new W.Blob([bytes], { type: "audio/midi" }), slug(A2M.name) + "-notes.mid");
+    status("Downloaded " + slug(A2M.name) + "-notes.mid (" + A2M.notes.length + " notes).");
+  });
+  on($("a2m-lead"), "click", function () {
+    if (!A2M.notes.length) return;
+    var t = firstTrackOf("lead");
+    if (!t) { status("Add a Lead track first (Track lanes \u2192 Add track)."); return; }
+    var stepDur = 60 / ARR().bpm / 4, b, k;
+    t.bars = [];
+    for (b = 0; b < 4; b++) t.bars.push([null, null, null, null]);
+    for (var i = 0; i < A2M.notes.length; i++) {
+      var n = A2M.notes[i], s = Math.round(n.start / stepDur);
+      if (s >= 0 && s < 64) {
+        var bar = Math.floor(s / 16), q = Math.floor((s % 16) / 4);
+        t.bars[bar][q] = { midi: n.midi, len: 1 };
+      }
+    }
+    t.barOn = [1, 1, 1, 1]; t.src = "you";
+    M.renderLaneBody(t.id); M.aiChoices();
+    status("Notes are now the \u201C" + t.name + "\u201D lead line (snapped to quarter beats).");
+  });
+}
+
+/* ================= 11. inline .mid writer (type-0, single track) ================= */
+function vlq(v) {
+  var bytes = [v & 127];
+  v = Math.floor(v / 128);
+  while (v > 0) { bytes.unshift((v & 127) | 128); v = Math.floor(v / 128); }
+  return bytes;
+}
+/* events: [{tick, midi, dur, ch, vel}]. Pure — no DOM, no audio. */
+function midiFileBytes(events, bpm) {
+  var TPQ = 480, usPerQ = Math.round(60000000 / Math.max(40, Math.min(220, bpm || 120)));
+  var bytes = [], i;
+  function pushStr(s) { for (var j = 0; j < s.length; j++) bytes.push(s.charCodeAt(j) & 255); }
+  function push16(v) { bytes.push((v >> 8) & 255, v & 255); }
+  function push32(v) { bytes.push((v >> 24) & 255, (v >> 16) & 255, (v >> 8) & 255, v & 255); }
+  pushStr("MThd"); push32(6); push16(0); push16(1); push16(TPQ);
+  var tb = [];
+  function wv(v) { var q = vlq(v), k; for (k = 0; k < q.length; k++) tb.push(q[k]); }
+  wv(0); tb.push(0xFF, 0x51, 0x03, (usPerQ >> 16) & 255, (usPerQ >> 8) & 255, usPerQ & 255);
+  wv(0); tb.push(0xFF, 0x58, 0x04, 4, 2, 24, 8);
+  var evs = events.slice().sort(function (a, b) { return a.tick - b.tick; });
+  var last = 0;
+  for (i = 0; i < evs.length; i++) {
+    var e = evs[i], ch = e.ch & 15, vel = Math.max(1, Math.min(127, e.vel || 90));
+    wv(Math.max(0, e.tick - last)); last = e.tick;
+    tb.push(0x90 | ch, e.midi & 127, vel);
+    wv(Math.max(1, e.dur | 0)); last = e.tick + Math.max(1, e.dur | 0);
+    tb.push(0x80 | ch, e.midi & 127, 64);
+  }
+  wv(0); tb.push(0xFF, 0x2F, 0x00);
+  pushStr("MTrk"); push32(tb.length);
+  for (i = 0; i < tb.length; i++) bytes.push(tb[i]);
+  return new Uint8Array(bytes);
+}
+/* Gather every note the song actually plays. Mirrors the render. Pure. */
+function collectMidiEvents(arr) {
+  var evs = [], ids = arr.trackOrder || [], s, b, gb = 0, i, k;
+  var DRUMMAP = { kick: 36, snare: 38, hat: 42, clap: 39, tom: 41, shaker: 70 };
+  var leadT = M.leadTrack(arr);
+  for (s = 0; s < arr.sections.length; s++) for (b = 0; b < arr.sections[s].bars; b++, gb++) {
+    var bi = gb % 4;
+    for (i = 0; i < ids.length; i++) {
+      var t = arr.tracks[ids[i]]; if (!t) continue;
+      var type = t.type || ids[i];
+      if (type === "drums") {
+        for (var lane in DRUMMAP) {
+          if (!t.steps[lane]) continue;
+          for (k = 0; k < 16; k++) if (t.steps[lane][k]) evs.push({ tick: (gb * 16 + k) * 120, midi: DRUMMAP[lane], dur: 100, ch: 9, vel: 96 });
+        }
+      } else if (type === "bass" && t.barOn[bi]) {
+        for (k = 0; k < t.bars[bi].length; k++) { var bn = t.bars[bi][k]; if (bn > 0) evs.push({ tick: (gb * 4 + k) * 480, midi: bn, dur: 420, ch: 1, vel: 90 }); }
+      } else if (type === "chords" && t.barOn[bi]) {
+        for (k = 0; k < t.bars[bi].length; k++) { var cn = t.bars[bi][k]; if (cn > 0) evs.push({ tick: gb * 1920, midi: cn, dur: 1800, ch: 2, vel: 80 }); }
+      } else if (type === "lead" && t.barOn[bi]) {
+        for (k = 0; k < t.bars[bi].length; k++) {
+          var cell = t.bars[bi][k];
+          if (cell && cell.midi > 0) evs.push({ tick: (gb * 16 + k) * 120, midi: cell.midi, dur: Math.max(60, Math.round(cell.len * 120)), ch: 3, vel: 92 });
+        }
+      } else if (type === "vocal" && t.barOn[bi] && leadT && leadT.barOn[bi]) {
+        for (k = 0; k < leadT.bars[bi].length; k++) {
+          var vc = leadT.bars[bi][k];
+          if (vc && vc.midi > 0) evs.push({ tick: (gb * 16 + k) * 120, midi: vc.midi + (t.oct || -12), dur: Math.max(60, Math.round(vc.len * 120)), ch: 4, vel: 88 });
+        }
+      }
+    }
+  }
+  return { bpm: arr.bpm, events: evs };
+}
+function exportMidi() {
+  if (!hasAll()) return;
+  Studio().unlock();
+  status("Writing MIDI\u2026");
+  try {
+    var ce = collectMidiEvents(ARR());
+    if (!ce.events.length) { status("No notes to export — arrange or add notes first."); return; }
+    var bytes = midiFileBytes(ce.events, ce.bpm);
+    var name = "workstation-" + slug(ARR().seed) + ".mid";
+    Studio().download(new W.Blob([bytes], { type: "audio/midi" }), name);
+    status("Downloaded " + name + " (" + ce.events.length + " notes). MIDI holds the notes only — audio clips can't be notes, so they aren't in the file.");
+  } catch (e) { status("Couldn't write the MIDI: " + e.message); }
+}
+
+/* ================= 14/15. voice tools: center-channel vocal remover + voice FX ================= */
+var VR = { buf: null, key: null };
+var VX = { buf: null, key: null };
+/* Pure sample math for the center-channel remover. Testable. */
+function centerRemoveStereo(L, R) {
+  var n = Math.min(L.length, R.length), out = new Float32Array(n), i;
+  for (i = 0; i < n; i++) out[i] = (L[i] - R[i]) * 0.5;
+  return out;
+}
+function normalizeBuffer(c, buf, peak) {
+  var ch, i, d, pk = 0;
+  for (ch = 0; ch < buf.numberOfChannels; ch++) { d = buf.getChannelData(ch); for (i = 0; i < d.length; i += 7) pk = Math.max(pk, Math.abs(d[i])); }
+  var g = pk > 0 ? (peak || 0.89) / pk : 1;
+  if (g !== 1) for (ch = 0; ch < buf.numberOfChannels; ch++) { d = buf.getChannelData(ch); for (i = 0; i < d.length; i++) d[i] *= g; }
+  return buf;
+}
+function refreshVoiceSelects() {
+  var keys = clipKeys(), i, k;
+  var sels = [$("vr-clip"), $("vx-clip")];
+  for (i = 0; i < sels.length; i++) {
+    var sel = sels[i]; if (!sel) continue;
+    var cur = sel.value;
+    sel.innerHTML = "";
+    if (!keys.length) {
+      var o0 = DOC.createElement("option"); o0.value = ""; o0.textContent = "(no clips yet — upload or record first)"; sel.appendChild(o0);
+    }
+    for (k = 0; k < keys.length; k++) {
+      var o = DOC.createElement("option");
+      o.value = keys[k]; o.textContent = W.__m3clipName(keys[k]);
+      sel.appendChild(o);
+    }
+    if (cur) sel.value = cur;
+  }
+}
+function vocalRemove() {
+  if (!hasAll()) return;
+  var sel = $("vr-clip"), key = sel ? sel.value : "";
+  var buf = key ? W.__m3getClip(key) : null;
+  if (!buf) { status("Pick a clip first (upload or record one in the Your audio section)."); return; }
+  if (buf.numberOfChannels < 2) { status("That clip is mono — center-channel removal needs a stereo file."); return; }
+  Studio().unlock();
+  status("Removing center vocals\u2026");
+  try {
+    var OC = W.OfflineAudioContext || W.webkitOfflineAudioContext;
+    var c = new OC(2, buf.length, buf.sampleRate);
+    var src = c.createBufferSource(); src.buffer = buf;
+    var split = c.createChannelSplitter(2), merge = c.createChannelMerger(2);
+    src.connect(split);
+    var outs = [0, 1], o;
+    for (o = 0; o < 2; o++) {
+      var gL = c.createGain(); gL.gain.value = 0.5;
+      var gR = c.createGain(); gR.gain.value = -0.5;
+      split.connect(gL, 0); split.connect(gR, 1);
+      gL.connect(merge, 0, o); gR.connect(merge, 0, o);
+    }
+    merge.connect(c.destination);
+    src.start(0);
+    c.startRendering().then(function (out) {
+      normalizeBuffer(c, out, 0.89);
+      VR.buf = out; VR.key = key;
+      var nm = W.__m3clipName(key) + " (center vocals removed)";
+      addClip(nm, out);
+      var pb = $("vr-play"), tb = $("vr-track");
+      if (pb) pb.disabled = false;
+      if (tb) tb.disabled = false;
+      status("Done — that's the karaoke-style center-channel remover (not AI stem separation). Play it or put it on a track.");
+    }, function (err) { status("Couldn't process that clip: " + (err && err.message ? err.message : err)); });
+  } catch (e) { status("Couldn't process that clip: " + e.message); }
+}
+/* Pure pitch-shift ratio math. Testable. */
+function shiftRatio(semitones) { return Math.pow(2, (semitones || 0) / 12); }
+function voiceFx() {
+  if (!hasAll()) return;
+  var sel = $("vx-clip"), key = sel ? sel.value : "";
+  var buf = key ? W.__m3getClip(key) : null;
+  if (!buf) { status("Pick a clip first (upload or record one in the Your audio section)."); return; }
+  var semi = parseInt($("vx-pitch").value, 10) || 0;
+  var form = parseInt($("vx-form").value, 10) || 0;
+  Studio().unlock();
+  status("Applying voice effect\u2026");
+  try {
+    var rate = shiftRatio(semi);
+    var OC = W.OfflineAudioContext || W.webkitOfflineAudioContext;
+    var c = new OC(2, Math.max(1, Math.floor(buf.length / rate)), buf.sampleRate);
+    var src = c.createBufferSource(); src.buffer = buf; src.playbackRate.value = rate;
+    var hp = c.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 80;
+    var pk = c.createBiquadFilter(); pk.type = "peaking"; pk.frequency.value = 900; pk.Q.value = 0.9; pk.gain.value = form;
+    src.connect(hp); hp.connect(pk); pk.connect(c.destination);
+    src.start(0);
+    c.startRendering().then(function (out) {
+      normalizeBuffer(c, out, 0.89);
+      VX.buf = out; VX.key = key;
+      addClip(W.__m3clipName(key) + " (voice fx " + (semi >= 0 ? "+" : "") + semi + "st)", out);
+      var pb = $("vx-play"), tb = $("vx-track");
+      if (pb) pb.disabled = false;
+      if (tb) tb.disabled = false;
+      status("Voice effect applied (pitch " + (semi >= 0 ? "+" : "") + semi + " semitones — note it also changes the speed a little).");
+    }, function (err) { status("Couldn't process that clip: " + (err && err.message ? err.message : err)); });
+  } catch (e) { status("Couldn't process that clip: " + e.message); }
+}
+function bindVoice() {
+  on($("vr-clip"), "focus", refreshVoiceSelects);
+  on($("vx-clip"), "focus", refreshVoiceSelects);
+  on($("vr-go"), "click", vocalRemove);
+  on($("vr-play"), "click", function () { if (VR.buf) S.playBuffer(VR.buf, "m3vr"); });
+  on($("vr-track"), "click", function () {
+    if (!VR.buf) return;
+    var keys = clipKeys(), key = keys[keys.length - 1], t = clipToNewTrack(key);
+    status("Vocal-removed clip is now on track \u201C" + t.name + "\u201D.");
+  });
+  on($("vx-pitch"), "input", function () { var v = $("vx-pitch-v"); if (v) v.textContent = ($("vx-pitch").value >= 0 ? "+" : "") + $("vx-pitch").value + " st"; });
+  on($("vx-form"), "input", function () { var v = $("vx-form-v"); if (v) v.textContent = $("vx-form").value; });
+  on($("vx-go"), "click", voiceFx);
+  on($("vx-play"), "click", function () { if (VX.buf) S.playBuffer(VX.buf, "m3vx"); });
+  on($("vx-track"), "click", function () {
+    if (!VX.buf) return;
+    var keys = clipKeys(), key = keys[keys.length - 1], t = clipToNewTrack(key);
+    status("Voice-effect clip is now on track \u201C" + t.name + "\u201D.");
+  });
+}
+
+/* ================= 13. AI mastering (an honest mastering-chain preset) ================= */
+var MASTERED = null;
+function mastering() {
+  if (!hasAll()) return;
+  Studio().unlock();
+  status("Rendering your mix\u2026");
+  var mg = $("mast-go"); if (mg) mg.disabled = true;
+  M.renderArr(ARR(), M.mixOf(ARR())).then(function (buf) {
+    status("Running the mastering chain (warm EQ \u2192 glue compressor \u2192 limiter \u2192 normalize)\u2026");
+    return S.applyFXChain(buf, ["eqwarm", "glue", "limiter", "normalize"]);
+  }).then(function (mb) {
+    MASTERED = mb;
+    var ms = $("mast-status");
+    if (ms) ms.textContent = "Mastered with the house chain preset (warm EQ + glue compressor + limiter + normalize). It's a fixed recipe, not magic.";
+    var p1 = $("mast-play"), p2 = $("mast-wav"), p3 = $("mast-mp3");
+    if (p1) p1.disabled = false;
+    if (p2) p2.disabled = false;
+    if (p3) p3.disabled = false;
+    if (mg) mg.disabled = false;
+    status("Mastered. Play it or download it below.");
+  }, function (err) {
+    if (mg) mg.disabled = false;
+    status("Couldn't master the mix: " + (err && err.message ? err.message : err));
+  });
+}
+function bindMaster() {
+  on($("mast-go"), "click", mastering);
+  on($("mast-play"), "click", function () { if (MASTERED) { try { Studio().unlock(); S.playBuffer(MASTERED, "m3mast"); } catch (e) { status("Couldn't play: " + e.message); } } });
+  on($("mast-wav"), "click", function () {
+    if (!MASTERED) return;
+    try {
+      var blob = Studio().wavBlob(MASTERED);
+      Studio().download(blob, "workstation-" + slug(ARR().seed) + "-mastered.wav");
+      status("Downloaded the mastered WAV.");
+    } catch (e) { status("Couldn't build the WAV: " + e.message); }
+  });
+  on($("mast-mp3"), "click", function () {
+    if (!MASTERED) return;
+    Studio().unlock();
+    Studio().mp3Blob(MASTERED).then(function (blob) {
+      Studio().download(blob, "workstation-" + slug(ARR().seed) + "-mastered.mp3");
+      status("Downloaded the mastered MP3.");
+    }, function (err) { status("MP3: " + (err && err.message ? err.message : err)); });
+  });
+}
+
+/* ================= add-track (item 1: the multitrack timeline) ================= */
+function bindAddTrack() {
+  on($("btnaddtrack"), "click", function () {
+    if (!hasAll()) return;
+    Studio().unlock();
+    var type = $("newtracktype") ? $("newtracktype").value : "drums";
+    var nm = $("newtrackname") ? $("newtrackname").value.replace(/^\s+|\s+$/g, "") : "";
+    var t = M.addTrack(type, nm || undefined);
+    M.buildLanes(); M.buildMixer(); M.aiChoices();
+    if (W.__m3fxRefresh) W.__m3fxRefresh();
+    if ($("newtrackname")) $("newtrackname").value = "";
+    var note = $("addtracknote"); if (note) note.textContent = "Added \u201C" + t.name + "\u201D.";
+    status("Added track \u201C" + t.name + "\u201D — it plays in sync with everything else.");
+  });
+}
+
+/* ================= 16. AI host: extra deterministic ideas ================= */
+var HOST_IDEAS = [
+  ["\uD83C\uDFB2 Surprise me", null],
+  ["\uD83C\uDF19 Dark trap idea", "dark trap banger"],
+  ["\u2600\uFE0F Happy pop idea", "happy pop song"],
+  ["\uD83C\uDFA7 Lofi idea", "rainy lofi night"]
+];
+function bindHostIdeas() {
+  var box = $("aihost"); if (!box || !hasAll()) return;
+  var p = el("p");
+  p.appendChild(el("span", "hintline", "More ideas from the host: "));
+  for (var i = 0; i < HOST_IDEAS.length; i++) (function (label, prompt) {
+    var b = el("button", "btn ghost", label); b.setAttribute("type", "button");
+    on(b, "click", function () {
+      var pr = prompt || SURPRISES[Math.floor(Math.random() * SURPRISES.length)];
+      loadIdea(ideaFromPrompt(pr));
+    });
+    p.appendChild(b); p.appendChild(DOC.createTextNode(" "));
+  })(HOST_IDEAS[i][0], HOST_IDEAS[i][1]);
+  box.appendChild(p);
+}
+
+/* ================= MIDI export button ================= */
+function bindMidiExport() {
+  on($("btnexpmidi"), "click", exportMidi);
+}
+
+/* ================= boot ================= */
+function labBoot() {
+  if (!hasAll()) return;
+  buildTemplates();
+  buildBeatMaker(); bindBeatMaker();
+  bindInstKeys();
+  buildRoll(); bindRoll();
+  buildLoops();
+  bindIdea();
+  syncFxTrackList(); renderFxControls(); renderFxMaster(); bindFx();
+  bindUpload(); bindMic(); refreshClipUI();
+  bindA2m();
+  refreshVoiceSelects(); bindVoice();
+  bindMaster();
+  bindAddTrack();
+  bindHostIdeas();
+  bindMidiExport();
+  status("Studio ready \u2014 new: templates, beat maker, instruments, note writer, loops, idea starter, FX, your audio, audio\u2192notes, voice tools, mastering, MIDI export.");
+}
+/* test hooks (Node harness; harmless in the browser) */
+W.__m3x = {
+  TEMPLATES: TEMPLATES, LOOPS: LOOPS, GENRE_WORDS: GENRE_WORDS, MOOD_WORDS: MOOD_WORDS,
+  ideaFromPrompt: ideaFromPrompt, buildLoop: buildLoop,
+  analyzeBuffer: analyzeBuffer, centerRemoveStereo: centerRemoveStereo, shiftRatio: shiftRatio,
+  vlq: vlq, midiFileBytes: midiFileBytes, collectMidiEvents: collectMidiEvents,
+  keySeq: keySeq, bmEmpty: bmEmpty, bmSeed: bmSeed,
+  addClip: addClip, clipKeys: clipKeys, CLIPS: function () { return CLIPS; },
+  hasAll: hasAll, labBoot: labBoot
+};
+if (DOC.readyState === "complete" || DOC.readyState === "interactive") labBoot();
+else on(DOC, "DOMContentLoaded", labBoot);
+})(typeof window !== "undefined" ? window : this);
+
 </script>
 </body>
 </html>

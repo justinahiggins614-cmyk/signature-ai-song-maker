@@ -152,9 +152,20 @@
     return fetchT(url).then(function (r) { return r.arrayBuffer(); })
       .then(function (ab) { return new Response(new Blob([ab]).stream().pipeThrough(new DecompressionStream("gzip"))).text(); });
   }
+  // Retry with backoff: phones on flaky connections get 3 attempts before an error surfaces.
+  function gunzipRetry(url, tries) {
+    tries = tries || 3;
+    function attempt(n) {
+      return gunzip(url).catch(function (e) {
+        if (n < tries) return new Promise(function (res) { setTimeout(res, 800 * n); }).then(function () { return attempt(n + 1); });
+        throw e;
+      });
+    }
+    return attempt(1);
+  }
   function loadIndex() {
     if (INDEX) return Promise.resolve(INDEX);
-    return gunzip("data/index/index.json.gz").then(function (txt) {
+    return gunzipRetry("data/index/index.json.gz").then(function (txt) {
       INDEX = [];
       txt.split("\n").forEach(function (l) {
         if (!l.trim()) return;
