@@ -87,17 +87,17 @@ window.__JAHREAD=R;
       .then(function (ab) { return new Response(new Blob([ab]).stream().pipeThrough(new DecompressionStream("gzip"))).text(); });
   }
 
-  /* ---------- 27-site JAH Network nav ---------- */
+  /* ---------- 31-site JAH Network nav ---------- */
   var NAV = [
     ["Signature Math", "signature-math"], ["Signature Universal Paradox Immune Calculator", "jah-calculator"], ["The Signature Dictionary", "jah-dictionary"],
-    ["JAH Wiki", "jah-wiki"], ["JAH-N Wiki", "jah-n-wiki-leaks"], ["Signature Llama: The Fully Cyber Utilizable AI", "signature-llama"],
+    ["JAH Wiki", "jah-wiki"], ["JAH-N Wiki Leaks", "jah-n-wiki-leaks"], ["Signature Llama: The Fully Cyber Utilizable AI", "signature-llama"],
     ["The Signature AI Phone Book", "jah-ai-models"], ["Globally Rejustered Patent Catalog", "cyber-patent-catalog"], ["Signature Spec Catalog Pending Patents", "signature-one-archive/specs.html"],
     ["The Signature PC System Depository", "jah-computer-systems"], ["The Signature Book Depository", "signature-books"], ["The Signature Comic Store", "signature-comics"],
-    ["The Signature Global Newspaper Archive", "signature-newspapers"], ["The Signature AI Mad Scientist Creation Lab", "signature-backend"], ["The Signature Boundless Generator Archive", "signature-boundless-generators"],
+    ["The Signature Global Newspaper Archive", "signature-newspapers"], ["The Signature AI Mix and Match Generator", "signature-backend"], ["The Signature Boundless Generator Archive", "signature-boundless-generators"],
     ["The Signature AI Mix Lab", "signature-ai-mixlab"], ["AI Olympics", "signature-ai-olypics"], ["The Signature Computer Chip Maker and Archive", "signature-chip-maker"],
     ["The Signature App Archive", "signature-app-archive"], ["The Signature AI Robot Matcher", "signature-ai-robot-matcher"], ["The Signature Experiment Solver", "signature-experiment-solver"],
     ["Signature AI Pixel", "signature-ai-image-video-maker"], ["Signature Music Studio", "signature-ai-song-maker"], ["The Signature Mr Fix-It", "signature-fixit"], ["The Signature University", "signature-university"],
-    ["The Signature Cyber Mega-Mall", "signature-cyber-mega-mall"], ["The Signature 3D Print Mega Mall", "signature-3d-print"]
+    ["The Signature Cyber Mega-Mall", "signature-cyber-mega-mall"], ["The Signature 3D Print Mega Mall", "signature-3d-print"], ["Signature Earth", "signature-earth"], ["The Signature Flight School", "signature-flight-school"], ["The Signature Game Store", "signature-game-store"], ["The Signature Website Creator", "signature-website-creator"]
   ];
   function buildNav(el, selfIx) {
     var h = "<b>THE JAH NETWORK</b> ", i;
