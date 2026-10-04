@@ -94,7 +94,7 @@ window.__JAHREAD=R;
     ["The Signature AI Phone Book", "jah-ai-models"], ["Globally Rejustered Patent Catalog", "cyber-patent-catalog"], ["Signature Spec Catalog Pending Patents", "signature-one-archive/specs.html"],
     ["The Signature PC System Depository", "jah-computer-systems"], ["The Signature Book Depository", "signature-books"], ["The Signature Comic Store", "signature-comics"],
     ["The Signature Global Newspaper Archive", "signature-newspapers"], ["The Signature AI Mad Scientist Creation Lab", "signature-backend"], ["The Signature Boundless Generator Archive", "signature-boundless-generators"],
-    ["The Signature AI Mix Lab", "signature-ai-mixlab"], ["AI Olypics", "signature-ai-olypics"], ["The Signature Computer Chip Maker and Archive", "signature-chip-maker"],
+    ["The Signature AI Mix Lab", "signature-ai-mixlab"], ["AI Olympics", "signature-ai-olypics"], ["The Signature Computer Chip Maker and Archive", "signature-chip-maker"],
     ["The Signature App Archive", "signature-app-archive"], ["The Signature AI Robot Matcher", "signature-ai-robot-matcher"], ["The Signature Experiment Solver", "signature-experiment-solver"],
     ["Signature AI Pixel", "signature-ai-image-video-maker"], ["Signature Music Studio", "signature-ai-song-maker"], ["The Signature Mr Fix-It", "signature-fixit"], ["The Signature University", "signature-university"],
     ["The Signature Cyber Mega-Mall", "signature-cyber-mega-mall"], ["The Signature 3D Print Mega Mall", "signature-3d-print"]
@@ -102,12 +102,13 @@ window.__JAHREAD=R;
   function buildNav(el, selfIx) {
     var h = "<b>THE JAH NETWORK</b> ", i;
     for (i = 0; i < NAV.length; i++) {
+      if (i === selfIx) continue;
       h += '<a href="https://justinahiggins614-cmyk.github.io/' + NAV[i][1] + '/">' + (i + 1) + " " + esc(NAV[i][0]) + "</a>";
     }
     h += '<span class="here">23 Signature Music Studio — YOU ARE HERE</span>';
     el.innerHTML = h;
   }
-  buildNav($("jahnet")); buildNav($("jahnet2"));
+  buildNav($("jahnet"), 22); buildNav($("jahnet2"), 22);
 
   /* ---------- mode toggle ---------- */
   var MODE = "self";

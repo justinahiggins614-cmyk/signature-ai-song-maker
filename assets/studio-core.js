@@ -55,7 +55,7 @@
     ["The Signature AI Phone Book", "jah-ai-models"], ["Globally Rejustered Patent Catalog", "cyber-patent-catalog"], ["Signature Spec Catalog Pending Patents", "signature-one-archive/specs.html"],
     ["The Signature PC System Depository", "jah-computer-systems"], ["The Signature Book Depository", "signature-books"], ["The Signature Comic Store", "signature-comics"],
     ["The Signature Global Newspaper Archive", "signature-newspapers"], ["The Signature AI Mad Scientist Creation Lab", "signature-backend"], ["The Signature Boundless Generator Archive", "signature-boundless-generators"],
-    ["The Signature AI Mix Lab", "signature-ai-mixlab"], ["AI Olypics", "signature-ai-olypics"], ["The Signature Computer Chip Maker and Archive", "signature-chip-maker"],
+    ["The Signature AI Mix Lab", "signature-ai-mixlab"], ["AI Olympics", "signature-ai-olypics"], ["The Signature Computer Chip Maker and Archive", "signature-chip-maker"],
     ["The Signature App Archive", "signature-app-archive"], ["The Signature AI Robot Matcher", "signature-ai-robot-matcher"], ["The Signature Experiment Solver", "signature-experiment-solver"],
     ["Signature AI Pixel", "signature-ai-image-video-maker"], ["Signature Music Studio", "signature-ai-song-maker"], ["The Signature Mr Fix-It", "signature-fixit"], ["The Signature University", "signature-university"],
     ["The Signature Cyber Mega-Mall", "signature-cyber-mega-mall"], ["The Signature 3D Print Mega Mall", "signature-3d-print"]
@@ -65,6 +65,7 @@
     if (!el) return;
     var h = "<b>THE JAH NETWORK</b> ", i;
     for (i = 0; i < JNAV.length; i++) {
+      if (JNAV[i][1] === "signature-ai-song-maker") continue;
       h += '<a href="https://justinahiggins614-cmyk.github.io/' + JNAV[i][1] + '/">' + (i + 1) + " " + esc(JNAV[i][0]) + "</a>";
     }
     h += '<span class="here">23 Signature Music Studio' + (hereLabel ? " \u00b7 " + esc(hereLabel) : "") + " \u2014 YOU ARE HERE</span>";
