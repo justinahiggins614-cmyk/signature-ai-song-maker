@@ -218,7 +218,8 @@ def build_static_catalog(rows):
 def stamp_counts(counts):
     """Re-stamp the last-known counts into index.html's raw HTML chips
     (2026-10-03 universal loading pattern): #counters between the
-    COUNT-STAMP markers and #libcount between the LIBCOUNT-STAMP markers.
+    COUNT-STAMP markers (the combined chip covers songs + library +
+    beats + gear, so no separate #libcount stamp is needed).
     The drip runs this after every run so the chips never boot stale."""
     p = os.path.join(HERE, "index.html")
     h = open(p).read()
@@ -236,12 +237,6 @@ def stamp_counts(counts):
         h = h.split(s0)[0] + s0 + body + s1 + s1.join(h.split(s1)[1:])
     else:
         print("WARNING: COUNT-STAMP markers missing — counters not re-stamped")
-    l0, l1 = "<!-- LIBCOUNT-STAMP-START -->", "<!-- LIBCOUNT-STAMP-END -->"
-    lbody = "(%s / 1,000,000)" % format(lib, ",")
-    if l0 in h and l1 in h:
-        h = h.split(l0)[0] + l0 + lbody + l1 + l1.join(h.split(l1)[1:])
-    else:
-        print("WARNING: LIBCOUNT-STAMP markers missing — libcount not re-stamped")
     # refresh the stamp date so the page shows when the count was published
     import re as _re
     h = _re.sub(r'data-stamp="\d{4}-\d{2}-\d{2}"', 'data-stamp="%s"' % TODAY, h, count=1)
