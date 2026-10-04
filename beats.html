@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>try{if(localStorage.getItem("jah-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Beat Archive — Signature Music Studio</title>
+<meta name="description" content="The Signature Music Studio Beat Archive: every original Signature beat — searchable, filterable by style, playable in your browser, downloadable as WAV and MP3. Marching to one million beats.">
+<link rel="canonical" href="https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/beats.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Beat Archive — Signature Music Studio">
+<meta property="og:description" content="Every original Signature beat — search, filter by style, play the render, download WAV and MP3. Marching to one million beats.">
+<meta property="og:url" content="https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/beats.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Beat Archive — Signature Music Studio">
+<meta name="twitter:description" content="Every original Signature beat — search, filter by style, play, download WAV and MP3.">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/studio-theme.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+{"@type":"WebPage","name":"Beat Archive — Signature Music Studio","url":"https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/beats.html","description":"Searchable, playable archive of every original Signature beat, with WAV and MP3 downloads.","author":{"@type":"Person","name":"Justin Addam Higgins"},"isPartOf":{"@type":"WebSite","name":"Signature Music Studio","url":"https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/"}},
+{"@type":"Dataset","name":"Signature Beat Archive","description":"Deterministic archive of original Signature beats — marching to one million.","creator":{"@type":"Person","name":"Justin Addam Higgins"},"url":"https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/data/music-catalog.json"}
+]}
+</script>
+</head>
+<body>
+<nav class="jahnet" aria-label="JAH Network Global Ecosystem"><div class="wrap" id="jahnet"></div></nav>
+<div id="studionav"></div>
+
+<header class="hero"><div class="wrap">
+<div class="kick">SITE 23 OF 27 · THE JAH NETWORK</div>
+<h1>🥁 BEAT ARCHIVE</h1>
+<div><span class="official">OFFICIAL SIGNATURE SITE — within the Signature/JAH system</span></div>
+<p class="sub">Every beat fully made — style, tempo, drum pattern — and <b>ready to play</b>: one click renders it. Download any beat as <b>.wav</b> or <b>.mp3</b> (industry standard). Marching to one million.</p>
+<p class="counter" id="beatcount" data-stamp="2026-10-04"><!-- BEATARCHIVE-STAMP-START -->🥁 <b>4,500</b> beats<!-- BEATARCHIVE-STAMP-END --> <span class="seqlab">last published count — loading live…</span></p>
+<p><a class="btn ghost" href="./" style="text-decoration:none">← Back to the Studio</a></p>
+<div class="honest">Every beat on this site is synthesized live in your browser with the Web Audio API — no samples, no downloads needed to play. All beats are original Signature patterns; not copies of any real song.</div>
+</div></header>
+
+<div class="wrap" id="main">
+<section class="sec" id="browser" aria-label="Beat browser">
+<div class="filterbar"><div class="row">
+<div><label>Search beats</label><input type="text" id="bq" placeholder="Search name or ID…" aria-label="Search beats"></div>
+<div><label>Style</label><select id="bstyle" aria-label="Filter beats by style"><option value="">All styles</option></select></div>
+<div><label>Order</label><select id="border" aria-label="Sort beats"><option value="new">Newest first</option><option value="old">Oldest first</option></select></div>
+<div style="flex:0"><label>&nbsp;</label><button class="btn violet" id="brandom" type="button">🎲 Random beat</button></div>
+</div></div>
+<div class="az" id="baz" aria-label="Browse by first letter"></div>
+<p class="seqlab" id="bcount" role="status"></p>
+<div class="grid" id="bgrid"><div class="card" role="status">Loading the archive…</div></div>
+<div class="row" id="bpages" style="margin-top:10px"></div>
+</section>
+
+<section class="sec" id="detail" style="display:none" aria-label="Beat detail"></section>
+</div>
+
+<div id="readbar" style="display:none"><span id="readlabel">Reading…</span>
+<button class="btn ghost" id="readplay">▶</button><button class="btn ghost" id="readstop">⏹</button><button class="btn ghost" id="readclose">✕</button></div>
+
+<script src="assets/synth.js"></script>
+<script src="assets/engine.js"></script>
+<script src="assets/lame.min.js"></script>
+<script src="assets/studio-core.js"></script>
+<script>
+(function () {
+  "use strict";
+  var BASE = "https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/";
+  var S = window.SigStudio, D = window.SigData;
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+
+  /* ---------- navs (SigStudio canon) ---------- */
+  try { S.jahNav("jahnet", "Beat Archive"); } catch (e) {}
+  try { $("studionav").innerHTML = S.nav("beats.html"); } catch (e) {}
+
+  /* ---------- tiered read-aloud (site pattern: speechSynthesis -> Google TTS audio) ---------- */
+  var readText = "";
+  function speakTier(text, done) {
+    try {
+      if ("speechSynthesis" in window && window.speechSynthesis) {
+        var u = new SpeechSynthesisUtterance(text); u.rate = 1; u.onend = done; u.onerror = done;
+        speechSynthesis.cancel(); speechSynthesis.speak(u); return;
+      }
+    } catch (e) {}
+    googleChunks(text, done);
+  }
+  function googleChunks(text, done) {
+    var parts = [], t = String(text);
+    while (t.length > 170) {
+      var cut = t.lastIndexOf(". ", 170); if (cut < 60) cut = t.lastIndexOf(" ", 170); if (cut < 60) cut = 170;
+      parts.push(t.slice(0, cut + 1)); t = t.slice(cut + 1);
+    }
+    if (t) parts.push(t);
+    var i = 0;
+    (function next() {
+      if (i >= parts.length) { done(); return; }
+      try {
+        var a = new Audio("https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=" + encodeURIComponent(parts[i++]));
+        a.onended = next; a.onerror = next; a.play().catch(next);
+      } catch (e) { next(); }
+    })();
+  }
+  function readAloud(text, label) {
+    readText = text; $("readlabel").textContent = "Reading: " + (label || "selection"); $("readbar").style.display = "block";
+    speakTier(text, function () { $("readbar").style.display = "none"; });
+  }
+  function stopReading() { try { speechSynthesis.cancel(); } catch (e) {} readText = ""; $("readbar").style.display = "none"; }
+  $("readstop").onclick = stopReading; $("readclose").onclick = stopReading;
+  $("readplay").onclick = function () { if (readText) readAloud(readText); };
+
+  /* ---------- data: compact index (studio-core caches it) ---------- */
+  var BEATS = [], IDX_OK = false;
+  function loadBeats() {
+    return S.loadIndex().then(function (rows) {
+      BEATS = rows.filter(function (r) { return r[2] === "beat"; })
+        .map(function (r) { return { id: r[0], title: r[1], chunk: r[3], n: parseInt(String(r[0]).slice(-7), 10) || 0 }; });
+      IDX_OK = true; paintCount();
+      try { localStorage.setItem("sigstudio_beatidx_v1", JSON.stringify({ at: new Date().toISOString(), rows: BEATS })); } catch (e) {}
+    }).catch(function () {
+      try {
+        var c = JSON.parse(localStorage.getItem("sigstudio_beatidx_v1") || "null");
+        if (c && c.rows && c.rows.length) {
+          BEATS = c.rows; IDX_OK = true; paintCount();
+          $("bcount").textContent = "Showing the last saved copy — check your connection, then reload.";
+          return;
+        }
+      } catch (e) {}
+      throw new Error("index failed");
+    });
+  }
+  function paintCount() {
+    $("beatcount").innerHTML = '🥁 <b>' + BEATS.length.toLocaleString() + '</b> / 1,000,000 beats <span class="seqlab">· live</span>';
+  }
+  function findBeat(id) { return S.findRecord(id); }
+
+  /* ---------- style (deterministic from the engine — matches the stored records) ---------- */
+  var styleCache = {}, bpmCache = {};
+  function beatMeta(b) {
+    if (!styleCache[b.id]) {
+      try { var g = D.genBeat(b.n); styleCache[b.id] = g.style || ""; bpmCache[b.id] = g.bpm || 0; }
+      catch (e) { styleCache[b.id] = ""; bpmCache[b.id] = 0; }
+    }
+    return { style: styleCache[b.id], bpm: bpmCache[b.id] };
+  }
+
+  /* ---------- render + download helpers ---------- */
+  function renderOne(rec, bars) { S.unlock(); return S.renderBeatBuffer(rec, bars || 4); }
+  function busy(btn, t) { try { btn.textContent = t; btn.disabled = true; } catch (e) {} }
+  function free(btn, t) { try { btn.textContent = t; btn.disabled = false; } catch (e) {} }
+  function fileBase(rec) { return String(rec.id || "beat").toLowerCase().replace(/[^a-z0-9]+/g, "-"); }
+  function dlWav(rec, btn, msgEl) {
+    busy(btn, "Rendering…");
+    renderOne(rec).then(function (buf) {
+      S.download(S.wavBlob(buf), fileBase(rec) + ".wav");
+      if (msgEl) msgEl.textContent = "WAV downloaded — industry standard, CD quality.";
+      free(btn, "⬇ .wav");
+    }).catch(function (e) {
+      if (msgEl) msgEl.textContent = "Couldn't render: " + (e && e.message || e);
+      free(btn, "⬇ .wav");
+    });
+  }
+  function dlMp3(rec, btn, msgEl) {
+    busy(btn, "Encoding…");
+    renderOne(rec).then(function (buf) { return S.mp3Blob(buf); }).then(function (blob) {
+      S.download(blob, fileBase(rec) + ".mp3");
+      if (msgEl) msgEl.textContent = "MP3 downloaded — industry standard, 128 kbps.";
+      free(btn, "⬇ .mp3");
+    }).catch(function (e) {
+      // honest path: lamejs not vendored on this page -> say so, WAV still works
+      if (msgEl) msgEl.textContent = (e && e.message) || "MP3 encoder not loaded — WAV works";
+      free(btn, "⬇ .mp3");
+    });
+  }
+
+  /* ---------- browser grid ---------- */
+  var PER = 60, page = 0, letter = "";
+  function filtered() {
+    var q = ($("bq").value || "").toLowerCase(), sf = $("bstyle").value, order = $("border").value, list = [], i, b;
+    for (i = 0; i < BEATS.length; i++) {
+      b = BEATS[i];
+      if (letter && (b.title[0] || "#").toUpperCase() !== letter) continue;
+      if (sf && beatMeta(b).style !== sf) continue;
+      if (q && (b.title + " " + b.id).toLowerCase().indexOf(q) === -1) continue;
+      list.push(b);
+    }
+    list.sort(function (a, b2) { return order === "old" ? a.n - b2.n : b2.n - a.n; });
+    return list;
+  }
+  function draw() {
+    var list = filtered(), pages = Math.max(1, Math.ceil(list.length / PER));
+    if (page >= pages) page = pages - 1;
+    var slice = list.slice(page * PER, page * PER + PER), h = "", i, b, m;
+    for (i = 0; i < slice.length; i++) {
+      b = slice[i]; m = beatMeta(b);
+      h += '<div class="card"><h4>' + esc(b.title) + '</h4><div class="id">' + esc(b.id) + '</div>' +
+        '<p class="seqlab">' + esc((m.style || "").replace(/-/g, " ")) + (m.bpm ? " · " + m.bpm + " BPM" : "") + '</p>' +
+        '<p><button class="fplay" data-bplay="' + esc(b.id) + '">▶ Play</button> ' +
+        '<button class="btn teal" data-bwav="' + esc(b.id) + '">⬇ .wav</button> ' +
+        '<button class="btn teal" data-bmp3="' + esc(b.id) + '">⬇ .mp3</button> ' +
+        '<button class="btn ghost" data-bopen="' + esc(b.id) + '">Open →</button></p>' +
+        '<p class="seqlab" data-bmsg="' + esc(b.id) + '"></p></div>';
+    }
+    $("bgrid").innerHTML = h || '<div class="card">No beats match — try clearing filters.</div>';
+    $("bcount").textContent = list.length.toLocaleString() + " beat" + (list.length === 1 ? "" : "s") + " · page " + (page + 1) + " of " + pages;
+    var ph = "";
+    if (pages > 1) {
+      ph = '<button class="btn ghost" id="pprev"' + (page === 0 ? " disabled" : "") + '>← Prev</button> ' +
+        '<span class="seqlab">page ' + (page + 1) + " / " + pages + '</span> ' +
+        '<button class="btn ghost" id="pnext"' + (page >= pages - 1 ? " disabled" : "") + '>Next →</button>';
+    }
+    $("bpages").innerHTML = ph;
+    var pv = $("pprev"), nx = $("pnext");
+    if (pv) pv.onclick = function () { if (page > 0) { page--; draw(); window.scrollTo(0, 0); } };
+    if (nx) nx.onclick = function () { if (page < pages - 1) { page++; draw(); window.scrollTo(0, 0); } };
+  }
+  function refilter() { page = 0; draw(); }
+
+  function cardMsg(id) {
+    var el = $("bgrid").querySelector('[data-bmsg="' + id + '"]');
+    return el;
+  }
+  function initBrowser() {
+    var az = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+    $("baz").innerHTML = az.map(function (l) { return '<button data-az="' + l + '">' + l + "</button>"; }).join("");
+    try {
+      var styles = (D && D.BEAT_STYLES) || ["hip-hop", "house", "trap", "pop", "rock", "lofi", "techno", "jazz", "ambient", "drum-and-bass", "reggae", "funk"];
+      styles.forEach(function (g) { var o = document.createElement("option"); o.value = g; o.textContent = g.replace(/-/g, " "); $("bstyle").appendChild(o); });
+    } catch (e) {}
+    $("bq").addEventListener("input", refilter);
+    $("bstyle").addEventListener("change", refilter);
+    $("border").addEventListener("change", refilter);
+    $("baz").addEventListener("click", function (e) {
+      var b = e.target.closest ? e.target.closest("[data-az]") : null; if (!b) return;
+      Array.prototype.forEach.call($("baz").querySelectorAll("button"), function (x) { x.classList.remove("on"); });
+      var l = b.getAttribute("data-az");
+      if (letter === l) { letter = ""; } else { letter = l; b.classList.add("on"); }
+      refilter();
+    });
+    $("brandom").onclick = function () {
+      if (!BEATS.length) return;
+      var b = BEATS[Math.floor(Math.random() * BEATS.length)];
+      location.href = "beats.html?beat=" + b.id;
+    };
+    $("bgrid").addEventListener("click", function (e) {
+      var t = e.target, id, btn;
+      function closest(attr) { return (t.closest ? t.closest("[" + attr + "]") : null); }
+      var o = closest("data-bopen");
+      if (o) { location.href = "beats.html?beat=" + o.getAttribute("data-bopen"); return; }
+      btn = closest("data-bplay") || closest("data-bwav") || closest("data-bmp3");
+      if (!btn) return;
+      id = btn.getAttribute("data-bplay") || btn.getAttribute("data-bwav") || btn.getAttribute("data-bmp3");
+      var msg = cardMsg(id), kind = btn.hasAttribute("data-bwav") ? "wav" : (btn.hasAttribute("data-bmp3") ? "mp3" : "play");
+      if (msg) msg.textContent = kind === "play" ? "Rendering…" : (kind === "wav" ? "Rendering WAV…" : "Encoding MP3…");
+      findBeat(id).then(function (rec) {
+        if (!rec) { if (msg) msg.textContent = "Couldn't find " + id + "."; return; }
+        if (kind === "play") {
+          busy(btn, "Rendering…");
+          renderOne(rec).then(function (buf) {
+            S.playBuffer(buf, "beatcard"); free(btn, "▶ Play");
+            if (msg) msg.textContent = "Playing — tap ▶ again to replay.";
+          }).catch(function (er) { free(btn, "▶ Play"); if (msg) msg.textContent = "Couldn't play: " + (er && er.message || er); });
+        } else if (kind === "wav") { dlWav(rec, btn, msg); }
+        else { dlMp3(rec, btn, msg); }
+      }, function () { if (msg) msg.textContent = "Couldn't load " + id + "."; });
+    });
+  }
+
+  /* ---------- detail view ---------- */
+  function beatText(rec) {
+    return (rec.name || rec.title || rec.id) + ". " + (rec.style || "").replace(/-/g, " ") + " beat, " +
+      rec.bpm + " BPM. " + (rec.desc || "");
+  }
+  function copyText(t, btn) {
+    function done() { var o = btn.textContent; btn.textContent = "Copied!"; setTimeout(function () { btn.textContent = o; }, 1500); }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(t).then(done, done); return; }
+    } catch (e) {}
+    var ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); } catch (e) {}
+    document.body.removeChild(ta); done();
+  }
+  function showDetail(rec) {
+    $("browser").style.display = "none";
+    var d = $("detail"); d.style.display = "block";
+    var seedLine = (rec.n != null) ? '<p class="seqlab">🔑 Permanent ID <b>' + esc(rec.id) + '</b> · reproducible seed <b>' + esc(rec.n) + '</b> — the same ID always makes this exact beat.</p>' : "";
+    d.innerHTML = '<p><a class="btn ghost" href="beats.html" style="text-decoration:none">← Back to the Beat Archive</a></p>' +
+      '<div class="rec"><h2>' + esc(rec.name || rec.title || rec.id) + ' <span class="id">' + esc(rec.id) + '</span></h2>' +
+      '<p class="meta">' + esc((rec.style || "").replace(/-/g, " ")) + " · " + rec.bpm + " BPM" + (rec.era ? " · era edition" : "") + '</p>' + seedLine +
+      '<p>' + esc(rec.desc || "") + '</p>' +
+      '<p><button class="btn" id="dplay">▶ Play beat</button> ' +
+      '<button class="btn teal" id="dwav">⬇ Download .wav</button> ' +
+      '<button class="btn teal" id="dmp3">⬇ Download .mp3</button> ' +
+      '<button class="btn ghost" id="dread">🔊 Read aloud</button> ' +
+      '<button class="btn ghost" id="dtxt">Copy .txt</button> ' +
+      '<button class="btn ghost" id="djson">Copy .json</button> ' +
+      '<button class="btn teal" id="ddl">⬇ Download .txt</button></p>' +
+      '<p class="seqlab" id="dmsg" role="status"></p></div>' +
+      '<div class="honest">Original Signature beat — generated by the Signature engine. Not a copy of any real song. WAV and MP3 are industry-standard downloads rendered from the same deterministic pattern.</div>';
+    document.title = (rec.name || rec.id) + " (" + rec.id + ") — Beat Archive · Signature Music Studio";
+    var ld = { "@context": "https://schema.org", "@type": "MusicRecording", "name": rec.name || rec.id, "identifier": rec.id,
+      "byArtist": { "@type": "Person", "name": "Justin Addam Higgins" }, "description": rec.desc || "",
+      "genre": (rec.style || "").replace(/-/g, " "), "url": BASE + "beats.html?beat=" + rec.id };
+    var s = document.createElement("script"); s.type = "application/ld+json"; s.textContent = JSON.stringify(ld);
+    d.appendChild(s);
+    var msg = $("dmsg");
+    $("dplay").onclick = function () {
+      var b = this; busy(b, "Rendering…");
+      renderOne(rec).then(function (buf) { S.playBuffer(buf, "beat"); free(b, "▶ Play beat"); msg.textContent = "Playing — tap ▶ again to replay."; })
+        .catch(function (er) { free(b, "▶ Play beat"); msg.textContent = "Couldn't play: " + (er && er.message || er); });
+    };
+    $("dwav").onclick = function () { dlWav(rec, this, msg); };
+    $("dmp3").onclick = function () { dlMp3(rec, this, msg); };
+    $("dread").onclick = function () { readAloud(beatText(rec), rec.name || rec.id); };
+    $("dtxt").onclick = function () { copyText(beatText(rec), this); };
+    $("djson").onclick = function () { copyText(JSON.stringify(rec, null, 2), this); };
+    $("ddl").onclick = function () {
+      var b = new Blob([beatText(rec)], { type: "text/plain" });
+      var a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = fileBase(rec) + ".txt";
+      document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+    };
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------- boot ---------- */
+  function bootError() {
+    $("bgrid").innerHTML = '<div class="card" role="alert"><h4>⚠️ Beat Archive unavailable</h4>' +
+      '<p class="seqlab">The archive index did not load — check your connection, then retry.</p>' +
+      '<p><button class="btn" onclick="location.reload()">↻ Retry</button></p></div>';
+  }
+  loadBeats().then(function () {
+    initBrowser(); draw();
+    var q = new URLSearchParams(location.search), id = q.get("beat");
+    if (id) {
+      $("bgrid").innerHTML = '<div class="card" role="status">Loading ' + esc(id) + '…</div>';
+      findBeat(id).then(function (rec) {
+        if (rec) showDetail(rec);
+        else throw new Error("not found");
+      }, function () {
+        $("browser").style.display = "none";
+        var d = $("detail"); d.style.display = "block";
+        d.innerHTML = '<p><a class="btn ghost" href="beats.html" style="text-decoration:none">← Back to the Beat Archive</a></p>' +
+          '<div class="card" role="alert"><h4>Beat not found</h4><p class="seqlab">No archive record for ' + esc(id) + '.</p></div>';
+      });
+    }
+  }, bootError);
+})();
+</script>
+</body>
+</html>

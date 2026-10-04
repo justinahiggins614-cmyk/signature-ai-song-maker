@@ -114,7 +114,11 @@ def main():
     for r in rows:
         counts[r[2]] = counts.get(r[2], 0) + 1
 
-    core = [BASE, BASE + "songs.html", BASE + "#studio", BASE + "#beatmaker", BASE + "#songwriter",
+    core = [BASE, BASE + "songs.html", BASE + "beats.html", BASE + "library.html",
+            BASE + "maker1.html", BASE + "maker2.html", BASE + "maker3.html",
+            BASE + "addon-sfx.html", BASE + "addon-backup.html", BASE + "addon-chorus.html",
+            BASE + "studio-setup.html",
+            BASE + "#studio", BASE + "#beatmaker", BASE + "#songwriter",
             BASE + "#vocalstudio", BASE + "#backups", BASE + "#cleanup",
             BASE + "#cdmaker", BASE + "#teacher"]
     per = {"songs": [], "library": [], "beats": [], "gear": []}
@@ -254,6 +258,24 @@ def stamp_counts(counts):
             print("song archive re-stamped: songs=%d" % songs)
         else:
             print("WARNING: SONGARCHIVE-STAMP markers missing — songs.html not re-stamped")
+    # Beat Archive (beats.html) and Sound Library Archive (library.html) — same
+    # markers pattern; the drip runs this after the index flush, never one run behind.
+    for (fname, m0, m1, body_t) in [
+        ("beats.html", "<!-- BEATARCHIVE-STAMP-START -->", "<!-- BEATARCHIVE-STAMP-END -->",
+         "🥁 <b>%s</b> beats" % format(beats, ",")),
+        ("library.html", "<!-- LIBRARYARCHIVE-STAMP-START -->", "<!-- LIBRARYARCHIVE-STAMP-END -->",
+         "🎛️ <b>%s</b> / 1,000,000 instruments, sets &amp; packs" % format(lib, ",")),
+    ]:
+        fp = os.path.join(HERE, fname)
+        if os.path.exists(fp):
+            fh = open(fp).read()
+            if m0 in fh and m1 in fh:
+                fh = fh.split(m0)[0] + m0 + body_t + m1 + m1.join(fh.split(m1)[1:])
+                fh = _re.sub(r'data-stamp="\d{4}-\d{2}-\d{2}"', 'data-stamp="%s"' % TODAY, fh, count=1)
+                open(fp, "w").write(fh)
+                print("%s re-stamped" % fname)
+            else:
+                print("WARNING: %s markers missing — %s not re-stamped" % (m0, fname))
 
 
 if __name__ == "__main__":

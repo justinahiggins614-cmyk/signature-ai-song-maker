@@ -37,6 +37,22 @@
 </div></header>
 
 <div class="wrap">
+<div id="studionav"></div>
+
+<section class="sec" id="startdoor">
+<h2>🚪 Start here — pick how you want to make music</h2>
+<p class="seqlab">Three song makers, from the simplest to the full studio. Every one talks you through it.</p>
+<div class="grid">
+<div class="card"><h4>🎵 Song Maker Option 1</h4><p>The AI host makes you a beat <b>right now</b> — a couple of taps. Tell it what you want, it makes it.</p><p><a class="btn big" href="maker1.html" style="text-decoration:none">Make a beat →</a></p></div>
+<div class="card"><h4>🎤 Song Maker Option 2</h4><p>Walk me through it — build a <b>full song</b> step by step with the AI host: sounds, beat, lyrics, singing, mix, finish.</p><p><a class="btn big" href="maker2.html" style="text-decoration:none">Build a song →</a></p></div>
+<div class="card"><h4>🎚️ Song Maker Option 3</h4><p>The full workstation — track lanes, mixer, sound library. For when you want every control.</p><p><a class="btn big" href="maker3.html" style="text-decoration:none">Open the studio →</a></p></div>
+<div class="card"><h4>✨ Add-ons</h4><p>Finished a song? Add <a href="addon-sfx.html">sound effects</a>, <a href="addon-backup.html">backup singers</a>, or build a bigger <a href="addon-chorus.html">chorus</a>.</p></div>
+<div class="card"><h4>🔌 Full Studio Setup</h4><p>The complete studio — every piece of gear, how to wire it, ready-made setups.</p><p><a class="btn ghost" href="studio-setup.html" style="text-decoration:none">See the setup →</a></p></div>
+<div class="card"><h4>📀 Archives</h4><p>Every finished <a href="songs.html">song</a>, every <a href="beats.html">beat</a>, every <a href="library.html">sound</a> — search, play, download .wav + .mp3.</p></div>
+</div>
+</section>
+<script>try{ if(window.SigStudio){ document.getElementById("studionav").innerHTML = SigStudio.nav("index.html"); } }catch(e){}</script>
+
 <div class="modes" role="group" aria-label="How to make music">
 <button data-mode="self" class="on">🎸 Make it yourself</button>
 <button data-mode="ai">🤖 Let the AI make it</button>
@@ -329,6 +345,8 @@
 <script src="assets/synth.js"></script>
 <script src="assets/engine.js"></script>
 <script src="assets/lyrics.js"></script>
+<script src="assets/lame.min.js"></script>
+<script src="assets/studio-core.js"></script>
 <script src="assets/app.js"></script>
 <script src="assets/app2.js"></script>
 <script src="assets/app3.js"></script>

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🔌 Full Studio Setup — Signature Music Studio</title>
+<meta name="description" content="The complete studio electrical setup as a song-making option — real gear from the archive, wiring diagrams, AI studio tech. Kid-simple.">
+<link rel="canonical" href="https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/studio-setup.html">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/studio-theme.css">
+<script>try{if(localStorage.getItem("jah-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+</head>
+<body>
+<nav class="jahnet"><div class="wrap" id="jahnet"></div></nav>
+<div id="studionav"></div>
+<header class="hero"><div class="wrap">
+<h1>🔌 Full Studio Setup</h1>
+<p class="tag">The whole studio as a song-making option — real gear, real wiring, and an AI tech to wire it for you.</p>
+</div></header>
+<main class="wrap">
+
+<section class="sec" id="sec-safety">
+<div class="honest"><b>⚡ Safety first:</b> wall-power wiring (the electricity in your walls) is dangerous — always ask a grown-up or a qualified electrician for anything that plugs into the wall. This page only covers <b>signal wiring</b> — the safe little cables between your mic, boxes, and computer.</div>
+</section>
+
+<section class="sec" id="sec-gear">
+<h2>1 · The real gear in the archive</h2>
+<p>Every piece below is a real record from the studio's own gear archive, with its real patch list — exactly how to route it.</p>
+<p class="seqlab" id="gearstatus" role="status">Loading the gear archive…</p>
+<div class="grid" id="geargrid"></div>
+</section>
+
+<section class="sec" id="sec-presets">
+<h2>2 · Pick a studio setup</h2>
+<p>Three ready-made studios. Pick one — the wiring diagram shows you exactly what plugs into what, in plain words.</p>
+<div class="grid" id="presetgrid"></div>
+<div id="presetdetail"></div>
+</section>
+
+<section class="sec" id="sec-ai">
+<h2>3 · Your AI studio tech</h2>
+<p>Tell the AI your budget and room — it will design a setup from the real archive and write the wiring for you.</p>
+<div id="aibox"></div>
+</section>
+
+</main>
+<footer><div class="wrap"><p class="seqlab">Signature Music Studio · signal wiring only — wall power is a job for a grown-up or electrician.</p></div></footer>
+
+<script src="assets/synth.js"></script>
+<script src="assets/engine.js"></script>
+<script src="assets/lyrics.js"></script>
+<script src="assets/lame.min.js"></script>
+<script src="assets/studio-core.js"></script>
+<script>
+(function () {
+"use strict";
+var $ = function (id) { return document.getElementById(id); };
+function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+
+/* ================= Studio core bridge (same contract) ================= */
+function makeBridge() {
+  if (window.SigStudio) return window.SigStudio;
+  var S = window.SigSynth || {}, D = window.SigData || {};
+  function fetchT(url, ms) {
+    return new Promise(function (res, rej) {
+      var done = false;
+      var to = setTimeout(function () { if (!done) { done = true; rej(new Error("timeout")); } }, ms || 25000);
+      fetch(url).then(function (r) {
+        if (done) return; done = true; clearTimeout(to);
+        if (!r.ok) rej(new Error("HTTP " + r.status)); else res(r);
+      }, function (e) { if (!done) { done = true; clearTimeout(to); rej(e); } });
+    });
+  }
+  function gunzip(url) {
+    return fetchT(url).then(function (r) { return r.arrayBuffer(); })
+      .then(function (ab) { return new Response(new Blob([ab]).stream().pipeThrough(new DecompressionStream("gzip"))).text(); });
+  }
+  var idxCache = null;
+  function loadIdx() {
+    if (idxCache) return Promise.resolve(idxCache);
+    return gunzip("data/index/index.json.gz").then(function (t) {
+      idxCache = t.split("\n").filter(Boolean).map(JSON.parse);
+      return idxCache;
+    });
+  }
+  function host(el, opts) {
+    opts = opts || {};
+    var acts = opts.actions || [];
+    var h = '<div class="aibox"><p class="aimsg"><b>AI host:</b> ' + esc(opts.greeting || "Hi! I'm here to help.") + "</p>" +
+      '<div id="aiform"></div>' +
+      '<p class="aiacts">' + acts.map(function (a, i) { return '<button class="btn ghost" data-aact="' + i + '">' + esc(a.label) + "</button>"; }).join(" ") + "</p>" +
+      '<p><input id="aiq" placeholder="Ask me anything…" size="30"> <button class="btn" id="aisend">Ask</button></p>' +
+      '<div class="aichat" id="aichat"></div></div>';
+    el.innerHTML = h;
+    function say(q, a) {
+      var c = el.querySelector("#aichat");
+      if (c) c.innerHTML += '<p class="aimsg"><b>You:</b> ' + esc(q) + '</p><p class="aimsg"><b>AI host:</b> ' + esc(a) + "</p>";
+    }
+    var btns = el.querySelectorAll("[data-aact]"), i;
+    function wire(b) {
+      b.onclick = function () {
+        SC.unlock();
+        try { acts[+b.getAttribute("data-aact")].run(); } catch (e) { say("button", "Hmm, that hiccuped: " + e.message); }
+      };
+    }
+    for (i = 0; i < btns.length; i++) wire(btns[i]);
+    el.querySelector("#aisend").onclick = function () {
+      SC.unlock();
+      var q = el.querySelector("#aiq").value;
+      say(q, opts.onAsk ? opts.onAsk(q) : "Tell me your budget and room above, and I'll design it.");
+    };
+  }
+  return {
+    jahNav: function (id) { var e = document.getElementById(id); if (e) e.innerHTML = '<a href="index.html">🎵 Music Studio</a> · <a href="songs.html">Songs</a>'; },
+    nav: function () { var e = document.getElementById("studionav"); if (e) e.innerHTML = '<div class="wrap"><a class="btn ghost" href="index.html">Song Makers</a> <a class="btn ghost" href="addon-sfx.html">✨ Sound Effects</a> <a class="btn ghost" href="addon-backup.html">🎤 Backup Singers</a> <a class="btn ghost" href="addon-chorus.html">🎵 Chorus</a> <a class="btn ghost" href="studio-setup.html">🔌 Studio Setup</a></div>'; },
+    unlock: function () { try { if (S.unlockAudio) S.unlockAudio(); } catch (e) {} },
+    renderSongBuffer: function () { return Promise.reject(new Error("not wired on this page")); },
+    renderBeatBuffer: function () { return Promise.reject(new Error("not wired on this page")); },
+    wavBlob: function (buf) { return S.bufferToWav(buf); },
+    mp3Blob: function () { return Promise.reject(new Error("MP3 encoder is not built into this studio yet.")); },
+    download: function (blob, name) {
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob); a.download = name;
+      document.body.appendChild(a); a.click();
+      setTimeout(function () { try { URL.revokeObjectURL(a.href); } catch (e) {} a.remove(); }, 4000);
+    },
+    findRecord: function () { return Promise.resolve(null); },
+    indexRows: loadIdx,
+    gearGen: function (n) { return D.genGear ? D.genGear(n) : null; },
+    myProjects: { list: function () { return Promise.resolve([]); } },
+    host: host
+  };
+}
+var SC = makeBridge();
+try { SC.jahNav("jahnet"); } catch (e) {}
+try { SC.nav("studio-setup.html"); } catch (e) {}
+
+/* ================= gear from the real archive ================= */
+var CATS = [
+  { id: "mic", name: "🎙 Microphones", fx: [{ id: "eqwarm", amount: 0.8 }], hear: "what a mic hears — warm and close" },
+  { id: "preamp", name: "🔊 Preamps", fx: [{ id: "tape", amount: 0.9 }], hear: "the preamp's cozy tube warmth" },
+  { id: "interface", name: "🔌 Audio interfaces", fx: [{ id: "normalize", amount: 1 }], hear: "the interface's clean, honest sound" },
+  { id: "monitor", name: "🔈 Monitors & headphones", fx: [{ id: "wide", amount: 0.8 }], hear: "wide stereo, like good monitors" },
+  { id: "patch", name: "🧵 Patch bays & cables", fx: [], hear: "a patch bay adds no sound — straight wire, honest" },
+  { id: "processor", name: "🎛 Processors (EQ, compressor, reverb)", fx: [{ id: "glue", amount: 0.9 }], hear: "the processor gluing the mix together" }
+];
+function gearRecord(n) {
+  if (SC.gearGen) { var g = SC.gearGen(n); if (g) return g; }
+  return null;
+}
+function loadGear() {
+  var box = $("geargrid");
+  function fallback() {
+    var out = [], i, g;
+    for (i = 0; i < 25; i++) { g = gearRecord(i); if (g) out.push(g); }
+    paintGear(out);
+    $("gearstatus").textContent = "Showing the built-in gear list (archive was offline).";
+  }
+  var rowsP = SC.indexRows ? SC.indexRows() : Promise.reject(new Error("no index"));
+  rowsP.then(function (rows) {
+    var perCat = {}, i, r, id, n, g;
+    for (i = 0; i < rows.length; i++) {
+      r = rows[i];
+      if (r[2] !== "gear") continue;
+      id = String(r[0]);
+      n = parseInt(id.slice(-7), 10);
+      g = gearRecord(n);
+      if (g && !perCat[g.cat]) perCat[g.cat] = g;
+    }
+    var list = [], c;
+    for (c = 0; c < CATS.length; c++) if (perCat[CATS[c].id]) list.push(perCat[CATS[c].id]);
+    if (!list.length) { fallback(); return; }
+    paintGear(list);
+    $("gearstatus").textContent = "Live from the gear archive — " + list.length + " gear types.";
+  }, fallback);
+}
+function catOf(id) { var i; for (i = 0; i < CATS.length; i++) if (CATS[i].id === id) return CATS[i]; return null; }
+function paintGear(list) {
+  var box = $("geargrid"), h = "", i, g, cat;
+  for (i = 0; i < list.length; i++) {
+    g = list[i]; cat = catOf(g.cat);
+    h += '<div class="card"><h3>' + esc(cat ? cat.name : g.cat) + "</h3>" +
+      "<h4>" + esc(g.name) + "</h4>" +
+      '<div class="id">' + esc(g.id) + "</div>" +
+      "<p>" + esc(g.desc) + "</p>" +
+      '<p><b>Patch list — exactly how to route it:</b><br>' + esc(g.patch) + "</p>" +
+      '<p><button class="btn ghost" data-hear="' + esc(g.cat) + '">▶ Hear it</button></p></div>';
+  }
+  box.innerHTML = h;
+  var bs = box.querySelectorAll("[data-hear]"), k;
+  function wire(b) {
+    b.onclick = function () { SC.unlock(); hearCat(b.getAttribute("data-hear")); };
+  }
+  for (k = 0; k < bs.length; k++) wire(bs[k]);
+}
+function hearCat(catId) {
+  SC.unlock();
+  var S = window.SigSynth, cat = catOf(catId);
+  $("gearstatus").textContent = "Playing a synth demo — " + (cat ? cat.hear : "gear character") + ".";
+  if (!S.renderVocal) { $("gearstatus").textContent = "The demo engine did not load — reload the page."; return; }
+  var rng = S.rngFrom("studiodemo:" + catId);
+  var chords = S.chordsFor(57, "pop", rng);
+  var melody = S.melodyFor(chords, 8, rng);
+  S.renderVocal(melody, "nova", [], 8).then(function (buf) {
+    var fx = cat ? cat.fx : [];
+    if (!fx.length) {
+      playBuf(buf, "heard straight through — no color added");
+      return;
+    }
+    return S.applyFXChain(buf, fx).then(function (b2) { playBuf(b2, "heard through this gear type"); },
+      function (e2) { $("gearstatus").textContent = "The demo hiccuped: " + e2.message; });
+  }, function (e) { $("gearstatus").textContent = "The demo hiccuped: " + e.message; });
+}
+function playBuf(buf, label) {
+  try {
+    if (window.SigSynth.stopLive) window.SigSynth.stopLive("gear");
+    window.SigSynth.playBuffer(buf, "gear");
+    $("gearstatus").textContent = "▶ Playing — " + label + ".";
+  } catch (e) { $("gearstatus").textContent = "Couldn't play here: " + e.message; }
+}
+
+/* ================= presets ================= */
+function gearNames(ns) {
+  return ns.map(function (n) { var g = gearRecord(n); return g ? g.name + " (" + g.id + ")" : "JAH-GEAR-" + n; });
+}
+function svgSketch(boxes) {
+  // boxes: array of labels; drawn as a horizontal signal-flow sketch
+  var w = 120, gap = 46, x = 10, h = "", i, y = 30;
+  for (i = 0; i < boxes.length; i++) {
+    h += '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="52" rx="8" fill="#1c2340" stroke="#7fd4ff"/>' +
+      '<text x="' + (x + w / 2) + '" y="' + (y + 24) + '" text-anchor="middle" fill="#eaf2ff" font-size="11">' + esc(boxes[i][0]) + "</text>" +
+      '<text x="' + (x + w / 2) + '" y="' + (y + 40) + '" text-anchor="middle" fill="#9fb3d9" font-size="10">' + esc(boxes[i][1] || "") + "</text>";
+    if (i < boxes.length - 1) {
+      h += '<line x1="' + (x + w) + '" y1="' + (y + 26) + '" x2="' + (x + w + gap) + '" y2="' + (y + 26) + '" stroke="#ffd166" stroke-width="2"/>' +
+        '<polygon points="' + (x + w + gap) + "," + (y + 26) + " " + (x + w + gap - 8) + "," + (y + 20) + " " + (x + w + gap - 8) + "," + (y + 32) + '" fill="#ffd166"/>';
+    }
+    x += w + gap;
+  }
+  return '<svg width="' + x + '" height="112" viewBox="0 0 ' + x + ' 112" role="img" aria-label="signal flow sketch">' + h + "</svg>";
+}
+var PRESETS = [
+  {
+    id: "bedroom", name: "🛏 Bedroom Starter", blurb: "The smallest real studio. One mic, one box, your computer, headphones. Perfect first setup.",
+    gear: [10, 17, 19, 21],
+    steps: [
+      "Plug the mic cable into the mic.",
+      "Plug the other end of the cable into INPUT 1 of the audio interface.",
+      "Plug the interface into your computer with the USB cable.",
+      "Plug your headphones into the headphone jack on the interface.",
+      "Sing or play — the sound goes: mic → interface → computer. Done!"
+    ],
+    sketch: [["Mic", "SM-1"], ["Interface", "IO-2"], ["Computer", "your songs"], ["Headphones", "NH-1"]]
+  },
+  {
+    id: "project", name: "🏠 Project Studio", blurb: "A serious home studio. A great vocal mic, a preamp for warmth, a patch bay to keep cables tidy, and real monitors.",
+    gear: [11, 14, 20, 16, 18, 21],
+    steps: [
+      "Plug the condenser mic into the PATCH BAY top row (the mic's parking spot).",
+      "Patch top row → preamp IN. Patch preamp OUT → interface INPUT 1.",
+      "Plug the interface into your computer with USB.",
+      "Plug the studio monitors into the interface's MONITOR OUT left and right.",
+      "Turn on phantom power on the preamp (condenser mics need it).",
+      "Sound path: mic → patch bay → preamp → interface → computer → monitors."
+    ],
+    sketch: [["Mic", "CM-2"], ["Patch bay", "Patch-16"], ["Preamp", "PA-1"], ["Interface", "IO-8"], ["Monitors", "NM-5"]]
+  },
+  {
+    id: "dream", name: "🌟 Dream Studio", blurb: "The full works. Ribbon mic warmth, a whole drum mic kit, tube preamp, and studio processors in the patch loop.",
+    gear: [12, 13, 15, 14, 20, 16, 18, 22, 23, 24, 21],
+    steps: [
+      "Ribbon mic → PATCH BAY top row. Drum mic kit → patch bay rows 2–8.",
+      "Patch bay → tube preamp (for the ribbon) and clean preamp (for the drums).",
+      "Preamps → interface INPUTS 1–8. Interface → computer with USB.",
+      "Processors live in the patch bay's spare rows: EQ → compressor → reverb, patched in when you want them.",
+      "Monitors → interface MONITOR OUT left/right. Headphones → headphone amp jack.",
+      "Sound path: mics → patch bay → preamps → interface → computer → monitors."
+    ],
+    sketch: [["Mics", "RM-3 + kit"], ["Patch bay", "Patch-16"], ["Preamps", "tube + clean"], ["Interface", "IO-8"], ["Monitors", "NM-5"]]
+  }
+];
+function paintPresets() {
+  var box = $("presetgrid"), h = "", i, p;
+  for (i = 0; i < PRESETS.length; i++) {
+    p = PRESETS[i];
+    h += '<div class="card"><h3>' + esc(p.name) + "</h3><p>" + esc(p.blurb) + "</p>" +
+      '<p class="seqlab">' + p.gear.length + " pieces of gear</p>" +
+      '<p><button class="btn" data-preset="' + p.id + '">See the wiring →</button> ' +
+      '<button class="btn ghost" data-dl="' + p.id + '">⬇ Checklist</button></p></div>';
+  }
+  box.innerHTML = h;
+  var bs = box.querySelectorAll("[data-preset]"), ds = box.querySelectorAll("[data-dl]"), k;
+  function wire(b) { b.onclick = function () { SC.unlock(); showPreset(b.getAttribute("data-preset")); }; }
+  function wired(b) { b.onclick = function () { SC.unlock(); downloadPreset(b.getAttribute("data-dl")); }; }
+  for (k = 0; k < bs.length; k++) wire(bs[k]);
+  for (k = 0; k < ds.length; k++) wired(ds[k]);
+}
+function presetById(id) { var i; for (i = 0; i < PRESETS.length; i++) if (PRESETS[i].id === id) return PRESETS[i]; return null; }
+function showPreset(id) {
+  var p = presetById(id);
+  if (!p) return;
+  var names = gearNames(p.gear);
+  var h = '<div class="card"><h3>' + esc(p.name) + ' — wiring diagram</h3>' + svgSketch(p.sketch) +
+    "<h4>What plugs into what (plain words):</h4><ol>" +
+    p.steps.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + "</ol>" +
+    "<h4>The gear (from the real archive):</h4><ul>" +
+    names.map(function (n) { return "<li>" + esc(n) + "</li>"; }).join("") + "</ul>" +
+    '<p><button class="btn" data-dl2="' + p.id + '">⬇ Download this checklist</button></p></div>';
+  var d = $("presetdetail");
+  d.innerHTML = h;
+  var b = d.querySelector("[data-dl2]");
+  if (b) b.onclick = function () { SC.unlock(); downloadPreset(p.id); };
+  d.scrollIntoView();
+}
+function checklistText(p) {
+  var names = gearNames(p.gear), out = [];
+  out.push("SIGNATURE MUSIC STUDIO — STUDIO SETUP CHECKLIST");
+  out.push(p.name);
+  out.push(p.blurb);
+  out.push("");
+  out.push("GEAR (from the real archive):");
+  var i;
+  for (i = 0; i < names.length; i++) out.push(" [ ] " + names[i]);
+  out.push("");
+  out.push("WIRING — what plugs into what:");
+  for (i = 0; i < p.steps.length; i++) out.push(" " + (i + 1) + ". " + p.steps[i]);
+  out.push("");
+  out.push("SAFETY: wall-power wiring is dangerous — ask a grown-up or a qualified electrician.");
+  out.push("This checklist covers signal wiring only.");
+  return out.join("\n");
+}
+function downloadPreset(id) {
+  var p = presetById(id);
+  if (!p) return;
+  SC.download(new Blob([checklistText(p)], { type: "text/plain" }), "studio-checklist-" + p.id + ".txt");
+}
+
+/* ================= AI studio tech ================= */
+function say2(t) { var c = $("aibox").querySelector("#aichat"); if (c) c.innerHTML += '<p class="aimsg"><b>AI host:</b> ' + esc(t) + "</p>"; }
+function buildAIForm() {
+  SC.host($("aibox"), {
+    greeting: "Hi! I'm your studio tech. Tell me your budget and your room below — I'll design a setup from the real gear archive and write the wiring for you.",
+    onAsk: function (q) {
+      q = String(q || "").toLowerCase();
+      if (/safe|electric|wall|power/.test(q)) return "Wall-power wiring is dangerous — always get a grown-up or a qualified electrician. I only do signal wiring: the safe little cables between gear.";
+      if (/wire|patch|cable/.test(q)) return "Tap 'AI: wire it for me' after designing — I'll write every cable, step by step.";
+      if (/budget|money|cost/.test(q)) return "Pick a budget below: Starter is the cheapest real setup, Dream is the full works.";
+      return "Pick your budget and room below, then tap 'AI: design my setup'.";
+    },
+    actions: [
+      { label: "AI: design my setup", run: function () { say2(aiDesign()); } },
+      { label: "AI: wire it for me", run: function () { say2(aiWire()); } }
+    ]
+  });
+  var form = $("aibox").querySelector("#aiform");
+  if (form) {
+    form.innerHTML = '<p><label>Budget: <select id="ai-budget"><option value="starter">Starter — smallest real studio</option><option value="project">Project — serious home studio</option><option value="dream">Dream — the full works</option></select></label> ' +
+      '<label>Room: <select id="ai-room"><option value="bedroom">Bedroom</option><option value="spareroom">Spare room</option><option value="garage">Garage</option></select></label></p>';
+  }
+}
+var lastDesign = null;
+function aiDesign() {
+  var b = ($("ai-budget") && $("ai-budget").value) || "starter";
+  var presetId = b === "starter" ? "bedroom" : b; // budget values -> preset ids
+  var room = ($("ai-room") && $("ai-room").value) || "bedroom";
+  var preset = presetById(presetId);
+  var names = gearNames(preset.gear);
+  lastDesign = { preset: preset, room: room, names: names };
+  var roomNote = room === "bedroom" ? "Small room? Keep the monitors close to you — nearfields like these are made for that."
+    : room === "spareroom" ? "Spare room? Put the monitors on stands, away from the walls a little."
+    : "Garage? Big space — the Dream processors will love it. Watch out for echo; a rug helps.";
+  return "Here's your " + preset.name + " for a " + room + ", built from the real gear archive:\n• " +
+    names.join("\n• ") + "\n" + roomNote + "\nTap 'AI: wire it for me' and I'll write every cable.";
+}
+function aiWire() {
+  if (!lastDesign) return "Design a setup first — tap 'AI: design my setup'.";
+  var p = lastDesign.preset, out = ["Wiring for your " + p.name + " (" + lastDesign.room + ") — signal cables only:"];
+  var i;
+  for (i = 0; i < p.steps.length; i++) out.push((i + 1) + ". " + p.steps[i]);
+  out.push("");
+  out.push("Patch lists from the archive:");
+  var ns = p.gear, j;
+  for (j = 0; j < ns.length; j++) {
+    var g = gearRecord(ns[j]);
+    if (g) out.push("• " + g.name + ": " + g.patch);
+  }
+  out.push("");
+  out.push("Safety: this is signal wiring only. Wall power = grown-up or electrician.");
+  var text = out.join("\n");
+  SC.download(new Blob([text], { type: "text/plain" }), "studio-wiring-" + p.id + ".txt");
+  return text + "\n(I also downloaded this as a checklist file for you.)";
+}
+
+loadGear();
+paintPresets();
+buildAIForm();
+})();
+</script>
+</body>
+</html>

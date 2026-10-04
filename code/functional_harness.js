@@ -241,7 +241,10 @@ async function main() {
 
   await t("boot: counters stamped with real archive counts", () => {
     const h = $("counters").innerHTML;
-    assert(/7,700/.test(h) && /songs/.test(h), "counters html: " + h.slice(0, 120));
+    const st = JSON.parse(fs.readFileSync(path.join(HERE, "data/state.json"), "utf8"));
+    const expSongs = (st.song - 1).toLocaleString("en-US"), expBeats = (st.beat - 1).toLocaleString("en-US");
+    assert(h.indexOf(expSongs) >= 0 && /songs/.test(h), "counters html: " + h.slice(0, 120));
+    assert(h.indexOf(expBeats) >= 0, "beats count missing: " + h.slice(0, 120));
     assert(/1,000,000/.test(h), "goal shown");
   });
   await t("boot: explore feed renders cards", () => {

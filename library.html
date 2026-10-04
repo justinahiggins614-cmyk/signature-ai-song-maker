@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>try{if(localStorage.getItem("jah-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sound Library — Signature Music Studio</title>
+<meta name="description" content="The Signature Music Studio Sound Library: every sound, instrument, set and pack — searchable, filterable, with synthesized previews and WAV downloads. Marching to one million.">
+<link rel="canonical" href="https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/library.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Sound Library — Signature Music Studio">
+<meta property="og:description" content="Every Signature sound, instrument, set and pack — search, filter, hear the synth preview, download WAV. Marching to one million.">
+<meta property="og:url" content="https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/library.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Sound Library — Signature Music Studio">
+<meta name="twitter:description" content="Every Signature sound, instrument, set and pack — synth previews and WAV downloads.">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/studio-theme.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+{"@type":"WebPage","name":"Sound Library — Signature Music Studio","url":"https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/library.html","description":"Searchable archive of every Signature sound, instrument, set and pack, with synthesized previews.","author":{"@type":"Person","name":"Justin Addam Higgins"},"isPartOf":{"@type":"WebSite","name":"Signature Music Studio","url":"https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/"}},
+{"@type":"Dataset","name":"Signature Sound Library","description":"Archive of original Signature sounds, instruments, sets and packs — marching to one million.","creator":{"@type":"Person","name":"Justin Addam Higgins"},"url":"https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/data/music-catalog.json"}
+]}
+</script>
+</head>
+<body>
+<nav class="jahnet" aria-label="JAH Network Global Ecosystem"><div class="wrap" id="jahnet"></div></nav>
+<div id="studionav"></div>
+
+<header class="hero"><div class="wrap">
+<div class="kick">SITE 23 OF 27 · THE JAH NETWORK</div>
+<h1>🎛️ SOUND LIBRARY</h1>
+<div><span class="official">OFFICIAL SIGNATURE SITE — within the Signature/JAH system</span></div>
+<p class="sub">Every sound, instrument, set and pack — searchable by name and ID, filterable by family and type, with a <b>synth preview</b> and <b>.wav download</b> on every record. Marching to one million.</p>
+<p class="counter" id="libcount" data-stamp="2026-10-04"><!-- LIBRARYARCHIVE-STAMP-START -->🎛️ <b>8,950</b> / 1,000,000 instruments, sets &amp; packs<!-- LIBRARYARCHIVE-STAMP-END --> <span class="seqlab">last published count — loading live…</span></p>
+<p><a class="btn ghost" href="./" style="text-decoration:none">← Back to the Studio</a></p>
+<div class="honest">Every preview is synthesized live in your browser with the Web Audio API — no samples. All sounds are original Signature designs.</div>
+</div></header>
+
+<div class="wrap" id="main">
+<section class="sec" id="browser" aria-label="Sound library browser">
+<div class="filterbar"><div class="row">
+<div><label>Search the library</label><input type="text" id="lq" placeholder="Search name or ID…" aria-label="Search the sound library"></div>
+<div><label>Family</label><select id="lsubtype" aria-label="Filter by family"><option value="">All families</option><option value="sound">Sound</option><option value="instrument">Instrument</option><option value="set">Set</option><option value="pack">Pack</option></select></div>
+<div><label>Category</label><select id="lcat" aria-label="Filter by category"><option value="">All categories</option></select></div>
+<div><label>Order</label><select id="lorder" aria-label="Sort the library"><option value="new">Newest first</option><option value="old">Oldest first</option></select></div>
+<div style="flex:0"><label>&nbsp;</label><button class="btn violet" id="lrandom" type="button">🎲 Random sound</button></div>
+</div></div>
+<div class="az" id="laz" aria-label="Browse by first letter"></div>
+<p class="seqlab" id="lcount" role="status"></p>
+<div class="grid" id="lgrid"><div class="card" role="status">Loading the library…</div></div>
+<div class="row" id="lpages" style="margin-top:10px"></div>
+</section>
+
+<section class="sec" id="detail" style="display:none" aria-label="Sound detail"></section>
+</div>
+
+<div id="readbar" style="display:none"><span id="readlabel">Reading…</span>
+<button class="btn ghost" id="readplay">▶</button><button class="btn ghost" id="readstop">⏹</button><button class="btn ghost" id="readclose">✕</button></div>
+
+<script src="assets/synth.js"></script>
+<script src="assets/engine.js"></script>
+<script src="assets/lame.min.js"></script>
+<script src="assets/studio-core.js"></script>
+<script>
+(function () {
+  "use strict";
+  var BASE = "https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/";
+  var S = window.SigStudio, SYN = window.SigSynth;
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+
+  /* ---------- navs (SigStudio canon) ---------- */
+  try { S.jahNav("jahnet", "Sound Library"); } catch (e) {}
+  try { $("studionav").innerHTML = S.nav("library.html"); } catch (e) {}
+
+  /* ---------- tiered read-aloud (site pattern) ---------- */
+  var readText = "";
+  function speakTier(text, done) {
+    try {
+      if ("speechSynthesis" in window && window.speechSynthesis) {
+        var u = new SpeechSynthesisUtterance(text); u.rate = 1; u.onend = done; u.onerror = done;
+        speechSynthesis.cancel(); speechSynthesis.speak(u); return;
+      }
+    } catch (e) {}
+    googleChunks(text, done);
+  }
+  function googleChunks(text, done) {
+    var parts = [], t = String(text);
+    while (t.length > 170) {
+      var cut = t.lastIndexOf(". ", 170); if (cut < 60) cut = t.lastIndexOf(" ", 170); if (cut < 60) cut = 170;
+      parts.push(t.slice(0, cut + 1)); t = t.slice(cut + 1);
+    }
+    if (t) parts.push(t);
+    var i = 0;
+    (function next() {
+      if (i >= parts.length) { done(); return; }
+      try {
+        var a = new Audio("https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=" + encodeURIComponent(parts[i++]));
+        a.onended = next; a.onerror = next; a.play().catch(next);
+      } catch (e) { next(); }
+    })();
+  }
+  function readAloud(text, label) {
+    readText = text; $("readlabel").textContent = "Reading: " + (label || "selection"); $("readbar").style.display = "block";
+    speakTier(text, function () { $("readbar").style.display = "none"; });
+  }
+  function stopReading() { try { speechSynthesis.cancel(); } catch (e) {} readText = ""; $("readbar").style.display = "none"; }
+  $("readstop").onclick = stopReading; $("readclose").onclick = stopReading;
+  $("readplay").onclick = function () { if (readText) readAloud(readText); };
+
+  /* ---------- data: compact index; sound rows: [id, name, 'sound', chunk] ---------- */
+  var SOUNDS = [], IDX_OK = false;
+  function loadSounds() {
+    return S.loadIndex().then(function (rows) {
+      SOUNDS = rows.filter(function (r) { return r[2] === "sound"; })
+        .map(function (r) { return { id: r[0], name: r[1], chunk: r[3], n: parseInt(String(r[0]).slice(-7), 10) || 0 }; });
+      IDX_OK = true; paintCount();
+      try { localStorage.setItem("sigstudio_libidx_v1", JSON.stringify({ at: new Date().toISOString(), rows: SOUNDS })); } catch (e) {}
+    }).catch(function () {
+      try {
+        var c = JSON.parse(localStorage.getItem("sigstudio_libidx_v1") || "null");
+        if (c && c.rows && c.rows.length) {
+          SOUNDS = c.rows; IDX_OK = true; paintCount();
+          $("lcount").textContent = "Showing the last saved copy — check your connection, then reload.";
+          return;
+        }
+      } catch (e) {}
+      throw new Error("index failed");
+    });
+  }
+  function paintCount() {
+    $("libcount").innerHTML = '🎛️ <b>' + SOUNDS.length.toLocaleString() + '</b> / 1,000,000 sounds <span class="seqlab">· live</span>';
+  }
+  function findSound(id) { return S.findRecord(id); }
+
+  /* ---------- enrichment: subtype/cat/voice per record, background + cached ----------
+     Sound records are not deterministic from the engine, so the page fetches each
+     sound chunk once (tiny files), caches the compact fields in localStorage, and
+     fills card metadata + the family/category filters in as chunks arrive. */
+  var ENRICH = {}, ENRICH_DONE = 0, ENRICH_TOTAL = 0, ENRICH_KEY = "sigstudio_libenrich_v1", ENRICH_CHUNKS = {};
+  try {
+    var ec = JSON.parse(localStorage.getItem(ENRICH_KEY) || "null");
+    if (ec && ec.map) { ENRICH = ec.map; ENRICH_DONE = ec.done || 0; ENRICH_CHUNKS = ec.chunks || {}; }
+  } catch (e) {}
+  function meta(id) { return ENRICH[id] || null; }
+  function enrichChunk(chunk) {
+    if (ENRICH_CHUNKS[chunk]) return Promise.resolve(0);
+    return S.loadChunk(chunk).then(function (recs) {
+      var n = 0, i, r;
+      for (i = 0; i < recs.length; i++) {
+        r = recs[i];
+        if (r && r.kind === "sound" && !ENRICH[r.id]) {
+          ENRICH[r.id] = { st: r.subtype || "", cat: r.cat || "", voice: r.voice || "", bright: r.bright, warm: r.warm, attack: r.attack };
+          n++;
+        }
+      }
+      ENRICH_DONE += n; ENRICH_CHUNKS[chunk] = 1;
+      try { localStorage.setItem(ENRICH_KEY, JSON.stringify({ at: new Date().toISOString(), done: ENRICH_DONE, chunks: ENRICH_CHUNKS, map: ENRICH })); } catch (e) {}
+      return n;
+    });
+  }
+  function startEnrich() {
+    var chunks = [], seen = {}, i;
+    for (i = 0; i < SOUNDS.length; i++) { if (!seen[SOUNDS[i].chunk]) { seen[SOUNDS[i].chunk] = 1; chunks.push(SOUNDS[i].chunk); } }
+    ENRICH_TOTAL = SOUNDS.length;
+    var ix = 0;
+    (function step() {
+      if (ix >= chunks.length) return;
+      var name = chunks[ix++];
+      if (ENRICH_CHUNKS[name]) { step(); return; }
+      enrichChunk(name).then(function () {
+        refreshVisibleMeta();
+        if (needsMetaFilters()) refilterQuiet();
+        setTimeout(step, 0);
+      }, function () { setTimeout(step, 0); });
+    })();
+  }
+  function needsMetaFilters() { return $("lsubtype").value !== "" || $("lcat").value !== ""; }
+
+  /* ---------- synth preview: deterministic from the record ----------
+     Melodic voices play a 4-note check; drum-family records play a short
+     pattern with the record's own drum voice. Same record, same preview. */
+  var DRUM_VOICES = { kick: "kick", snare: "snare", hat: "hat", clap: "clap", tom: "tom", shaker: "shaker" };
+  function previewBuffer(rec) {
+    S.unlock();
+    var m = meta(rec.id) || {};
+    var voice = m.voice || rec.voice || "keys";
+    var rng = SYN.rngFrom("sndprev:" + rec.n);
+    if (String(m.cat || rec.cat) === "drum") {
+      var dv = DRUM_VOICES[voice] || "kick";
+      var step = 60 / 100 / 2, secs = step * 8 + 0.6;
+      return SYN.renderBuffer(secs, function (c, dest, t0) {
+        var order = [dv, dv === "kick" ? "snare" : "kick", dv, dv === "snare" ? "kick" : "snare", dv, "hat", dv, "hat"];
+        for (var i = 0; i < 8; i++) {
+          var fn = SYN[order[i]] || SYN.kick;
+          if (order[i] === "hat") fn(c, dest, t0 + i * step, 0.8, false);
+          else fn(c, dest, t0 + i * step, 0.9);
+        }
+      });
+    }
+    var root = 57 + Math.floor(rng() * 5);
+    var notes = [0, 4, 7, 12].map(function (iv) { return root + iv; });
+    var nstep = 0.42, nsecs = notes.length * nstep + 1.4;
+    return SYN.renderBuffer(nsecs, function (c, dest, t0) {
+      for (var i = 0; i < notes.length; i++) SYN.tone(c, dest, t0 + i * nstep, notes[i], 0.55, voice, 1);
+    });
+  }
+  function fileBase(rec) { return String(rec.id || "sound").toLowerCase().replace(/[^a-z0-9]+/g, "-"); }
+
+  /* ---------- browser grid ---------- */
+  var PER = 60, page = 0, letter = "";
+  var CATS = ["bass", "brass", "drum", "fx", "keys", "lead", "pad", "pluck", "strings", "world"];
+  function metaLine(s) {
+    var m = meta(s.id);
+    if (!m) return '<p class="seqlab">loading details…</p>';
+    var bits = [];
+    if (m.st) bits.push(m.st);
+    if (m.cat) bits.push(m.cat);
+    if (m.voice && m.voice !== m.cat) bits.push(m.voice + " voice");
+    return '<p class="seqlab">' + esc(bits.join(" · ")) + '</p>';
+  }
+  function filtered() {
+    var q = ($("lq").value || "").toLowerCase(), st = $("lsubtype").value, cf = $("lcat").value,
+        order = $("lorder").value, list = [], i, s, m;
+    for (i = 0; i < SOUNDS.length; i++) {
+      s = SOUNDS[i];
+      if (letter && (s.name[0] || "#").toUpperCase() !== letter) continue;
+      if (q && (s.name + " " + s.id).toLowerCase().indexOf(q) === -1) continue;
+      if (st || cf) {
+        m = meta(s.id);
+        if (!m) continue; // still indexing this record
+        if (st && m.st !== st) continue;
+        if (cf && m.cat !== cf) continue;
+      }
+      list.push(s);
+    }
+    list.sort(function (a, b) { return order === "old" ? a.n - b.n : b.n - a.n; });
+    return list;
+  }
+  function draw() {
+    var list = filtered(), pages = Math.max(1, Math.ceil(list.length / PER));
+    if (page >= pages) page = pages - 1;
+    var slice = list.slice(page * PER, page * PER + PER), h = "", i, s;
+    for (i = 0; i < slice.length; i++) {
+      s = slice[i];
+      h += '<div class="card" data-card="' + esc(s.id) + '"><h4>' + esc(s.name) + '</h4><div class="id">' + esc(s.id) + '</div>' +
+        metaLine(s) +
+        '<p><button class="fplay" data-lplay="' + esc(s.id) + '">▶ Preview</button> ' +
+        '<button class="btn teal" data-lwav="' + esc(s.id) + '">⬇ .wav</button> ' +
+        '<button class="btn ghost" data-lopen="' + esc(s.id) + '">Open →</button></p>' +
+        '<p class="seqlab" data-lmsg="' + esc(s.id) + '"></p></div>';
+    }
+    $("lgrid").innerHTML = h || '<div class="card">No sounds match — try clearing filters.</div>';
+    var idxNote = (ENRICH_DONE < ENRICH_TOTAL && needsMetaFilters()) ? " · indexing details " + ENRICH_DONE.toLocaleString() + "/" + ENRICH_TOTAL.toLocaleString() : "";
+    $("lcount").textContent = list.length.toLocaleString() + " sound" + (list.length === 1 ? "" : "s") + " · page " + (page + 1) + " of " + pages + idxNote;
+    var ph = "";
+    if (pages > 1) {
+      ph = '<button class="btn ghost" id="pprev"' + (page === 0 ? " disabled" : "") + '>← Prev</button> ' +
+        '<span class="seqlab">page ' + (page + 1) + " / " + pages + '</span> ' +
+        '<button class="btn ghost" id="pnext"' + (page >= pages - 1 ? " disabled" : "") + '>Next →</button>';
+    }
+    $("lpages").innerHTML = ph;
+    var pv = $("pprev"), nx = $("pnext");
+    if (pv) pv.onclick = function () { if (page > 0) { page--; draw(); window.scrollTo(0, 0); } };
+    if (nx) nx.onclick = function () { if (page < pages - 1) { page++; draw(); window.scrollTo(0, 0); } };
+  }
+  function refilter() { page = 0; draw(); }
+  function refilterQuiet() { draw(); }
+  function refreshVisibleMeta() {
+    // fill in meta lines for the cards currently on screen without a full redraw
+    var cards = $("lgrid").querySelectorAll("[data-card]"), i, s = {}, id, el;
+    for (i = 0; i < cards.length; i++) {
+      id = cards[i].getAttribute("data-card");
+      el = cards[i].querySelector(".seqlab");
+      if (el && el.textContent === "loading details…" && meta(id)) {
+        var tmp = document.createElement("div");
+        tmp.innerHTML = metaLine({ id: id });
+        cards[i].replaceChild(tmp.firstChild, el);
+      }
+    }
+  }
+  function busy(btn, t) { try { btn.textContent = t; btn.disabled = true; } catch (e) {} }
+  function free(btn, t) { try { btn.textContent = t; btn.disabled = false; } catch (e) {} }
+
+  function initBrowser() {
+    var az = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+    $("laz").innerHTML = az.map(function (l) { return '<button data-az="' + l + '">' + l + "</button>"; }).join("");
+    CATS.forEach(function (c) { var o = document.createElement("option"); o.value = c; o.textContent = c; $("lcat").appendChild(o); });
+    $("lq").addEventListener("input", refilter);
+    $("lsubtype").addEventListener("change", refilter);
+    $("lcat").addEventListener("change", refilter);
+    $("lorder").addEventListener("change", refilter);
+    $("laz").addEventListener("click", function (e) {
+      var b = e.target.closest ? e.target.closest("[data-az]") : null; if (!b) return;
+      Array.prototype.forEach.call($("laz").querySelectorAll("button"), function (x) { x.classList.remove("on"); });
+      var l = b.getAttribute("data-az");
+      if (letter === l) { letter = ""; } else { letter = l; b.classList.add("on"); }
+      refilter();
+    });
+    $("lrandom").onclick = function () {
+      if (!SOUNDS.length) return;
+      var s = SOUNDS[Math.floor(Math.random() * SOUNDS.length)];
+      location.href = "library.html?sound=" + s.id;
+    };
+    $("lgrid").addEventListener("click", function (e) {
+      var t = e.target;
+      function closest(attr) { return (t.closest ? t.closest("[" + attr + "]") : null); }
+      var o = closest("data-lopen");
+      if (o) { location.href = "library.html?sound=" + o.getAttribute("data-lopen"); return; }
+      var btn = closest("data-lplay") || closest("data-lwav");
+      if (!btn) return;
+      var id = btn.getAttribute("data-lplay") || btn.getAttribute("data-lwav");
+      var isWav = btn.hasAttribute("data-lwav");
+      var msg = $("lgrid").querySelector('[data-lmsg="' + id + '"]');
+      if (msg) msg.textContent = isWav ? "Rendering WAV…" : "Rendering preview…";
+      findSound(id).then(function (rec) {
+        if (!rec) { if (msg) msg.textContent = "Couldn't find " + id + "."; return; }
+        busy(btn, "Rendering…");
+        previewBuffer(rec).then(function (buf) {
+          if (isWav) { S.download(S.wavBlob(buf), fileBase(rec) + "-preview.wav"); if (msg) msg.textContent = "WAV preview downloaded."; }
+          else { S.playBuffer(buf, "sndcard"); if (msg) msg.textContent = "Playing — tap ▶ again to replay."; }
+          free(btn, isWav ? "⬇ .wav" : "▶ Preview");
+        }).catch(function (er) { free(btn, isWav ? "⬇ .wav" : "▶ Preview"); if (msg) msg.textContent = "Couldn't render: " + (er && er.message || er); });
+      }, function () { if (msg) msg.textContent = "Couldn't load " + id + "."; });
+    });
+  }
+
+  /* ---------- detail view ---------- */
+  function soundText(rec) {
+    var m = meta(rec.id) || {};
+    return (rec.name || rec.id) + ". " + (m.st || rec.subtype || "sound") + ", " + (m.cat || rec.cat || "") +
+      " family, " + (m.voice || rec.voice || "") + " voice. " + (rec.desc || "");
+  }
+  function copyText(t, btn) {
+    function done() { var o = btn.textContent; btn.textContent = "Copied!"; setTimeout(function () { btn.textContent = o; }, 1500); }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(t).then(done, done); return; }
+    } catch (e) {}
+    var ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); } catch (e) {}
+    document.body.removeChild(ta); done();
+  }
+  function specRows(rec) {
+    var m = meta(rec.id) || {};
+    function row(k, v) { return '<p class="seqlab"><b>' + esc(k) + ':</b> ' + esc(v) + '</p>'; }
+    return row("Family", m.st || rec.subtype || "—") + row("Category", m.cat || rec.cat || "—") +
+      row("Voice engine", m.voice || rec.voice || "—") +
+      row("Bright", (m.bright != null ? m.bright : rec.bright)) + row("Warm", (m.warm != null ? m.warm : rec.warm)) +
+      row("Attack", (m.attack != null ? m.attack : rec.attack) + "s");
+  }
+  function showDetail(rec) {
+    $("browser").style.display = "none";
+    var d = $("detail"); d.style.display = "block";
+    var seedLine = (rec.n != null) ? '<p class="seqlab">🔑 Permanent ID <b>' + esc(rec.id) + '</b> · record <b>' + esc(rec.n) + '</b> of the Sound Library.</p>' : "";
+    d.innerHTML = '<p><a class="btn ghost" href="library.html" style="text-decoration:none">← Back to the Sound Library</a></p>' +
+      '<div class="rec"><h2>' + esc(rec.name || rec.id) + ' <span class="id">' + esc(rec.id) + '</span></h2>' +
+      seedLine + specRows(rec) +
+      '<p>' + esc(rec.desc || "") + '</p>' +
+      '<p><button class="btn" id="dplay">▶ Synth preview</button> ' +
+      '<button class="btn teal" id="dwav">⬇ Download .wav</button> ' +
+      '<button class="btn teal" id="dmp3">⬇ Download .mp3</button> ' +
+      '<button class="btn ghost" id="dread">🔊 Read aloud</button> ' +
+      '<button class="btn ghost" id="djson">Copy .json</button> ' +
+      '<button class="btn teal" id="ddl">⬇ Download .txt</button></p>' +
+      '<p class="seqlab" id="dmsg" role="status"></p></div>' +
+      '<div class="honest">Original Signature sound — synthesized by the Signature engine. The preview and downloads are rendered live from the record\'s own voice settings.</div>';
+    document.title = (rec.name || rec.id) + " (" + rec.id + ") — Sound Library · Signature Music Studio";
+    var m = meta(rec.id) || {};
+    var ld = { "@context": "https://schema.org", "@type": "AudioObject", "name": rec.name || rec.id, "identifier": rec.id,
+      "byArtist": { "@type": "Person", "name": "Justin Addam Higgins" }, "description": rec.desc || "",
+      "genre": m.cat || rec.cat || "", "url": BASE + "library.html?sound=" + rec.id, "encodingFormat": "audio/wav" };
+    var s = document.createElement("script"); s.type = "application/ld+json"; s.textContent = JSON.stringify(ld);
+    d.appendChild(s);
+    var msg = $("dmsg");
+    $("dplay").onclick = function () { var btn = this; busy(btn, "Rendering…");
+      previewBuffer(rec).then(function (buf) { S.playBuffer(buf, "snd"); free(btn, "▶ Synth preview"); msg.textContent = "Playing — tap ▶ again to replay."; },
+        function (er) { msg.textContent = "Couldn't render: " + (er && er.message || er); free(btn, "▶ Synth preview"); }); };
+    $("dwav").onclick = function () { var btn = this; busy(btn, "Rendering…");
+      previewBuffer(rec).then(function (buf) { S.download(S.wavBlob(buf), fileBase(rec) + "-preview.wav"); msg.textContent = "WAV downloaded — industry standard."; free(btn, "⬇ Download .wav"); },
+        function (er) { msg.textContent = "Couldn't render: " + (er && er.message || er); free(btn, "⬇ Download .wav"); }); };
+    $("dmp3").onclick = function () { var btn = this; busy(btn, "Encoding…");
+      previewBuffer(rec).then(function (buf) { return S.mp3Blob(buf); }).then(function (blob) {
+        S.download(blob, fileBase(rec) + "-preview.mp3"); msg.textContent = "MP3 downloaded — industry standard, 128 kbps."; free(btn, "⬇ Download .mp3");
+      }).catch(function (e) { msg.textContent = (e && e.message) || "MP3 encoder not loaded — WAV works"; free(btn, "⬇ Download .mp3"); }); };
+    $("dread").onclick = function () { readAloud(soundText(rec), rec.name || rec.id); };
+    $("djson").onclick = function () { copyText(JSON.stringify(rec, null, 2), this); };
+    $("ddl").onclick = function () {
+      var b = new Blob([soundText(rec)], { type: "text/plain" });
+      var a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = fileBase(rec) + ".txt";
+      document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+    };
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------- boot ---------- */
+  function bootError() {
+    $("lgrid").innerHTML = '<div class="card" role="alert"><h4>⚠️ Sound Library unavailable</h4>' +
+      '<p class="seqlab">The archive index did not load — check your connection, then retry.</p>' +
+      '<p><button class="btn" onclick="location.reload()">↻ Retry</button></p></div>';
+  }
+  loadSounds().then(function () {
+    initBrowser(); draw(); startEnrich();
+    var q = new URLSearchParams(location.search), id = q.get("sound");
+    if (id) {
+      $("lgrid").innerHTML = '<div class="card" role="status">Loading ' + esc(id) + '…</div>';
+      findSound(id).then(function (rec) {
+        if (rec) showDetail(rec);
+        else throw new Error("not found");
+      }, function () {
+        $("browser").style.display = "none";
+        var d = $("detail"); d.style.display = "block";
+        d.innerHTML = '<p><a class="btn ghost" href="library.html" style="text-decoration:none">← Back to the Sound Library</a></p>' +
+          '<div class="card" role="alert"><h4>Sound not found</h4><p class="seqlab">No library record for ' + esc(id) + '.</p></div>';
+      });
+    }
+  }, bootError);
+})();
+</script>
+</body>
+</html>

@@ -58,6 +58,8 @@
 
 <script src="assets/synth.js"></script>
 <script src="assets/engine.js"></script>
+<script src="assets/lame.min.js"></script>
+<script src="assets/studio-core.js"></script>
 <script>
 (function () {
   "use strict";
@@ -294,7 +296,9 @@
       '<button class="btn ghost" id="dread">🔊 Read aloud</button> ' +
       '<button class="btn ghost" id="dtxt">Copy .txt</button> ' +
       '<button class="btn ghost" id="djson">Copy .json</button> ' +
-      '<button class="btn teal" id="ddl">⬇ Download .txt</button></p></div>' +
+      '<button class="btn teal" id="ddl">⬇ Download .txt</button> ' +
+      '<button class="btn teal" id="dwav">⬇ Download .wav</button> ' +
+      '<button class="btn teal" id="dmp3">⬇ Download .mp3</button></p></div>' +
       '<div class="honest">Original Signature composition — written by the Signature song engine. No melodies or lyrics reproduced from any real song.</div>';
     document.title = rec.title + " (" + rec.id + ") — Song Archive · Signature Music Studio";
     var ld = { "@context": "https://schema.org", "@type": "MusicRecording", "name": rec.title, "identifier": rec.id,
@@ -303,12 +307,34 @@
       "recordingOf": { "@type": "MusicComposition", "name": rec.title, "identifier": rec.id } };
     var s = document.createElement("script"); s.type = "application/ld+json"; s.textContent = JSON.stringify(ld);
     d.appendChild(s);
-    $("dplay").onclick = function () {
-      var b = this; b.textContent = "Rendering…"; b.disabled = true;
+    var detBuf = null;
+    function detRender(btn, label) {
+      btn.textContent = "Rendering…"; btn.disabled = true;
       try { S.unlockAudio(); } catch (e) {}
+      var p = detBuf ? Promise.resolve(detBuf) :
+        S.renderFullSong(rec, null, null).then(function (buf) { detBuf = buf; return buf; });
+      return p.then(function (buf) { btn.textContent = label; btn.disabled = false; return buf; },
+        function (e) { btn.textContent = label; btn.disabled = false; throw e; });
+    }
+    $("dplay").onclick = function () {
+      var b = this;
       try { S.setPlayerLabel(rec.title || rec.id); S.setBusy("Rendering song…"); } catch (e2) {}
-      S.renderFullSong(rec, null, null).then(function (buf) { S.playBuffer(buf, "song"); b.textContent = "▶ Play demo mix"; b.disabled = false; })
-        .catch(function () { b.textContent = "▶ Play demo mix"; b.disabled = false; });
+      detRender(b, "▶ Play demo mix").then(function (buf) { S.playBuffer(buf, "song"); }, function () {});
+    };
+    $("dwav").onclick = function () {
+      var b = this, SS = window.SigStudio;
+      detRender(b, "⬇ Download .wav").then(function (buf) {
+        SS.download(SS.wavBlob(buf), rec.id + ".wav");
+      }, function () { b.textContent = "Couldn't render — try again."; });
+    };
+    $("dmp3").onclick = function () {
+      var b = this, SS = window.SigStudio;
+      detRender(b, "⬇ Download .mp3").then(function (buf) {
+        return SS.mp3Blob(buf);
+      }).then(function (blob) {
+        SS.download(blob, rec.id + ".mp3");
+        b.textContent = "⬇ Download .mp3";
+      }, function (e) { b.textContent = (e && e.message) || "MP3 failed."; setTimeout(function(){ b.textContent = "⬇ Download .mp3"; }, 4000); });
     };
     $("dread").onclick = function () { readAloud(songText(rec), rec.title); };
     $("dtxt").onclick = function () { copyText(songText(rec), this); };

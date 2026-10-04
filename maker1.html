@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>try{if(localStorage.getItem("jah-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Song Maker Option 1 — Tell the AI Host, Get Your Beat | Signature Music Studio</title>
+<meta name="description" content="Song Maker Option 1: the kid-simple beat maker. Tell the AI host what kind of beat you want in plain words, tap one button, and it makes the beat right in front of you — play it, download it, save it. Same words = same beat, every time.">
+<link rel="canonical" href="https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/maker1.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Song Maker Option 1 — Tell the AI Host, Get Your Beat">
+<meta property="og:description" content="The kid-simple beat maker: tell the AI host what kind of beat you want in plain words, tap one button, and it makes the beat right in front of you.">
+<meta property="og:url" content="https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/maker1.html">
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/studio-theme.css">
+<script src="assets/synth.js"></script>
+<script src="assets/engine.js"></script>
+<script src="assets/lame.min.js"></script>
+<script src="assets/studio-core.js"></script>
+<style>
+/* page-scoped bits only — the site look itself stays exactly as the theme defines */
+.hostsays{margin:.45rem 0;padding:.55rem .8rem;border-left:4px solid var(--gold);background:rgba(245,197,66,.07);border-radius:0 10px 10px 0;font-size:16px;line-height:1.45}
+#mk1hostlines{min-height:3.2rem}
+#mk1prompt{width:100%;font-size:18px;padding:.8rem;border-radius:12px}
+.mk1chips{display:flex;flex-wrap:wrap;gap:.5rem;margin:.6rem 0}
+#mk1make{font-size:22px;padding:.9rem 2rem}
+</style>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","name":"Song Maker Option 1 — Tell the AI Host, Get Your Beat","url":"https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/maker1.html","description":"Kid-simple AI-assisted beat maker: describe the beat in plain words, the AI host makes it, you play, download, and save it.","author":{"@type":"Person","name":"Justin Addam Higgins"}}
+</script>
+</head>
+<body>
+<nav class="jahnet" aria-label="JAH Network Global Ecosystem"><div class="wrap" id="jahnet"></div></nav>
+
+<header class="hero"><div class="wrap">
+<div class="kick">SONG MAKER OPTION 1 · SIGNATURE MUSIC STUDIO</div>
+<h1>🎧 TELL THE HOST. GET YOUR BEAT.</h1>
+<div><span class="official">OFFICIAL SIGNATURE SITE — within the Signature/JAH system</span></div>
+<p class="sub">The easiest song maker here. Tell the AI host what kind of beat you want in plain words — it picks the style and speed, makes the beat right in front of you, and walks you through it. A couple of taps and you have a beat.</p>
+<div id="studionav"></div>
+<p class="counter">🥁 <b data-count="beat">4,500</b> beats in the archive, marching to 1,000,000 <span class="seqlab">— your beats join the fun below</span></p>
+<div class="honest">Same words = same beat, every time. Every beat is an original Signature composition, made fresh in your browser — never a copy of any real song. All sounds are synthesized; there are no human singers here.</div>
+</div></header>
+
+<div class="wrap">
+
+<section class="sec" id="mk1step1">
+<h2>Step 1 — Tell the host</h2>
+<label for="mk1prompt" style="font-size:18px;color:var(--gold)">Tell the AI host what kind of beat you want…</label>
+<textarea id="mk1prompt" rows="3" placeholder="e.g. a bouncy hip-hop beat, not too fast…"></textarea>
+<div class="mk1chips" id="mk1tries" aria-label="Try one of these"></div>
+<p class="seqlab">Words the host understands: <b>faster</b>, <b>slower</b>, a number like <b>120 bpm</b>, and styles like <b>trap, house, reggae, funk, jazz, lofi, techno, pop, rock, boom-bap, afrobeats, reggaeton, gospel, country</b> — plus feelings like <b>chill, dark, bright, party, epic, dreamy</b>.</p>
+<p><button class="btn big" id="mk1make">🤖 Make my beat</button> <span class="seqlab" id="mk1info" role="status"></span></p>
+</section>
+
+<section class="sec" id="mk1step2">
+<h2>Step 2 — The host builds it</h2>
+<div class="card">
+<div id="mk1hostlines" aria-live="polite"></div>
+<div id="mk1host"></div>
+</div>
+</section>
+
+<section class="sec" id="mk1step3">
+<h2>Step 3 — Your beat</h2>
+<div id="mk1beat"><p class="seqlab">Nothing here yet — make your beat in Step 1 and it will appear right here.</p></div>
+</section>
+
+<div class="finder">
+<label for="mk1finderq" style="color:var(--violet);font-size:16px">🔎 Lost? Describe what you want to the host…</label>
+<input id="mk1finderq" type="text" placeholder="e.g. a slower beat, something spooky…" aria-label="Describe what you want">
+<div class="hits" id="mk1finderhits"></div>
+</div>
+
+<p class="honest">How it works, in plain words: your words become a <b>seed</b> — a recipe the studio follows exactly. The same words always make the same beat, because the studio never rolls dice on a recipe it already has. Buttons like <b>Make it longer</b> and <b>Add a bassline</b> just add a labeled line to the recipe, so you can hear the difference and come back to any version. Real sound needs a real browser — if a button ever can't play here, it will say so in plain words instead of going silent.</p>
+
+</div>
+<script>
+/* ============================================================
+   Song Maker Option 1 — "The AI host makes you a beat right now"
+   Kid-simple flow: type words -> giant button -> the host talks you
+   through it -> beat renders -> play / .wav / .mp3 / save.
+   Deterministic: same words = same beat, every time.
+   Codes against the SigStudio contract (assets/studio-core.js):
+   jahNav, nav, unlock, renderBeatBuffer, wavBlob, mp3Blob, download,
+   myProjects, host. Sounds come from the REAL SigSynth engine.
+   ============================================================ */
+(function () {
+"use strict";
+
+var $ = function (id) { return document.getElementById(id); };
+var Studio = (typeof window !== "undefined" && window.SigStudio) ? window.SigStudio : null;
+var S = (typeof window !== "undefined" && window.SigSynth) ? window.SigSynth : null;
+var D = (typeof window !== "undefined" && window.SigData) ? window.SigData : null;
+var Shelf = null; /* the song shelf: SigStudio.mySongs (shipped) or SigStudio.myProjects (draft contract) */
+
+function esc(s) {
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+function infoLine(t) { var el = $("mk1info"); if (el) el.textContent = t; }
+function sayHost(t) {
+  var box = $("mk1hostlines"); if (!box) return;
+  var p = document.createElement("p");
+  p.className = "hostsays";
+  p.textContent = "\uD83E\uDD16 " + t; /* robot emoji prefix */
+  box.appendChild(p);
+}
+
+/* ---------- honest boot ---------- */
+function bootError(missing) {
+  sayHost("Hmm — I can't start yet. " + missing + " The page needs its studio engine files (assets/studio-core.js, synth.js, engine.js).");
+  infoLine("The studio engine did not load.");
+  var b = $("mk1make"); if (b) b.disabled = true;
+}
+(function bootNav() {
+  if (!Studio || !S || !D) {
+    var missing = [];
+    if (!Studio) missing.push("studio-core.js (SigStudio)");
+    if (!S) missing.push("synth.js (SigSynth)");
+    if (!D) missing.push("engine.js (SigData)");
+    bootError("Missing: " + missing.join(", ") + ".");
+    return;
+  }
+  var need = ["unlock", "renderBeatBuffer", "wavBlob", "mp3Blob", "download", "host", "jahNav", "nav"];
+  var lacking = [];
+  for (var i = 0; i < need.length; i++) if (typeof Studio[need[i]] === "undefined") lacking.push("SigStudio." + need[i]);
+  if (lacking.length) { bootError("The studio engine is missing: " + lacking.join(", ") + "."); return; }
+  /* The shelf: the shipped core calls it mySongs; the draft contract said
+     myProjects — accept either so the page never breaks on the name. */
+  Shelf = null;
+  if (Studio.mySongs && typeof Studio.mySongs.push === "function") Shelf = Studio.mySongs;
+  else if (Studio.myProjects && typeof Studio.myProjects.push === "function") Shelf = Studio.myProjects;
+  try { Studio.jahNav("jahnet"); } catch (e) {}
+  try { $("studionav").innerHTML = Studio.nav("maker1.html"); } catch (e) {}
+})();
+
+/* ============================================================
+   Word -> beat understanding (pure, deterministic, testable).
+   ============================================================ */
+var STYLE_WORDS = {
+  "hip-hop": ["hip hop", "hip-hop", "hiphop", "rap", "boom bap", "boom-bap", "boombap"],
+  "trap": ["trap"],
+  "house": ["house", "dance", "club"],
+  "pop": ["pop"],
+  "rock": ["rock"],
+  "lofi": ["lofi", "lo-fi"],
+  "techno": ["techno", "edm", "electro"],
+  "jazz": ["jazz", "swing"],
+  "ambient": ["ambient", "spacey", "floaty"],
+  "drum-and-bass": ["drum and bass", "drum-and-bass", "dnb", "jungle"],
+  "reggae": ["reggae"],
+  "funk": ["funk", "funky"],
+  "drill": ["drill"],
+  "rnb": ["rnb", "r&b", "r and b"],
+  "afrobeats": ["afrobeats", "afrobeat", "afro"],
+  "reggaeton": ["reggaeton", "dembow"],
+  "dancehall": ["dancehall"],
+  "gospel": ["gospel", "choir"],
+  "country": ["country", "western"]
+};
+var MOOD_WORDS = {
+  "dark": ["dark", "scary", "spooky"],
+  "bright": ["bright", "happy", "sunny", "cheerful"],
+  "chill": ["chill", "sleepy", "calm", "mellow", "relaxed"],
+  "epic": ["epic", "big", "huge", "movie"],
+  "smooth": ["smooth", "silky"],
+  "driving": ["driving", "punchy", "hard"],
+  "dreamy": ["dreamy"],
+  "gritty": ["gritty", "rough", "dirty"]
+};
+
+function findStyle(text) {
+  var t = " " + String(text).toLowerCase() + " ", style, words, i;
+  for (style in STYLE_WORDS) {
+    if (!Object.prototype.hasOwnProperty.call(STYLE_WORDS, style)) continue;
+    words = STYLE_WORDS[style];
+    for (i = 0; i < words.length; i++) if (t.indexOf(words[i]) !== -1) return style;
+  }
+  return null;
+}
+
+/* parseRequest(text) -> {words, style, styleRef, bpm, mood}.
+   Everything is derived from the words (seeded), never from dice —
+   except the "surprise" pool, which is meant to be new each time. */
+function parseRequest(text) {
+  var raw = String(text == null ? "" : text).trim().replace(/\s+/g, " ");
+  var words = raw || "my first beat";
+  var low = " " + words.toLowerCase() + " ";
+  var rng = S ? S.rngFrom("m1:" + words) : null;
+  function ri(lo, hi) { return rng ? lo + Math.floor(rng() * (hi - lo)) : lo; }
+
+  var style = findStyle(words), styleRef = null;
+  if (!style && D && D.parseStyleRequest) {
+    var ref = D.parseStyleRequest(words);
+    if (ref) { style = ref.genre; styleRef = ref.name; }
+  }
+  if (!style && S) style = S.pick(rng, S.GENRES);
+  if (!style) style = "hip-hop";
+
+  var bpm, m = low.match(/(\d{2,3})\s*bpm/);
+  if (m) bpm = parseInt(m[1], 10);
+  else if (/\b(faster|fast|quick|quicker|upbeat|party|energetic|hyper)\b/.test(low)) bpm = ri(116, 140);
+  else if (/\b(slower|slow|chill|sleepy|calm|mellow|relaxed)\b/.test(low)) bpm = ri(72, 88);
+  else bpm = ri(84, 120);
+  if (/\bdouble[\s-]?time\b/.test(low)) bpm = bpm * 2;
+  bpm = Math.max(60, Math.min(180, bpm));
+
+  var mood = "bouncy", mo, ws, j, found = false;
+  for (mo in MOOD_WORDS) {
+    if (!Object.prototype.hasOwnProperty.call(MOOD_WORDS, mo)) continue;
+    ws = MOOD_WORDS[mo];
+    for (j = 0; j < ws.length; j++) if (low.indexOf(ws[j]) !== -1) { mood = mo; found = true; break; }
+    if (found) break;
+  }
+  return { words: words, style: style, styleRef: styleRef, bpm: bpm, mood: mood };
+}
+
+/* The deterministic seed. Arrangement choices are labeled additions. */
+function seedFor(r, extras) {
+  var s = r.words + "|" + r.style + "|" + r.bpm;
+  if (extras) s += "|" + extras;
+  return s;
+}
+var NAME_A = ["Sunny", "Bouncy", "Midnight", "Neon", "Copper", "Velvet", "Electric", "Quiet", "Bright", "Wild", "Sleepy", "Golden", "Cosmic", "Happy", "Gentle"];
+var NAME_B = ["Bounce", "Groove", "Shuffle", "Party", "Drift", "Stomp", "Wave", "Jiggle", "Roll", "Spark"];
+function pad6(n) { n = String(n); while (n.length < 6) n = "0" + n; return n; }
+function beatName(r, extras) {
+  var rng = S.rngFrom("m1name:" + seedFor(r, extras));
+  return S.pick(rng, NAME_A) + " " + S.pick(rng, NAME_B);
+}
+function beatLikeFor(r, extras) {
+  var labels = [];
+  if ((" " + extras + " ").indexOf(" longer ") !== -1 || extras === "longer" || /(^|\+)longer($|\+)/.test(extras)) labels.push("longer, 8 bars");
+  if (/(^|\+)bassline($|\+)/.test(extras)) labels.push("with bassline");
+  var name = beatName(r, extras) + " — " + r.style + ", " + r.bpm + " BPM" +
+    (labels.length ? " (" + labels.join("; ") + ")" : "");
+  var seed = seedFor(r, extras);
+  var desc = "An original Signature beat made from your words: \u201C" + r.words + "\u201D. " +
+    "Seed \u201C" + seed + "\u201D — the same words always make this same beat. " +
+    (labels.length ? "Arranged: " + labels.join("; ") + ". " : "") +
+    "Every note generated fresh in your browser; not a copy of any real song.";
+  return {
+    id: "MAKER1-" + pad6(Math.abs(S.hashSeed(seed)) % 1000000),
+    name: name, style: r.style, bpm: r.bpm, desc: desc, seed: seed
+  };
+}
+function fileNameFor(like, ext) {
+  var base = String(like.name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "my-beat";
+  return base.slice(0, 60) + "." + ext;
+}
+
+/* ============================================================
+   The making.
+   ============================================================ */
+var cur = { r: null, extras: "", bars: 4, seed: "", like: null, buffer: null, playing: false, busy: false };
+
+function renderCurrent(lines) {
+  cur.seed = seedFor(cur.r, cur.extras);
+  cur.like = beatLikeFor(cur.r, cur.extras);
+  cur.buffer = null; cur.playing = false;
+  for (var i = 0; i < lines.length; i++) sayHost(lines[i]);
+  infoLine("Making your beat…");
+  return Studio.renderBeatBuffer(cur.like, cur.bars).then(function (buf) {
+    cur.buffer = buf;
+    sayHost("Done! Your beat is ready — " + cur.bars + " bars of " + cur.r.style + " at " + cur.r.bpm + " BPM.");
+    sayHost("Seed note: \u201Csame words = same beat every time\u201D. Your seed is: " + cur.seed);
+    renderBeatCard();
+    suggestNext();
+    infoLine("Beat ready — press play!");
+  }).catch(function (e) {
+    var msg = (e && e.message) || String(e);
+    infoLine("Couldn't make the beat: " + msg);
+    sayHost("Uh oh — I couldn't make the beat (" + msg + "). Tap \u201CMake my beat\u201D again and I'll try once more.");
+  });
+}
+
+function onMake() {
+  var r = parseRequest($("mk1prompt").value);
+  cur.r = r; cur.extras = ""; cur.bars = 4;
+  var lines = ["Got it! Making you a " + r.mood + " " + r.style + " beat at " + r.bpm + " BPM."];
+  if (r.styleRef) lines.push("You asked for a " + r.styleRef + "-style beat — I'm making our own original take on that sound. It's not by or with " + r.styleRef + ", and it won't copy any real song.");
+  lines.push("Cooking up the drums… kick, snare, hats — every hit placed by your words.");
+  return renderCurrent(lines);
+}
+
+/* The host LEADS: one grounded suggestion after every render. */
+function suggestNext() {
+  var r = cur.r;
+  if (cur.bars < 8) { sayHost("Want a longer beat? Tap \u201CMake it longer\u201D below and I'll stretch it."); return; }
+  if (!/(^|\+)bassline($|\+)/.test(cur.extras)) { sayHost("Want it deeper? Tap \u201CAdd a bassline\u201D for the low-end recipe."); return; }
+  if (r.bpm < 100) { sayHost("Want it faster? Add the word \u201Cfaster\u201D to your words and tap Make my beat."); return; }
+  if (r.bpm > 120) { sayHost("Want it slower? Add the word \u201Cslower\u201D to your words and tap Make my beat."); return; }
+  sayHost("Try \u201CSurprise me\u201D if you want a brand-new beat you didn't ask for!");
+}
+
+var SURPRISE = [
+  "bouncy space robot party", "sleepy rainy-day lofi groove", "spooky midnight trap beat",
+  "happy sunshine reggae bounce", "fast workout hype beat", "dreamy floating ambient drift",
+  "funky dance-floor shaker", "smooth late-night jazz swing", "epic movie-trailer stomp", "silly wiggle dance beat"
+];
+function onSurprise() {
+  var rng = S.rngFrom("surprise:" + Date.now() + ":" + Math.random());
+  var words = S.pick(rng, SURPRISE);
+  $("mk1prompt").value = words;
+  sayHost("Rolling the dice… how about: \u201C" + words + "\u201D?");
+  cur.extras = ""; cur.bars = 4; cur.r = parseRequest(words);
+  return renderCurrent(["Fresh words, fresh beat — " + cur.r.mood + " " + cur.r.style + " at " + cur.r.bpm + " BPM."]);
+}
+
+/* ---------- the beat card: play / downloads / save ---------- */
+function renderBeatCard() {
+  var box = $("mk1beat");
+  var like = cur.like, r = cur.r;
+  var labels = cur.bars + " bars" + (/(^|\+)bassline($|\+)/.test(cur.extras) ? " · with bassline" : "");
+  box.innerHTML =
+    '<div class="card"><h4>🎵 ' + esc(like.name) + '</h4>' +
+    '<p class="seqlab">' + esc(r.style) + ' · ' + r.bpm + ' BPM · ' + esc(labels) + '</p>' +
+    '<p><button class="btn big" id="mk1play">▶ Play</button></p>' +
+    '<p><button class="btn" id="mk1wav">⬇ Download .wav</button> ' +
+    '<button class="btn" id="mk1mp3">⬇ Download .mp3</button> ' +
+    '<button class="btn teal" id="mk1save">💾 Save to My Songs</button></p>' +
+    '<p class="seqlab">Seed: ' + esc(cur.seed) + ' — same words = same beat, every time.</p></div>' +
+    '<p class="honest">An original Signature composition, made fresh in your browser. Not a copy of any real song.</p>';
+  $("mk1play").addEventListener("click", onPlay);
+  $("mk1wav").addEventListener("click", onWav);
+  $("mk1mp3").addEventListener("click", onMp3);
+  $("mk1save").addEventListener("click", onSave);
+}
+
+function ensureBuffer() {
+  if (cur.buffer) return Promise.resolve(cur.buffer);
+  return Studio.renderBeatBuffer(cur.like, cur.bars).then(function (b) { cur.buffer = b; return b; });
+}
+function onPlay() {
+  Studio.unlock();
+  if (cur.playing) { S.stopLive("m1"); cur.playing = false; infoLine("Stopped. Tap ▶ Play to hear it again."); return; }
+  ensureBuffer().then(function (buf) {
+    var src = S.playBuffer(buf, "m1");
+    if (src) { cur.playing = true; infoLine("Playing… tap ▶ Play again to stop."); }
+    else infoLine("Tap ▶ Play again — your browser held the audio the first time.");
+  }).catch(function (e) { infoLine("Couldn't play: " + ((e && e.message) || e)); });
+}
+function onWav() {
+  Studio.unlock();
+  infoLine("Making your .wav file…");
+  ensureBuffer().then(function (buf) {
+    var blob = Studio.wavBlob(buf);
+    Studio.download(blob, fileNameFor(cur.like, "wav"));
+    infoLine("Your .wav is downloading. Check your downloads.");
+    sayHost("Sent! Your .wav is downloading now.");
+  }).catch(function (e) { infoLine("Couldn't make the .wav: " + ((e && e.message) || e)); });
+}
+function onMp3() {
+  Studio.unlock();
+  infoLine("Making your .mp3 file…");
+  ensureBuffer().then(function (buf) { return Studio.mp3Blob(buf); }).then(function (blob) {
+    Studio.download(blob, fileNameFor(cur.like, "mp3"));
+    infoLine("Your .mp3 is downloading.");
+    sayHost("Sent! Your .mp3 is downloading now.");
+  }).catch(function () {
+    infoLine("MP3 needs the encoder file — WAV works now");
+    sayHost("The MP3 maker needs its encoder file, which isn't on this page yet — but WAV works right now. Tap \u2B07 Download .wav.");
+  });
+}
+function onSave() {
+  Studio.unlock();
+  if (!Shelf) { infoLine("Saving isn't available — the song shelf didn't load."); return; }
+  Shelf.push({ type: "beat", title: cur.like.name, id: cur.like.id, createdAt: new Date().toISOString() });
+  infoLine("Saved to My Songs — find it under My Songs on the Song Archive page.");
+  sayHost("Saved! Your beat is in My Songs now.");
+}
+
+/* ---------- the AI host widget + grounded answers ---------- */
+function onAsk(text) {
+  var t = String(text == null ? "" : text).toLowerCase();
+  if (!cur.r) return "Make a beat first — type some words above and tap \u201CMake my beat\u201D, then ask me anything about it.";
+  if (/bpm|tempo|speed|fast|slow/.test(t)) {
+    var pace = cur.r.bpm < 90 ? "nice and relaxed" : (cur.r.bpm > 120 ? "pretty quick" : "a comfy middle speed");
+    return "Your beat runs at " + cur.r.bpm + " BPM — " + pace + ".";
+  }
+  if (/style|genre|kind|type/.test(t))
+    return "Your beat is " + cur.r.style + " style" + (cur.r.styleRef ? " — my own original take on a " + cur.r.styleRef + " feel (not affiliated, never a copy)" : "") + ".";
+  if (/seed|same/.test(t)) return "Your seed is \u201C" + cur.seed + "\u201D. Same words = same beat, every time.";
+  if (/real|copy|steal|someone/.test(t)) return "Every beat here is an original Signature composition made fresh in your browser — never a copy of any real song.";
+  if (/long|length|bars/.test(t)) return "Your beat is " + cur.bars + " bars. Tap \u201CMake it longer\u201D and I'll stretch it.";
+  if (/bass/.test(t)) return (/(^|\+)bassline($|\+)/.test(cur.extras)) ? "Yes — this one uses the bassline recipe (deeper low-end groove)." : "No bassline yet — tap \u201CAdd a bassline\u201D and I'll re-cook it with the low-end recipe.";
+  if (/who are you|your name/.test(t)) return "I'm your beat host — I make beats from plain words. No confusing buttons, I promise.";
+  if (/play/.test(t)) return "Tap the big \u25B6 Play button on your beat card in Step 3.";
+  var taught = D.teach(text);
+  if (taught && taught.covered) return taught.title + ": " + taught.text;
+  return "I answer from this page and the studio's own data. Ask me about your beat's speed, style, seed, or length.";
+}
+
+var HOST_ACTIONS = [
+  { label: "Make it longer", run: function () {
+      Studio.unlock();
+      if (!cur.r) { sayHost("Make a beat first, then I'll make it longer!"); return Promise.resolve(); }
+      if (cur.bars >= 12) { sayHost("It's already nice and long — 12 bars!"); return Promise.resolve(); }
+      cur.bars = (cur.bars >= 8) ? 12 : 8;
+      if (!/(^|\+)longer($|\+)/.test(cur.extras)) cur.extras = cur.extras ? cur.extras + "+longer" : "longer";
+      return renderCurrent(["Making it longer — " + cur.bars + " bars now.", "New seed: " + seedFor(cur.r, cur.extras) + " (labeled, so you can come back)."]);
+  } },
+  { label: "Add a bassline", run: function () {
+      Studio.unlock();
+      if (!cur.r) { sayHost("Make a beat first, then I'll add the bassline!"); return Promise.resolve(); }
+      if (/(^|\+)bassline($|\+)/.test(cur.extras)) { sayHost("This one already uses the bassline recipe — hear that low end?"); return Promise.resolve(); }
+      cur.extras = cur.extras ? cur.extras + "+bassline" : "bassline";
+      return renderCurrent(["Adding a bassline — re-cooking your beat with the low-end recipe.", "New seed: " + seedFor(cur.r, cur.extras) + " (labeled, so you can come back)."]);
+  } },
+  { label: "Surprise me", run: function () { Studio.unlock(); return onSurprise(); } }
+];
+
+function initHost() {
+  var el = $("mk1host");
+  if (typeof Studio.host !== "function") {
+    /* graceful fallback if the widget renderer is ever missing */
+    el.innerHTML = '<p class="seqlab">Hi! I\'m your beat host.</p><p>' +
+      HOST_ACTIONS.map(function (a, i) { return '<button class="btn" data-m1a="' + i + '">' + esc(a.label) + '</button>'; }).join(" ") + '</p>';
+    var btns = el.querySelectorAll("button");
+    for (var i = 0; i < btns.length; i++) (function (ix) {
+      btns[ix].addEventListener("click", function () { HOST_ACTIONS[ix].run(); });
+    })(i);
+    return;
+  }
+  Studio.host(el, {
+    greeting: "Hi! I'm your beat host. Type what kind of beat you want up in Step 1 and tap \u201CMake my beat\u201D — I'll handle the rest. You can also ask me questions right here.",
+    mode: "maker1",
+    onAsk: onAsk,
+    actions: HOST_ACTIONS
+  });
+}
+
+/* ---------- try-a-word chips (kid options) ---------- */
+function initChips() {
+  var tries = [
+    ["🎉", "bouncy party beat"],
+    ["😴", "slow sleepy beat"],
+    ["👻", "spooky dark beat"],
+    ["🏃", "fast workout beat faster"]
+  ];
+  var box = $("mk1tries");
+  box.innerHTML = tries.map(function (t, i) {
+    return '<button class="btn ghost" id="mk1try' + i + '" data-try="' + esc(t[1]) + '">' + t[0] + ' ' + esc(t[1]) + '</button>';
+  }).join("");
+  for (var i = 0; i < tries.length; i++) (function (ix) {
+    $("mk1try" + ix).addEventListener("click", function () {
+      Studio.unlock();
+      $("mk1prompt").value = tries[ix][1];
+      sayHost("Good pick! Making that beat now…");
+      onMake();
+    });
+  })(i);
+}
+
+/* ---------- deep link: ?make=<words> pre-fills and auto-makes ---------- */
+function readDeepLink() {
+  var q = "";
+  try { q = location.search || ""; } catch (e) { q = ""; }
+  var m = /(?:^|[?&])make=([^&]*)/.exec(q);
+  if (!m) return null;
+  try { return decodeURIComponent(m[1].replace(/\+/g, " ")); } catch (e) { return m[1]; }
+}
+
+/* ---------- wire it all up ---------- */
+function init() {
+  if (!Studio || !S || !D) return; /* boot already explained itself */
+  initChips();
+  initHost();
+  if (typeof Studio.stampCounts === "function") { try { Studio.stampCounts(); } catch (e) {} }
+  $("mk1make").addEventListener("click", function () { Studio.unlock(); onMake(); });
+  $("mk1prompt").addEventListener("keydown", function (ev) {
+    if (ev && (ev.key === "Enter") && (ev.ctrlKey || ev.metaKey)) { Studio.unlock(); onMake(); }
+  });
+  var finderQ = $("mk1finderq");
+  if (finderQ) finderQ.addEventListener("keydown", function (ev) {
+    if (!ev || ev.key !== "Enter") return;
+    var v = String(finderQ.value || "").trim();
+    if (!v) return;
+    $("mk1prompt").value = v;
+    sayHost("Nice — I'll make that: \u201C" + v + "\u201D.");
+    Studio.unlock(); onMake();
+  });
+  var dl = readDeepLink();
+  if (dl) { $("mk1prompt").value = dl; sayHost("You came in with words ready: \u201C" + dl + "\u201D — making it now!"); onMake(); }
+  else sayHost("Welcome! Tell me what kind of beat you want, and tap \u201CMake my beat\u201D.");
+}
+init();
+
+/* test seam: pure logic + state for the Node functional exercise */
+if (typeof window !== "undefined") {
+  window.__M1 = {
+    parseRequest: parseRequest, seedFor: seedFor, beatName: beatName,
+    beatLikeFor: beatLikeFor, fileNameFor: fileNameFor, findStyle: findStyle,
+    onAsk: onAsk, hostActions: HOST_ACTIONS,
+    state: function () { return cur; },
+    make: onMake, surprise: onSurprise
+  };
+}
+
+})();
+</script>
+</body>
+</html>

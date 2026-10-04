@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🎤 Add-on: Backup Singers — Signature Music Studio</title>
+<meta name="description" content="Add synthesized backup singers to any Signature song — choir, harmonies, ad-libs. Kid-simple.">
+<link rel="canonical" href="https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/addon-backup.html">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/studio-theme.css">
+<script>try{if(localStorage.getItem("jah-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+</head>
+<body>
+<nav class="jahnet"><div class="wrap" id="jahnet"></div></nav>
+<div id="studionav"></div>
+<header class="hero"><div class="wrap">
+<h1>🎤 Add-on: Backup Singers</h1>
+<p class="tag">Give your song a singing crew — harmonies, a big choir, and fun ad-libs.</p>
+</div></header>
+<main class="wrap">
+
+<section class="sec" id="sec-song">
+<h2>1 · Get your song in here</h2>
+<p class="seqlab" id="songstatus" role="status">No song yet — pick one below.</p>
+<div class="grid">
+  <div class="card">
+    <h3>🎵 My Songs</h3>
+    <p>Songs you saved on this device.</p>
+    <button class="btn" id="btn-mylist">Show my songs</button>
+    <div id="mylist"></div>
+  </div>
+  <div class="card">
+    <h3>📀 From the archive</h3>
+    <p>Type a song ID, like <b>JAH-SONG-0000001</b>.</p>
+    <p><input id="in-archiveid" placeholder="JAH-SONG-0000001" size="20">
+    <button class="btn" id="btn-archive">Pull it in</button></p>
+  </div>
+  <div class="card">
+    <h3>📁 Drop your own file</h3>
+    <p>Your file never leaves this device. Max 10&nbsp;MB.</p>
+    <p><input type="file" id="in-dropfile" accept="audio/*"></p>
+  </div>
+</div>
+<p class="honest">Dropped files are decoded right here in your browser — they never leave your device.</p>
+</section>
+
+<section class="sec" id="sec-crew">
+<h2>2 · Build your singing crew</h2>
+<p>First pick the lead voice, then switch each backup singer on or off and slide their loudness.</p>
+<p><label><b>Lead voice:</b> <select id="sel-voice"></select></label></p>
+<div id="backuplist"></div>
+<p class="honest">Every voice here is synthesized by the studio engine — there are no human singers, just really good robots.</p>
+<p>
+<button class="btn" id="btn-preview">▶ Preview lead + backups</button>
+<button class="btn ghost" id="btn-stop">⏹ Stop</button>
+<button class="btn" id="btn-wav">⬇ .wav</button>
+<button class="btn" id="btn-mp3">⬇ .mp3</button>
+</p>
+<p class="seqlab" id="status" role="status">Ready.</p>
+</section>
+
+<section class="sec" id="sec-ai">
+<h2>3 · Your AI studio buddy</h2>
+<p>Stuck? Let the AI host pick the crew and finish it for you.</p>
+<div id="aibox"></div>
+</section>
+
+</main>
+<footer><div class="wrap"><p class="seqlab">Signature Music Studio · all voices synthesized, all songs original.</p></div></footer>
+
+<script src="assets/synth.js"></script>
+<script src="assets/engine.js"></script>
+<script src="assets/lyrics.js"></script>
+<script src="assets/lame.min.js"></script>
+<script src="assets/studio-core.js"></script>
+<script>
+(function () {
+"use strict";
+var $ = function (id) { return document.getElementById(id); };
+function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+function status(t) { var e = $("status"); if (e) e.textContent = t; }
+
+/* ================= Studio core bridge (same contract as addon-sfx) ================= */
+function makeBridge() {
+  if (window.SigStudio) return window.SigStudio;
+  var S = window.SigSynth || {};
+  function fetchT(url, ms) {
+    return new Promise(function (res, rej) {
+      var done = false;
+      var to = setTimeout(function () { if (!done) { done = true; rej(new Error("timeout")); } }, ms || 25000);
+      fetch(url).then(function (r) {
+        if (done) return; done = true; clearTimeout(to);
+        if (!r.ok) rej(new Error("HTTP " + r.status)); else res(r);
+      }, function (e) { if (!done) { done = true; clearTimeout(to); rej(e); } });
+    });
+  }
+  function gunzip(url) {
+    return fetchT(url).then(function (r) { return r.arrayBuffer(); })
+      .then(function (ab) { return new Response(new Blob([ab]).stream().pipeThrough(new DecompressionStream("gzip"))).text(); });
+  }
+  var idxCache = null;
+  function loadIdx() {
+    if (idxCache) return Promise.resolve(idxCache);
+    return gunzip("data/index/index.json.gz").then(function (t) {
+      idxCache = t.split("\n").filter(Boolean).map(JSON.parse);
+      return idxCache;
+    });
+  }
+  function findRecord(id) {
+    id = String(id || "").trim().toUpperCase();
+    if (!id) return Promise.resolve(null);
+    return loadIdx().then(function (rows) {
+      var row = null, i;
+      for (i = 0; i < rows.length; i++) if (String(rows[i][0]).toUpperCase() === id) row = rows[i];
+      if (!row) return null;
+      return gunzip("data/records/" + row[3]).then(function (t) {
+        var ls = t.split("\n"), j;
+        for (j = 0; j < ls.length; j++) {
+          if (!ls[j]) continue;
+          var r = JSON.parse(ls[j]);
+          if (r.id === id) return r;
+        }
+        return null;
+      });
+    }, function () { return null; });
+  }
+  function host(el, opts) {
+    opts = opts || {};
+    var acts = opts.actions || [];
+    var h = '<div class="aibox"><p class="aimsg"><b>AI host:</b> ' + esc(opts.greeting || "Hi! I'm here to help.") + "</p>" +
+      '<p class="aiacts">' + acts.map(function (a, i) { return '<button class="btn ghost" data-aact="' + i + '">' + esc(a.label) + "</button>"; }).join(" ") + "</p>" +
+      '<p><input id="aiq" placeholder="Ask me anything…" size="30"> <button class="btn" id="aisend">Ask</button></p>' +
+      '<div class="aichat" id="aichat"></div></div>';
+    el.innerHTML = h;
+    function say(q, a) {
+      var c = el.querySelector("#aichat");
+      if (c) c.innerHTML += '<p class="aimsg"><b>You:</b> ' + esc(q) + '</p><p class="aimsg"><b>AI host:</b> ' + esc(a) + "</p>";
+    }
+    var btns = el.querySelectorAll("[data-aact]"), i;
+    function wire(b) {
+      b.onclick = function () {
+        SC.unlock();
+        try { acts[+b.getAttribute("data-aact")].run(); } catch (e) { say("button", "Hmm, that hiccuped: " + e.message); }
+      };
+    }
+    for (i = 0; i < btns.length; i++) wire(btns[i]);
+    el.querySelector("#aisend").onclick = function () {
+      SC.unlock();
+      var q = el.querySelector("#aiq").value;
+      say(q, opts.onAsk ? opts.onAsk(q) : "Try one of the buttons above — I'll handle the rest.");
+    };
+  }
+  return {
+    jahNav: function (id) { var e = document.getElementById(id); if (e) e.innerHTML = '<a href="index.html">🎵 Music Studio</a> · <a href="songs.html">Songs</a> · <a href="studio-setup.html">🔌 Studio Setup</a>'; },
+    nav: function () { var e = document.getElementById("studionav"); if (e) e.innerHTML = '<div class="wrap"><a class="btn ghost" href="index.html">Song Makers</a> <a class="btn ghost" href="addon-sfx.html">✨ Sound Effects</a> <a class="btn ghost" href="addon-backup.html">🎤 Backup Singers</a> <a class="btn ghost" href="addon-chorus.html">🎵 Chorus</a> <a class="btn ghost" href="studio-setup.html">🔌 Studio Setup</a></div>'; },
+    unlock: function () { try { if (S.unlockAudio) S.unlockAudio(); } catch (e) {} },
+    renderSongBuffer: function (song, seconds) {
+      if (S.renderSong) return S.renderSong(song, seconds || 60, null);
+      return Promise.reject(new Error("song engine is not loaded"));
+    },
+    renderBeatBuffer: function () { return Promise.reject(new Error("beat render is not wired on this page")); },
+    wavBlob: function (buf) { return S.bufferToWav(buf); },
+    mp3Blob: function () { return Promise.reject(new Error("MP3 encoder is not built into this studio yet — the .wav plays everywhere, use that.")); },
+    download: function (blob, name) {
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob); a.download = name;
+      document.body.appendChild(a); a.click();
+      setTimeout(function () { try { URL.revokeObjectURL(a.href); } catch (e) {} a.remove(); }, 4000);
+    },
+    findRecord: findRecord,
+    indexRows: loadIdx,
+    myProjects: {
+      list: function () {
+        try { return Promise.resolve(JSON.parse(localStorage.getItem("sigstudio_projects") || "[]")); }
+        catch (e) { return Promise.resolve([]); }
+      }
+    },
+    host: host
+  };
+}
+var SC = makeBridge();
+try { SC.jahNav("jahnet"); } catch (e) {}
+try { SC.nav("addon-backup.html"); } catch (e) {}
+
+/* ================= state + song pull-in ================= */
+var state = { song: null };
+function setSong(s) { state.song = s; $("songstatus").textContent = "🎵 In the studio: " + s.title + " (" + s.id + ") — now build your crew."; }
+function pullById(id) {
+  SC.unlock();
+  if (!id) { $("songstatus").textContent = "Type a song ID first."; return; }
+  $("songstatus").textContent = "Looking up " + id + "…";
+  SC.findRecord(id).then(function (r) {
+    if (!r) { $("songstatus").textContent = "Couldn't find " + id + " — check the ID and try again."; return; }
+    setSong(r);
+  });
+}
+$("btn-archive").onclick = function () { SC.unlock(); pullById($("in-archiveid").value); };
+$("btn-mylist").onclick = function () {
+  SC.unlock();
+  SC.myProjects.list().then(function (list) {
+    var box = $("mylist");
+    if (!list.length) { box.innerHTML = "<p class=\"seqlab\">No saved songs on this device yet.</p>"; return; }
+    box.innerHTML = list.map(function (p, i) {
+      return '<p><button class="btn ghost" data-mp="' + i + '">Use</button> ' + esc(p.title) + ' <span class="seqlab">' + esc(p.id) + "</span></p>";
+    }).join("");
+    var bs = box.querySelectorAll("[data-mp]"), i;
+    function wire(b) {
+      b.onclick = function () {
+        SC.unlock();
+        var p = list[+b.getAttribute("data-mp")];
+        if (p && p.id && p.id.indexOf("JAH-") === 0) pullById(p.id);
+        else if (p) setSong({ id: p.id || "local", title: p.title || "My song", genre: "pop", tempo: 100 });
+      };
+    }
+    for (i = 0; i < bs.length; i++) wire(bs[i]);
+  });
+};
+$("in-dropfile").addEventListener("change", function () {
+  SC.unlock();
+  var f = $("in-dropfile").files && $("in-dropfile").files[0];
+  if (!f) return;
+  if (f.size > 10 * 1024 * 1024) { $("songstatus").textContent = "That file is over 10 MB — pick a smaller one."; return; }
+  $("songstatus").textContent = "Reading your file… (your file never leaves this device)";
+  setSong({ id: "dropped:" + f.name, title: f.name.replace(/\.[^.]+$/, ""), genre: "pop", tempo: 120 });
+});
+(function deepLink() {
+  try {
+    var q = new URLSearchParams(window.location.search).get("songid");
+    if (q) pullById(q);
+  } catch (e) {}
+})();
+
+/* ================= the crew ================= */
+var KID = {
+  soprano: "High singers — sparkle on top",
+  alto: "Warm harmony — sits right above the lead",
+  tenor: "Middle harmony — fills in under the lead",
+  bass: "Low foundation — deep and strong",
+  choir: "Big choir — a whole group singing together",
+  adlibs: "Ad-libs — fun little riffs between phrases"
+};
+function paintCrew() {
+  var S = window.SigSynth || {};
+  var vs = $("sel-voice"), h = "", i, v;
+  if (S.CREATED_VOICES) {
+    for (i = 0; i < S.CREATED_VOICES.length; i++) {
+      v = S.CREATED_VOICES[i];
+      h += '<option value="' + esc(v.id) + '">' + esc(v.name) + " — " + esc(v.desc) + "</option>";
+    }
+  }
+  vs.innerHTML = h || "<option>No voices loaded</option>";
+  var bt = S.BACKUP_TYPES || [], bh = "";
+  for (i = 0; i < bt.length; i++) {
+    bh += '<div class="card"><p><label><input type="checkbox" id="bk-on-' + bt[i].id + '"' + (bt[i].id === "alto" || bt[i].id === "choir" ? " checked" : "") + '> <b>' + esc(bt[i].name) + "</b></label></p>" +
+      "<p>" + esc(KID[bt[i].id] || bt[i].desc || "") + "</p>" +
+      '<p><label>How loud <input type="range" id="bk-lvl-' + bt[i].id + '" min="0" max="100" value="60"></label></p></div>';
+  }
+  $("backuplist").innerHTML = bh || '<p class="honest">Backup types did not load — reload the page.</p>';
+}
+function melodyForSong(song) {
+  var S = window.SigSynth;
+  var rng = S.rngFrom("backup:" + song.id);
+  var keyRoot = 48 + Math.floor(rng() * 12);
+  var chords = S.chordsFor(keyRoot, song.genre || "pop", rng);
+  return S.melodyFor(chords, 16, rng);
+}
+function enabledBackups() {
+  var S = window.SigSynth || {}, out = [], i, bt = S.BACKUP_TYPES || [];
+  for (i = 0; i < bt.length; i++) {
+    var c = $("bk-on-" + bt[i].id);
+    if (c && c.checked) out.push({ id: bt[i].id, level: ($("bk-lvl-" + bt[i].id).value / 100) });
+  }
+  return out;
+}
+/* Mix rendered layers offline, each with its own loudness. */
+function mixLayers(layers) {
+  var OC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  if (!OC) return Promise.reject(new Error("this browser can't mix audio offline"));
+  var len = 0, i;
+  for (i = 0; i < layers.length; i++) len = Math.max(len, layers[i].buf.length);
+  var sr = layers[0].buf.sampleRate;
+  var c = new OC(2, len, sr);
+  for (i = 0; i < layers.length; i++) {
+    (function (L) {
+      var src = c.createBufferSource(); src.buffer = L.buf;
+      var g = c.createGain(); g.gain.value = L.gain;
+      src.connect(g); g.connect(c.destination); src.start(0);
+    })(layers[i]);
+  }
+  return c.startRendering();
+}
+function buildCrew(seconds, done) {
+  SC.unlock();
+  if (!state.song) { status("Pick a song first — step 1 up top."); done(new Error("no song")); return; }
+  var S = window.SigSynth;
+  if (!S.renderVocal) { status("The vocal engine did not load — reload the page."); done(new Error("no vocal")); return; }
+  var voiceId = $("sel-voice").value;
+  var backs = enabledBackups();
+  var melody = melodyForSong(state.song);
+  status("Teaching the singers your tune… (" + (backs.length + 1) + " voices)");
+  var jobs = [{ render: S.renderVocal(melody, voiceId, [], seconds), gain: 1.0 }];
+  var i;
+  for (i = 0; i < backs.length; i++) {
+    (function (b) {
+      jobs.push({ render: S.renderVocal(melody, voiceId, [b.id], seconds), gain: 0.9 * b.level });
+    })(backs[i]);
+  }
+  Promise.all(jobs.map(function (j) { return j.render; })).then(function (bufs) {
+    var layers = bufs.map(function (b, k) { return { buf: b, gain: jobs[k].gain }; });
+    return mixLayers(layers);
+  }).then(function (mixed) { status("Your crew is ready!"); done(null, mixed); },
+    function (e) { status("The singers hiccuped: " + e.message); done(e); });
+}
+function play(buf) {
+  SC.unlock();
+  try {
+    if (window.SigSynth.stopLive) window.SigSynth.stopLive("bk");
+    window.SigSynth.playBuffer(buf, "bk");
+    status("Playing — lead plus your backup crew.");
+  } catch (e) { status("Couldn't play here: " + e.message); }
+}
+$("btn-preview").onclick = function () { SC.unlock(); buildCrew(24, function (e, b) { if (!e) play(b); }); };
+$("btn-stop").onclick = function () { SC.unlock(); try { window.SigSynth.stopLive("bk"); } catch (e) {} status("Stopped."); };
+$("btn-wav").onclick = function () {
+  SC.unlock();
+  buildCrew(60, function (e, b) {
+    if (e) return;
+    status("Making your .wav…");
+    try {
+      SC.download(SC.wavBlob(b), "backup-" + (state.song ? state.song.id : "song") + ".wav");
+      status("Downloaded! Check your downloads folder.");
+    } catch (err) { status("Couldn't make the .wav: " + err.message); }
+  });
+};
+$("btn-mp3").onclick = function () {
+  SC.unlock();
+  buildCrew(60, function (e, b) {
+    if (e) return;
+    status("Making your .mp3…");
+    SC.mp3Blob(b).then(function (blob) {
+      SC.download(blob, "backup-" + (state.song ? state.song.id : "song") + ".mp3");
+      status("Downloaded! Check your downloads folder.");
+    }, function (err) { status("MP3 didn't work: " + err.message); });
+  });
+};
+
+/* ================= AI host ================= */
+function say2(t) { var c = $("aibox").querySelector("#aichat"); if (c) c.innerHTML += '<p class="aimsg"><b>AI host:</b> ' + esc(t) + "</p>"; }
+function aiDoIt() {
+  var S = window.SigSynth || {}, bt = S.BACKUP_TYPES || [], i, c;
+  var want = ["alto", "choir"];
+  for (i = 0; i < bt.length; i++) {
+    c = $("bk-on-" + bt[i].id);
+    if (c) { c.checked = want.indexOf(bt[i].id) >= 0; $("bk-lvl-" + bt[i].id).value = 65; }
+  }
+  buildCrew(24, function (e, b) { if (!e) play(b); });
+  return "Done — I gave you a warm harmony plus the big choir, the classic combo. Playing it now.";
+}
+SC.host($("aibox"), {
+  greeting: "Hi! I'm your backup-singer buddy. Pull in a song, or just tell me — and I'll build the crew for you.",
+  onAsk: function (q) {
+    q = String(q || "").toLowerCase();
+    if (/big|huge|choir/.test(q)) return "Big choir = turn on 'Big choir'. Want huge? Add the Low foundation too.";
+    if (/harmon/.test(q)) return "Warm harmony and Middle harmony are the classic pair — one above, one under the lead.";
+    if (/riff|ad-?lib|fun/.test(q)) return "Ad-libs adds fun little riffs between phrases. Slide it loud for playfulness.";
+    if (/voice|lead|sing/.test(q)) return "Pick the lead voice at the top — Nova is bright, Stone is deep.";
+    return "Switch singers on in step 2, or tap 'AI: do it for me' and I'll build a classic crew.";
+  },
+  actions: [
+    { label: "AI: do it for me", run: function () { say2(aiDoIt()); } },
+    { label: "AI: finish it", run: function () { say2(aiDoIt()); setTimeout(function () { $("btn-wav").click(); }, 600); } }
+  ]
+});
+
+paintCrew();
+})();
+</script>
+</body>
+</html>

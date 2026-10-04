@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Song Maker — Option 2: Walk Me Through It | Signature Music Studio</title>
+<meta name="description" content="Song Maker Option 2: build a full song step by step with an AI host — pick sounds, make a beat, write lyrics, sing, mix, and finish. Plain and simple, for everyone.">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/studio-theme.css">
+<style>
+/* Option 2 — guided song builder (page-local only; site look untouched) */
+.m2stage{display:none}
+.m2stage.on{display:block}
+ol.dots{list-style:none;display:flex;gap:.5rem;padding:0;margin:1rem 0;flex-wrap:wrap}
+ol.dots li{flex:1;min-width:110px;text-align:center;padding:.55rem .3rem;border:1px solid var(--line,#3a2c5c);border-radius:10px;cursor:pointer;background:#141021}
+ol.dots li b{display:block;font-size:1.1rem}
+ol.dots li.done{border-color:var(--gold,#d8a92c)}
+ol.dots li.cur{background:#241a3d;border-color:var(--gold,#d8a92c)}
+ol.dots li span{font-size:.78rem;color:var(--mut,#9a8fc0)}
+.scard{border:1px solid var(--line,#3a2c5c);border-radius:10px;padding:.7rem;margin:.6rem 0;background:#171227}
+.scard h4{margin:.1rem 0 .4rem}
+.sitem{display:flex;align-items:center;gap:.5rem;padding:.3rem 0;border-top:1px dotted var(--line,#3a2c5c)}
+.sitem .nm{flex:1}
+.sitem .id{font-size:.72rem;color:var(--mut,#9a8fc0)}
+.picked{color:#7fe08a;font-size:.85rem}
+input[type=text],input[type=number],select,textarea{width:100%;max-width:520px;padding:.5rem;border-radius:8px;border:1px solid var(--line,#3a2c5c);background:#0f0b1c;color:inherit;font-size:1rem}
+textarea{min-height:150px;font-family:inherit}
+.frow{display:flex;align-items:center;gap:.7rem;margin:.4rem 0;max-width:520px}
+.frow label{width:90px}
+.frow input[type=range]{flex:1}
+.frow .val{width:44px;text-align:right;color:var(--mut,#9a8fc0)}
+.hostask{display:flex;gap:.5rem;margin-top:.6rem;max-width:640px}
+.hostask input{flex:1}
+.hostans{margin-top:.5rem;min-height:1.2em}
+.vcard{display:inline-block;border:1px solid var(--line,#3a2c5c);border-radius:10px;padding:.6rem .8rem;margin:.3rem;cursor:pointer;background:#171227}
+.vcard.sel{border-color:var(--gold,#d8a92c);background:#241a3d}
+.vcard small{color:var(--mut,#9a8fc0);display:block}
+.m2nav{display:flex;align-items:center;gap:1rem;margin:1.2rem 0}
+#stagelabel{flex:1;text-align:center;font-weight:bold}
+.seqlab{font-size:.85rem;color:var(--mut,#9a8fc0)}
+</style>
+</head>
+<body>
+<nav class="jahnet" aria-label="JAH Network Global Ecosystem"><div class="wrap" id="jahnet"></div></nav>
+<div id="studionav"></div>
+
+<header class="hero"><div class="wrap">
+  <h1>Song Maker — Option 2</h1>
+  <p class="tag">Walk me through it — build a full song, step by step. Six easy stages, one at a time, with an AI host beside you.</p>
+</div></header>
+
+<div class="wrap">
+
+  <section class="sec card" id="hostsec" aria-label="Your AI host">
+    <h2>🤖 Your AI host</h2>
+    <div id="hostbox"><p class="seqlab">Loading your host…</p></div>
+  </section>
+
+  <ol class="dots" id="dots" aria-label="Song building stages">
+    <li data-s="1"><b>1</b><span>Sounds</span></li>
+    <li data-s="2"><b>2</b><span>Beat + Instrument</span></li>
+    <li data-s="3"><b>3</b><span>Lyrics</span></li>
+    <li data-s="4"><b>4</b><span>Singing</span></li>
+    <li data-s="5"><b>5</b><span>Mix / Master</span></li>
+    <li data-s="6"><b>6</b><span>Finish</span></li>
+  </ol>
+
+  <!-- ============ STAGE 1 : SOUNDS ============ -->
+  <section class="sec m2stage" id="stage1" aria-label="Stage 1: sounds">
+    <h2>Step 1 of 6 — Pick your instruments</h2>
+    <p>These are real sounds from the studio archive. Search inside a family, tap ▶ to hear a short synthesized preview, then tap <b>Use this one</b>. Your picks carry into every later step.</p>
+    <p><button class="btn teal" id="s1_ai">🤖 AI: pick instruments for me</button> <span class="seqlab" id="s1_info"></span></p>
+    <div id="s1_cats"></div>
+  </section>
+
+  <!-- ============ STAGE 2 : BEAT + INSTRUMENT ============ -->
+  <section class="sec m2stage" id="stage2" aria-label="Stage 2: beat and instrument">
+    <h2>Step 2 of 6 — Make your beat</h2>
+    <p>Playing: <span class="seqlab" id="b_carry"></span></p>
+    <div class="grid">
+      <div class="card"><h3>Style &amp; speed</h3>
+        <p><label>Style<br><select id="b_genre" aria-label="Beat style"></select></label></p>
+        <p><label>Speed (BPM — beats per minute)<br><input type="number" id="b_bpm" value="100" min="60" max="180" aria-label="Beats per minute"></label></p>
+        <p><label>Bars (how long the loop is)<br><input type="number" id="b_bars" value="8" min="1" max="16" aria-label="Bars"></label></p>
+        <p><label>Lead instrument voice<br><select id="b_inst" aria-label="Lead instrument voice"></select></label></p>
+        <p><button class="btn" id="b_make">🥁 Make my beat</button>
+           <button class="btn teal" id="b_ai">🤖 AI: make my beat</button></p>
+        <p class="seqlab" id="b_seed">No beat yet — tap “Make my beat”.</p>
+      </div>
+      <div class="card"><h3>Drum grid — tap squares to add or remove hits</h3>
+        <div id="b_grid"></div>
+        <p><button class="btn" id="b_preview">▶ Preview beat</button> <span class="seqlab" id="b_info"></span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STAGE 3 : LYRICS ============ -->
+  <section class="sec m2stage" id="stage3" aria-label="Stage 3: lyrics">
+    <h2>Step 3 of 6 — Write the words</h2>
+    <p>Tell the AI what your song is about, and it writes rhyming verses and a chorus. Every line stays editable — it's your song.</p>
+    <p><label>What is your song about?<br><input type="text" id="l_theme" placeholder="for example: the midnight highway" aria-label="Song theme"></label></p>
+    <p><button class="btn teal" id="l_ai">🤖 AI: write my lyrics</button>
+       <label class="seqlab" style="margin-left:.8rem"><input type="checkbox" id="l_inst" style="width:auto;display:inline-block"> No words — make it an <b>instrumental</b></label></p>
+    <p><label>Your lyrics (edit anything):<br><textarea id="l_text" aria-label="Song lyrics"></textarea></label></p>
+    <p class="seqlab" id="l_info"></p>
+  </section>
+
+  <!-- ============ STAGE 4 : SINGING ============ -->
+  <section class="sec m2stage" id="stage4" aria-label="Stage 4: singing">
+    <h2>Step 4 of 6 — Sing it</h2>
+    <p>Pick a created voice — every voice here is <b>synthesized by the computer</b> (no real singers). Then hear your words sung over your beat.</p>
+    <div id="v_voices" role="radiogroup" aria-label="Created voices"></div>
+    <p><b>Backup singers</b> <span class="seqlab">(optional — harmony voices behind the lead)</span></p>
+    <div id="v_backups"></div>
+    <p><button class="btn" id="v_preview">▶ Preview my vocal line over the beat</button>
+       <button class="btn teal" id="v_ai">🤖 AI: pick a voice for me</button></p>
+    <p class="seqlab" id="v_info"></p>
+    <div class="card"><h3>🎤 Or sing it yourself</h3>
+      <p><label style="display:block;margin:.4rem 0"><input type="checkbox" id="v_consent" style="width:auto;display:inline-block"> I understand my voice sample stays <b>in this browser only</b> — never uploaded, never shared — and I can delete it anytime.</label></p>
+      <p><button class="btn" id="v_rec">🔴 Record my voice</button>
+         <label class="btn ghost" style="cursor:pointer">⬆ Upload a voice sample<input type="file" id="v_up" accept="audio/*" style="display:none" aria-label="Upload a voice sample"></label>
+         <button class="btn" id="v_own_preview">▶ Preview my voice on the melody</button></p>
+      <div class="honest"><b>🔒 Your voice, your device.</b> Recording and uploads are accepted as wav, mp3, webm or ogg (whatever your browser can decode), up to <b>10&nbsp;MB</b>. Your sample is decoded <b>in this browser's memory only — it is never uploaded anywhere and never leaves your device</b>. It is replaced when you record or upload a new sample, and it is gone when you reload or close the page.</div>
+    </div>
+  </section>
+
+  <!-- ============ STAGE 5 : MIX / MASTER ============ -->
+  <section class="sec m2stage" id="stage5" aria-label="Stage 5: mix and master">
+    <h2>Step 5 of 6 — Mix it like an engineer</h2>
+    <p>These sliders set how loud each part is in the final song. Slide, then tap ▶ to hear your full mix.</p>
+    <div id="m_faders"></div>
+    <p><button class="btn" id="m_preview">▶ Preview full mix</button>
+       <button class="btn teal" id="m_ai">🤖 AI: set a balanced mix</button></p>
+    <p class="seqlab" id="m_info"></p>
+  </section>
+
+  <!-- ============ STAGE 6 : FINISH ============ -->
+  <section class="sec m2stage" id="stage6" aria-label="Stage 6: finish">
+    <h2>Step 6 of 6 — Finish your song 🎉</h2>
+    <p><label>Name your song<br><input type="text" id="f_title" placeholder="My First Song" aria-label="Song title"></label></p>
+    <p><button class="btn teal" id="f_stampbtn">🎵 Stamp my song</button> <span class="seqlab" id="f_stamp">Your stamp will appear here.</span></p>
+    <div class="honest">🏷️ Your stamp looks like <b>JAH-MYSONG-000001</b>. It is <b>made on this device</b> — the number lives in your browser, not in the archive, so it marks songs you built yourself.</div>
+    <p>
+      <button class="btn" id="f_play">▶ Play my finished song</button>
+      <button class="btn" id="f_wav">⬇ Download .wav</button>
+      <button class="btn" id="f_mp3">⬇ Download .mp3</button>
+      <button class="btn teal" id="f_save">💾 Save to My Songs</button>
+    </p>
+    <p class="seqlab" id="f_info"></p>
+    <div class="card"><h3>💿 Burn a CD</h3>
+      <p>Your finished song can go on a real CD. Browsers can't drive a disc burner directly, so this builds a <b>disc image</b> (your song + a cue sheet) for your own burner software.</p>
+      <p><button class="btn ghost" id="f_cd">Show CD steps</button></p>
+      <div id="f_cdbox" style="display:none">
+        <p><label>Cue sheet (tells burner software where your song starts):<br><textarea id="f_cue" rows="6" aria-label="Cue sheet"></textarea></label></p>
+        <p><button class="btn" id="f_cuedl">⬇ Download cue sheet</button>
+           <button class="btn" id="f_pkgdl">⬇ Download disc image (.zip)</button></p>
+        <div class="honest">⚠️ <b>Browsers can't burn a disc directly.</b> Take the disc image to your computer's CD burner program (like Windows Media Player or iTunes) to burn a real disc. The .zip holds your song's .wav plus this cue sheet.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="m2nav">
+    <button class="btn ghost" id="backbtn">← Back</button>
+    <div id="stagelabel" aria-live="polite"></div>
+    <button class="btn" id="nextbtn">Next →</button>
+  </div>
+
+</div>
+
+<nav class="jahnet" aria-label="JAH Network (footer)" style="border:none;background:none"><div class="wrap" id="jahnet2" style="justify-content:center"></div></nav>
+
+<script src="assets/synth.js"></script>
+<script src="assets/engine.js"></script>
+<script src="assets/lyrics.js"></script>
+<script src="assets/lame.min.js"></script>
+<script src="assets/studio-core.js"></script>
+<script>
+/* ============================================================
+   Song Maker — Option 2: "Walk me through it"
+   Six guided stages; each stage's result carries into the next.
+   Coded against the window.SigStudio contract (assets/studio-core.js).
+   If studio-core.js is missing/partial, the shim below implements the
+   SAME contract from the real shipped engine (synth.js / engine.js /
+   lyrics.js), so the page never breaks.
+   ============================================================ */
+(function () {
+"use strict";
+var S = window.SigSynth, D = window.SigData;
+function $(id) { return document.getElementById(id); }
+function esc(s) { return String(s == null ? "" : s).replace(/[&<>\"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+function clampN(v, lo, hi, dflt) { v = parseInt(v, 10); if (isNaN(v)) return dflt; return Math.max(lo, Math.min(hi, v)); }
+
+/* ---------------- SigStudio shim (same contract) ---------------- */
+function voiceById(id) {
+  var vs = S.CREATED_VOICES, i;
+  for (i = 0; i < vs.length; i++) if (vs[i].id === id) return vs[i];
+  return vs[0];
+}
+function installShim() {
+  var NAV = [
+    ["Signature Math", "signature-math"], ["Signature Universal Paradox Immune Calculator", "jah-calculator"], ["The Signature Dictionary", "jah-dictionary"],
+    ["JAH Wiki", "jah-wiki"], ["JAH-N Wiki", "jah-n-wiki-leaks"], ["Signature Llama: The Fully Cyber Utilizable AI", "signature-llama"],
+    ["The Signature AI Phone Book", "jah-ai-models"], ["Globally Rejustered Patent Catalog", "cyber-patent-catalog"], ["Signature Spec Catalog Pending Patents", "signature-one-archive/specs.html"],
+    ["The Signature PC System Depository", "jah-computer-systems"], ["The Signature Book Depository", "signature-books"], ["The Signature Comic Store", "signature-comics"],
+    ["The Signature Global Newspaper Archive", "signature-newspapers"], ["The Signature AI Mad Scientist Creation Lab", "signature-backend"], ["The Signature Boundless Generator Archive", "signature-boundless-generators"],
+    ["The Signature AI Mix Lab", "signature-ai-mixlab"], ["AI Olypics", "signature-ai-olypics"], ["The Signature Computer Chip Maker and Archive", "signature-chip-maker"],
+    ["The Signature App Archive", "signature-app-archive"], ["The Signature AI Robot Matcher", "signature-ai-robot-matcher"], ["The Signature Experiment Solver", "signature-experiment-solver"],
+    ["Signature AI Pixel", "signature-ai-image-video-maker"], ["The Signature Mr Fix-It", "signature-fixit"], ["The Signature University", "signature-university"],
+    ["The Signature Cyber Mega-Mall", "signature-cyber-mega-mall"], ["The Signature 3D Print Depository", "signature-3d-print"]
+  ];
+  var X = {};
+  X.unlock = function () { try { S.unlockAudio(); } catch (e) {} };
+  X.jahNav = function (id) {
+    var el = typeof id === "string" ? $(id) : id; if (!el) return;
+    var h = "<b>THE JAH NETWORK</b> ", i;
+    for (i = 0; i < NAV.length; i++) h += '<a href="https://justinahiggins614-cmyk.github.io/' + NAV[i][1] + '/">' + (i + 1) + " " + esc(NAV[i][0]) + "</a>";
+    h += '<span class="here">23 Signature Music Studio — YOU ARE HERE</span>';
+    el.innerHTML = h;
+  };
+  X.nav = function (page) {
+    var el = $("studionav"); if (!el) return;
+    function a(href, label, here) { return '<a href="' + href + '"' + (here ? ' aria-current="page"' : "") + ">" + label + "</a>"; }
+    el.innerHTML = '<nav class="snav" aria-label="Studio"><div class="wrap">' +
+      a("index.html", "🏠 Studio home") + a("songs.html", "🎵 Songs") +
+      a("maker1.html", "Song Maker 1", page === "maker1.html") +
+      a("maker2.html", "Song Maker 2", page === "maker2.html") +
+      a("maker3.html", "Song Maker 3", page === "maker3.html") + "</div></nav>";
+  };
+  X.renderBeatBuffer = function (beatLike, bars) {
+    var bpm = beatLike.bpm || 100, secs = bars * 16 * (60 / bpm / 4);
+    return S.renderBuffer(secs + 0.3, function (c, dest, t0) { S.scheduleBeat(c, dest, t0, beatLike, bars, 1); });
+  };
+  X.renderSongBuffer = function (songLike, mix) {
+    var bpm = songLike.bpm || 100, bars = songLike.bars || 8;
+    var seconds = songLike.seconds > 0 ? songLike.seconds : Math.min(150, bars * 4 * 60 / bpm);
+    return S.renderBuffer(seconds + 0.5, function (c, dest, t0) {
+      var mx = S.makeBuses(c, dest, mix);
+      S.scheduleBeat(c, dest, t0, songLike.pattern, bars, 0.9, mx);
+      var step = 60 / bpm, rng = S.rngFrom("m2song:" + songLike.seed);
+      var chords = S.chordsFor(songLike.keyRoot || 48, songLike.genre || "hip-hop", rng);
+      var bi, ch;
+      for (bi = 0; bi < bars; bi++) {
+        ch = chords[bi % chords.length];
+        S.tone(c, dest, t0 + bi * 4 * step, ch[0] - 12, 3.6 * step, "bass", 0.9, mx.bass);
+        S.tone(c, dest, t0 + bi * 4 * step, ch[1], 3.8 * step, "pad", 0.5, mx.chords);
+        S.tone(c, dest, t0 + bi * 4 * step, ch[2], 3.8 * step, "pad", 0.4, mx.chords);
+      }
+      var mel = (songLike.melody && songLike.melody.length) ? songLike.melody : S.melodyFor(chords, bars, rng);
+      var voice = voiceById(songLike.voiceId);
+      var mt = t0, mi, n;
+      for (mi = 0; mi < mel.length && mt < t0 + seconds - 1; mi++) {
+        n = mel[mi];
+        if (n.midi > 0) {
+          if (songLike.instrumental) S.tone(c, dest, mt, n.midi, n.len * step * 0.92, songLike.leadVoice || "lead", 0.75, mx.lead);
+          else S.singNote(c, dest, mt, n.midi, n.len * step * 0.92, voice, 1, mx.vocal);
+        }
+        mt += n.len * step;
+      }
+    });
+  };
+  X.wavBlob = function (buf) { return S.bufferToWav(buf); };
+  X.mp3Blob = function () {
+    return Promise.reject(new Error("No MP3 encoder is loaded in this browser, so I can't make an .mp3 here. Download the .wav instead — any free audio converter can turn it into an .mp3."));
+  };
+  X.download = function (blob, filename) {
+    var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = filename;
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { try { URL.revokeObjectURL(a.href); } catch (e) {} a.remove(); }, 4000);
+  };
+  X.findRecord = function (id) {
+    var m = /^JAH-(SONG|BEAT|SOUND|GEAR)-(\d+)$/.exec(String(id || "").toUpperCase());
+    if (!m) return Promise.resolve(null);
+    try { return Promise.resolve(D.gen(m[1].toLowerCase(), parseInt(m[2], 10))); }
+    catch (e) { return Promise.resolve(null); }
+  };
+  function projKey() { return "jah-maker2-projects"; }
+  function projRead() { try { return JSON.parse(localStorage.getItem(projKey()) || "[]"); } catch (e) { return []; } }
+  X.myProjects = {
+    push: function (rec) { var l = projRead(); l.push(rec); try { localStorage.setItem(projKey(), JSON.stringify(l)); } catch (e) {} return l.length; },
+    list: function () { return projRead(); }
+  };
+  X.host = function (el, opt) {
+    opt = opt || {};
+    el.innerHTML = '<p class="hostgreet"></p><div class="hostactions"></div>' +
+      '<div class="hostask"><input type="text" placeholder="Ask your AI host anything…" aria-label="Ask your AI host">' +
+      '<button class="btn" type="button">Ask</button></div><div class="hostans seqlab"></div>';
+    var box = el.querySelector(".hostactions"), greet = el.querySelector(".hostgreet");
+    var inp = el.querySelector(".hostask input"), ans = el.querySelector(".hostans");
+    function refresh(o2) {
+      o2 = o2 || {};
+      if (o2.greeting != null) greet.textContent = o2.greeting;
+      box.innerHTML = "";
+      (o2.actions || []).forEach(function (a) {
+        var b = document.createElement("button"); b.className = "btn teal"; b.type = "button"; b.textContent = a.label;
+        b.onclick = function () { X.unlock(); a.fn(); };
+        box.appendChild(b);
+      });
+    }
+    refresh(opt);
+    el.querySelector(".hostask button").onclick = function () {
+      X.unlock();
+      var q = inp.value || "";
+      Promise.resolve(opt.onAsk ? opt.onAsk(q) : "").then(function (a) { ans.textContent = a; });
+    };
+    return { say: function (t) { ans.textContent = t; }, refresh: refresh };
+  };
+  return X;
+}
+var St = window.SigStudio;
+if (!St) { St = installShim(); window.SigStudio = St; }
+else { /* fill any contract gaps so partial cores can't break the page */
+  var _full = installShim();
+  ["unlock", "jahNav", "nav", "renderSongBuffer", "renderBeatBuffer", "wavBlob", "mp3Blob", "download", "findRecord", "myProjects", "host"]
+    .forEach(function (k) { if (typeof St[k] !== "function" && typeof St[k] !== "object") St[k] = _full[k]; });
+}
+/* every tap handler runs unlock() synchronously first (mobile audio rule) */
+function tap(fn) { return function () { try { St.unlock(); } catch (e) {} return fn.apply(this, arguments); }; }
+function play(buf, label, infoEl, infoMsg) {
+  var src = null;
+  try { if (S.setPlayerLabel && label) S.setPlayerLabel(label); src = S.playBuffer(buf, "m2"); } catch (e) { src = null; }
+  if (!src && infoEl) infoEl.textContent = infoMsg || "Audio is blocked in this browser — tap ▶ again and it should play.";
+  return src;
+}
+
+/* ---------------- state ---------------- */
+var M2 = {
+  seed: 1, stage: 1, maxStage: 1,
+  sounds: {},            // category -> archive sound record
+  beat: { genre: "hip-hop", bpm: 100, bars: 8, bump: 0, pattern: null },
+  lyrics: { text: "", theme: "", instrumental: false },
+  vocal: { voiceId: "nova", backups: [], ownSample: null },
+  mix: { drums: 0.9, bass: 0.85, chords: 0.8, lead: 0.85, vocal: 0.95 },
+  song: { title: "", id: null },
+  buf: { beat: null, full: null, own: null }
+};
+function pad6(n) { var s = String(n); while (s.length < 6) s = "0" + s; return s; }
+
+var NARR = [
+  "👋 Hi! I'm your song-building host. Let's make a whole song together, one easy step at a time. Step 1: pick the instruments you want to hear. Tap a family, listen with ▶, and tap “Use this one”. Or tap “🤖 AI: pick instruments for me” and I'll choose!",
+  "Step 2: the beat! Pick a style and a speed (BPM = beats per minute — bigger number, faster song). Then tap the squares to add or remove drum hits. Tap ▶ to hear it. Your instruments from Step 1 come along.",
+  "Step 3: words! Tell me what your song is about and I'll write rhyming verses and a chorus for you. You can change any line — it's your song. Want no words at all? Tick “instrumental”.",
+  "Step 4: time to sing! Pick one of our created voices — they're all synthesized by the computer, no real singers — and hear your words sung over your beat. You can even record your own voice.",
+  "Step 5: you're the sound engineer now! These sliders set how loud each part of your song is. Slide them around, then tap ▶ to hear your full mix.",
+  "Step 6: the finish line! 🎉 Name your song, stamp it with its very own number, and download it. You made a whole song — nice work!"
+];
+var STAGE_NAMES = ["Sounds", "Beat + Instrument", "Lyrics", "Singing", "Mix / Master", "Finish"];
+var hostApi = null;
+
+function askHost(q) {
+  q = String(q || "").toLowerCase();
+  function has() { for (var i = 0; i < arguments.length; i++) if (q.indexOf(arguments[i]) >= 0) return true; return false; }
+  if (has("bpm", "speed", "fast", "slow")) return "BPM means “beats per minute” — how fast your song goes. 60 is slow and dreamy, 180 is super fast. Most pop songs live around 90–120.";
+  if (has("mix", "loud", "slider", "fader", "quiet")) return "The sliders on Step 5 set how loud each part is — drums, bass, chords, lead, and voice. If you can't hear the singing, turn the voice slider up. Nothing here can break your song, so play around!";
+  if (has("lyric", "word", "rhyme", "verse", "chorus")) return "On Step 3 I write your lyrics in pairs of lines that rhyme, built as Verse, Chorus, Verse, Chorus, Bridge, Chorus. You can rewrite any line in the box.";
+  if (has("voice", "sing", "vocal")) return "Our voices on Step 4 are synthesized — made by the computer, no real singers. Pick the one you like, or record your own voice. Your recording never leaves this device.";
+  if (has("cd", "disc", "burn")) return "Browsers can't drive a disc burner directly, so Step 6 builds you a disc image: your song plus a cue sheet, in one .zip. Take it to your computer's CD burner program to burn a real disc.";
+  if (has("wav", "mp3", "download")) return "On Step 6 you can download your finished song as a .wav (best quality, plays everywhere). If the .mp3 button says no encoder is loaded, the .wav is the way — any free converter can make an .mp3 from it.";
+  if (has("stamp", "id", "number", "jah-mysong")) return "Your JAH-MYSONG number is stamped on Step 6 and made on this device — it lives in your browser, not the archive. It marks songs you built yourself.";
+  if (has("instrument", "sound", "drum", "piano", "guitar")) return "Step 1 is where you pick instruments from the real archive. Your picks play the music in every later step — the keys or lead you pick carries the melody.";
+  if (!q.trim()) return "Type a question above — I can explain any step in plain words.";
+  return "Good question! I'm a simple helper, so I answer best about the steps: sounds, beat, lyrics, singing, mixing, or finishing. Try asking about one of those.";
+}
+function aiForStage() {
+  var n = M2.stage;
+  if (n === 1) aiPickSounds();
+  else if (n === 2) makeBeat(true);
+  else if (n === 3) writeLyricsGo();
+  else if (n === 4) aiPickVoice();
+  else if (n === 5) balanceMix();
+  else if (n === 6) finishSong();
+}
+
+/* ---------------- stage navigation ---------------- */
+function go(n) {
+  n = clampN(n, 1, 6, 1);
+  M2.stage = n; M2.maxStage = Math.max(M2.maxStage, n);
+  for (var i = 1; i <= 6; i++) {
+    var sec = $("stage" + i); if (sec) sec.classList.toggle("on", i === n);
+  }
+  var dots = $("dots").querySelectorAll("li"), d;
+  for (d = 0; d < dots.length; d++) {
+    var s = d + 1;
+    dots[d].classList.toggle("cur", s === n);
+    dots[d].classList.toggle("done", s < n);
+  }
+  $("stagelabel").textContent = "Step " + n + " of 6 — " + STAGE_NAMES[n - 1];
+  $("backbtn").disabled = (n === 1);
+  $("nextbtn").textContent = (n === 6) ? "Done ✓" : "Next →";
+  if (n === 2) renderCarry();
+  if (n === 6) renderFinishStamp();
+  if (hostApi && hostApi.refresh) hostApi.refresh({ greeting: NARR[n - 1], actions: [{ label: "🤖 AI: do this stage for me", fn: aiForStage }] });
+  try { if (window.scrollTo) window.scrollTo(0, 0); } catch (e) {}
+}
+function renderCarry() {
+  var names = [], k;
+  for (k in M2.sounds) if (M2.sounds[k]) names.push(M2.sounds[k].name);
+  $("b_carry").textContent = names.length ? names.join(" · ") : "no instruments picked yet (Step 1) — the beat still works";
+}
+
+/* ---------------- stage 1 : sounds ---------------- */
+var CATS = [
+  ["drums", "Drums", "drum"], ["bass", "Bass", "bass"], ["keys", "Keys & Piano", "keys"],
+  ["strings", "Strings", "strings"], ["brass", "Brass", "brass"], ["pads", "Pads", "pad"],
+  ["leads", "Leads", "lead"], ["world", "World", "pluck"], ["fx", "FX", "fx"]
+];
+var DRUMS = ["kick", "snare", "hat", "clap"];
+function soundRec(catIx, i) { return D.gen("sound", 1000 * catIx + 37 * i + 7); }
+function previewSound(catIx) {
+  var fam = CATS[catIx][2], rng = S.rngFrom("m2pv:" + M2.seed + ":" + catIx);
+  try {
+    if (fam === "drum") S.playDrum(DRUMS[Math.floor(rng() * DRUMS.length)]);
+    else S.playTone(60 + Math.floor(rng() * 12), 1.2, fam === "fx" ? "pluck" : fam);
+  } catch (e) { $("s1_info").textContent = "Couldn't preview — audio is blocked. Tap ▶ again."; }
+}
+function renderStage1() {
+  var wrap = $("s1_cats"), h = "", ci;
+  for (ci = 0; ci < CATS.length; ci++) {
+    h += '<div class="scard" data-cat="' + ci + '"><h4>' + esc(CATS[ci][1]) + ' <span class="picked" id="s1_pick_' + ci + '"></span></h4>' +
+      '<input type="text" id="s1_q_' + ci + '" placeholder="Search these ' + esc(CATS[ci][1].toLowerCase()) + '…" aria-label="Search ' + esc(CATS[ci][1]) + '">' +
+      '<div id="s1_list_' + ci + '"></div></div>';
+  }
+  wrap.innerHTML = h;
+  for (ci = 0; ci < CATS.length; ci++) (function (c) {
+    function drawList(filter) {
+      var lh = "", i, rec;
+      for (i = 0; i < 8; i++) {
+        rec = soundRec(c, i);
+        if (filter && (rec.name + " " + rec.desc + " " + rec.id).toLowerCase().indexOf(filter) < 0) continue;
+        lh += '<div class="sitem"><span class="nm">' + esc(rec.name) + ' <span class="id">' + esc(rec.id) + '</span></span>' +
+          '<button class="btn ghost" data-pv="' + c + ":" + i + '" type="button">▶</button>' +
+          '<button class="btn" data-use="' + c + ":" + i + '" type="button">Use this one</button></div>';
+      }
+      $("s1_list_" + c).innerHTML = lh || '<p class="seqlab">No matches — try another word.</p>';
+    }
+    drawList("");
+    $("s1_q_" + c).addEventListener("input", tap(function () { drawList(this.value.toLowerCase()); }));
+    $("s1_list_" + c).addEventListener("click", tap(function (e) {
+      var t = e.target;
+      var pv = t.getAttribute && t.getAttribute("data-pv"), us = t.getAttribute && t.getAttribute("data-use");
+      if (pv) { var p = pv.split(":"); previewSound(+p[0]); }
+      else if (us) { var u = us.split(":"); pickSound(+u[0], +u[1]); }
+    }));
+  })(ci);
+  refreshPicks();
+}
+function pickSound(catIx, i) {
+  var rec = soundRec(catIx, i);
+  M2.sounds[CATS[catIx][0]] = rec;
+  refreshPicks();
+  $("s1_info").textContent = "Picked “" + rec.name + "” for " + CATS[catIx][1] + ".";
+}
+function refreshPicks() {
+  for (var ci = 0; ci < CATS.length; ci++) {
+    var el = $("s1_pick_" + ci), rec = M2.sounds[CATS[ci][0]];
+    if (el) el.textContent = rec ? "✓ " + rec.name : "";
+  }
+}
+function aiPickSounds() {
+  var rng = S.rngFrom("m2s1:" + M2.seed), ci;
+  for (ci = 0; ci < CATS.length; ci++) pickSound(ci, Math.floor(rng() * 8));
+  $("s1_info").textContent = "Done — I picked one instrument from each family. Tap any “Use this one” to swap it.";
+}
+
+/* ---------------- stage 2 : beat + instrument ---------------- */
+var LANES = [["kick", "KICK"], ["snare", "SNARE"], ["hat", "HAT"], ["clap", "CLAP"], ["tom", "TOM"], ["shaker", "SHAKER"]];
+var LEAD_VOICES = ["keys", "lead", "pluck", "strings", "brass", "pad", "epiano", "flute", "marimba", "koto", "bass"];
+function renderStage2controls() {
+  var g = $("b_genre"), i, h = "";
+  for (i = 0; i < S.GENRES.length; i++) h += '<option value="' + esc(S.GENRES[i]) + '">' + esc(S.GENRES[i].replace(/-/g, " ")) + "</option>";
+  g.innerHTML = h; g.value = M2.beat.genre;
+  var iv = $("b_inst"), ih = "";
+  for (i = 0; i < LEAD_VOICES.length; i++) ih += '<option value="' + LEAD_VOICES[i] + '">' + LEAD_VOICES[i] + "</option>";
+  iv.innerHTML = ih; iv.value = "lead";
+}
+function makeBeat(fromAI) {
+  M2.beat.genre = $("b_genre").value || "hip-hop";
+  M2.beat.bpm = clampN($("b_bpm").value, 60, 180, 100);
+  M2.beat.bars = clampN($("b_bars").value, 1, 16, 8);
+  if (fromAI) M2.beat.bump++;
+  var phrase = "m2beat:" + M2.seed + ":" + M2.beat.bump + ":" + M2.beat.genre;
+  M2.beat.pattern = S.patternFor(phrase, M2.beat.genre, M2.beat.bpm);
+  drawGrid();
+  $("b_seed").textContent = "Seed: " + M2.beat.pattern.seed + " — the same seed always makes this exact beat.";
+  $("b_info").textContent = fromAI ? "Your AI beat is ready — tap squares to change it, then ▶ to hear it." : "Beat ready — tap squares to change it, then ▶ to hear it.";
+}
+function drawGrid() {
+  var pat = M2.beat.pattern; if (!pat) { $("b_grid").innerHTML = '<p class="seqlab">Tap “Make my beat” first.</p>'; return; }
+  var h = '<table style="border-collapse:collapse;font-size:11px" aria-label="Drum step grid">', li, st;
+  for (li = 0; li < LANES.length; li++) {
+    h += '<tr><td style="padding:3px 8px;color:var(--mut,#9a8fc0)">' + LANES[li][1] + "</td>";
+    for (st = 0; st < 16; st++) {
+      var on = pat.steps[LANES[li][0]][st];
+      h += '<td data-lane="' + LANES[li][0] + '" data-step="' + st + '" tabindex="0" role="button" aria-label="' + LANES[li][1] + " step " + (st + 1) + (on ? " on" : " off") + '"' +
+        ' style="width:22px;height:22px;border:1px solid var(--line,#3a2c5c);background:' + (on ? "var(--gold,#d8a92c)" : "#1a1428") + ';cursor:pointer;border-radius:3px"></td>';
+    }
+    h += "</tr>";
+  }
+  $("b_grid").innerHTML = h + "</table>";
+}
+function previewBeat() {
+  if (!M2.beat.pattern) { $("b_info").textContent = "Make a beat first — tap “Make my beat”."; return; }
+  $("b_info").textContent = "Rendering your beat…";
+  var like = { bpm: M2.beat.bpm, genre: M2.beat.genre, seed: M2.beat.pattern.seed, steps: M2.beat.pattern.steps };
+  St.renderBeatBuffer(like, M2.beat.bars).then(function (buf) {
+    M2.buf.beat = buf;
+    $("b_info").textContent = "Playing your beat — " + M2.beat.bpm + " BPM, " + M2.beat.bars + " bars.";
+    play(buf, "AI beat — " + M2.beat.genre, $("b_info"));
+  }).catch(function (e) {
+    $("b_info").textContent = "Couldn't render the beat: " + e.message;
+  });
+}
+
+/* ---------------- stage 3 : lyrics ---------------- */
+function writeLyricsGo() {
+  var theme = ($("l_theme").value || "").trim() || "my song";
+  var rng = S.rngFrom("m2lyrics:" + M2.seed + ":" + theme.toLowerCase());
+  var w = D.writeLyrics(rng, theme);
+  M2.lyrics.theme = w.theme;
+  $("l_text").value = w.lyrics;
+  M2.lyrics.instrumental = $("l_inst").checked;
+  $("l_info").textContent = "I wrote verses and a chorus about “" + w.theme + "”. Change any line you like — the box is yours.";
+}
+function readLyrics() {
+  M2.lyrics.text = $("l_text").value;
+  M2.lyrics.instrumental = $("l_inst").checked;
+  M2.lyrics.theme = ($("l_theme").value || "").trim();
+}
+
+/* ---------------- shared song builder (stages 4–6) ---------------- */
+function songLike(seconds) {
+  readLyrics();
+  var rng = S.rngFrom("m2song:" + M2.seed);
+  var chords = S.chordsFor(48, M2.beat.genre, rng);
+  var melody = S.melodyFor(chords, M2.beat.bars, rng);
+  return {
+    seed: M2.seed, title: M2.song.title || "My Song", genre: M2.beat.genre,
+    bpm: M2.beat.bpm, bars: M2.beat.bars, keyRoot: 48,
+    pattern: M2.beat.pattern || S.patternFor("m2beat:" + M2.seed + ":0:" + M2.beat.genre, M2.beat.genre, M2.beat.bpm),
+    melody: melody, voiceId: M2.vocal.voiceId, backups: M2.vocal.backups,
+    instrumental: M2.lyrics.instrumental, leadVoice: $("b_inst") ? $("b_inst").value : "lead",
+    lyrics: M2.lyrics.text, seconds: seconds
+  };
+}
+function mixOf() {
+  var out = {}, inputs = $("m_faders").querySelectorAll("input[data-bus]"), i;
+  for (i = 0; i < inputs.length; i++) out[inputs[i].getAttribute("data-bus")] = clampN(inputs[i].value, 0, 100, 90) / 100;
+  return out;
+}
+
+/* ---------------- stage 4 : singing ---------------- */
+function renderStage4() {
+  var h = "", i, v;
+  for (i = 0; i < S.CREATED_VOICES.length; i++) {
+    v = S.CREATED_VOICES[i];
+    h += '<label class="vcard' + (v.id === M2.vocal.voiceId ? " sel" : "") + '" data-voice="' + esc(v.id) + '">' +
+      '<input type="radio" name="m2voice" value="' + esc(v.id) + '"' + (v.id === M2.vocal.voiceId ? " checked" : "") + ' style="width:auto;display:inline-block"> ' +
+      "<b>" + esc(v.name) + "</b><small>" + esc(v.desc) + " · synthesized voice</small></label>";
+  }
+  $("v_voices").innerHTML = h;
+  var bh = "";
+  for (i = 0; i < S.BACKUP_TYPES.length; i++) {
+    var b = S.BACKUP_TYPES[i];
+    bh += '<label class="seqlab" style="margin-right:.9rem"><input type="checkbox" data-backup="' + esc(b.id) + '" style="width:auto;display:inline-block"> ' + esc(b.name) + "</label>";
+  }
+  $("v_backups").innerHTML = bh;
+  $("v_voices").addEventListener("click", tap(function (e) {
+    var card = e.target.closest ? e.target.closest("[data-voice]") : null;
+    if (!card) return;
+    M2.vocal.voiceId = card.getAttribute("data-voice");
+    var cards = $("v_voices").querySelectorAll(".vcard"), j;
+    for (j = 0; j < cards.length; j++) cards[j].classList.toggle("sel", cards[j].getAttribute("data-voice") === M2.vocal.voiceId);
+  }));
+  $("v_backups").addEventListener("change", tap(function () {
+    var boxes = $("v_backups").querySelectorAll("input[data-backup]"), out = [], j;
+    for (j = 0; j < boxes.length; j++) if (boxes[j].checked) out.push(boxes[j].getAttribute("data-backup"));
+    M2.vocal.backups = out;
+  }));
+}
+function aiPickVoice() {
+  var rng = S.rngFrom("m2v:" + M2.seed);
+  M2.vocal.voiceId = S.CREATED_VOICES[Math.floor(rng() * S.CREATED_VOICES.length)].id;
+  var cards = $("v_voices").querySelectorAll(".vcard"), j;
+  for (j = 0; j < cards.length; j++) {
+    var on = cards[j].getAttribute("data-voice") === M2.vocal.voiceId;
+    cards[j].classList.toggle("sel", on);
+    var r = cards[j].querySelector("input"); if (r) r.checked = on;
+  }
+  var v = voiceById(M2.vocal.voiceId);
+  $("v_info").textContent = "I picked “" + v.name + "” for you — " + v.desc + ". Tap ▶ to hear it sing.";
+}
+function previewVocal() {
+  readLyrics();
+  if (M2.lyrics.instrumental && !$("l_text").value) { $("v_info").textContent = "You picked “instrumental” on Step 3, so there's no vocal line — untick it there if you want singing."; }
+  $("v_info").textContent = "Rendering your vocal line…";
+  var like = songLike(Math.min(60, M2.beat.bars * 4 * 60 / M2.beat.bpm));
+  St.renderSongBuffer(like, mixOfSafe()).then(function (buf) {
+    $("v_info").textContent = "Playing — “" + voiceById(M2.vocal.voiceId).name + "” singing over your beat.";
+    play(buf, "Vocal preview — " + voiceById(M2.vocal.voiceId).name, $("v_info"));
+  }).catch(function (e) { $("v_info").textContent = "Couldn't render the vocal: " + e.message; });
+}
+function mixOfSafe() { try { return mixOf(); } catch (e) { return M2.mix; } }
+/* own voice: record or upload, in-browser only */
+var _rec = null, _recChunks = [], _recStream = null, _recTimer = null;
+function recVoice() {
+  var info = $("v_info"), btn = $("v_rec");
+  if (_rec) { try { _rec.stop(); } catch (e) {} return; }
+  if (!$("v_consent").checked) { info.textContent = "Please tick the consent box first — it says your voice stays on this device."; return; }
+  var g = (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) ? navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices) : null;
+  if (!g || typeof MediaRecorder === "undefined") { info.textContent = "Microphone not available in this browser — you can still use the created voices above."; return; }
+  g({ audio: true }).then(function (stream) {
+    _recStream = stream; _recChunks = [];
+    _rec = new MediaRecorder(stream);
+    _rec.ondataavailable = function (e) { if (e.data && e.data.size) _recChunks.push(e.data); };
+    _rec.onstop = function () {
+      try { _recStream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {}
+      _rec = null; btn.textContent = "🔴 Record my voice"; clearTimeout(_recTimer);
+      var blob = new Blob(_recChunks, { type: (_rec && _rec.mimeType) || "audio/webm" });
+      if (blob.size > 10 * 1024 * 1024) { info.textContent = "That recording is over 10 MB — try a shorter one."; return; }
+      if (!blob.size) { info.textContent = "Nothing was recorded — try again."; return; }
+      info.textContent = "Decoding your voice…";
+      decodeVoiceBlob(blob, info);
+    };
+    _rec.start();
+    btn.textContent = "⏹ Stop recording";
+    info.textContent = "Recording… sing or talk, then tap Stop (stops by itself after 10 seconds).";
+    _recTimer = setTimeout(function () { if (_rec) { try { _rec.stop(); } catch (e) {} } }, 10000);
+  }).catch(function () { info.textContent = "Couldn't reach the microphone — the browser said no. You can still use the created voices above."; });
+}
+function decodeVoiceBlob(blob, info) {
+  var AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) { info.textContent = "This browser can't decode audio — try the created voices above."; return; }
+  blob.arrayBuffer().then(function (ab) {
+    var ac = new AC();
+    ac.decodeAudioData(ab).then(function (buf) {
+      M2.vocal.ownSample = buf;
+      try { ac.close(); } catch (e) {}
+      info.textContent = "Got it — your voice is saved in this browser only. Tap “▶ Preview my voice on the melody”.";
+    }).catch(function () { info.textContent = "Couldn't read that audio file — try recording instead."; });
+  }).catch(function () { info.textContent = "Couldn't read that audio file."; });
+}
+function previewOwnVoice() {
+  var info = $("v_info");
+  if (!M2.vocal.ownSample) { info.textContent = "Record or upload your voice first — then I'll sing the melody with it."; return; }
+  info.textContent = "Rendering your voice on the melody…";
+  var like = songLike(0), seconds = Math.min(90, like.bars * 4 * 60 / like.bpm);
+  S.renderOwnVoice(like.melody, M2.vocal.ownSample, seconds).then(function (buf) {
+    M2.buf.own = buf;
+    info.textContent = "Playing — your voice singing your melody.";
+    play(buf, "My voice on the melody", info);
+  }).catch(function (e) { info.textContent = "Couldn't render it: " + e.message; });
+}
+
+/* ---------------- stage 5 : mix / master ---------------- */
+var BUSES = [["drums", "Drums"], ["bass", "Bass"], ["chords", "Chords"], ["lead", "Lead"], ["vocal", "Voice"]];
+function renderStage5() {
+  var h = "", i;
+  for (i = 0; i < BUSES.length; i++) {
+    var v = Math.round((M2.mix[BUSES[i][0]] || 0.9) * 100);
+    h += '<div class="frow"><label for="mfx_' + BUSES[i][0] + '">' + BUSES[i][1] + '</label>' +
+      '<input type="range" id="mfx_' + BUSES[i][0] + '" data-bus="' + BUSES[i][0] + '" min="0" max="100" value="' + v + '" aria-label="' + BUSES[i][1] + ' volume">' +
+      '<span class="val" id="mval_' + BUSES[i][0] + '">' + v + "</span></div>";
+  }
+  $("m_faders").innerHTML = h;
+  $("m_faders").addEventListener("input", tap(function (e) {
+    var t = e.target;
+    if (t && t.getAttribute && t.getAttribute("data-bus")) {
+      var lab = $("mval_" + t.getAttribute("data-bus"));
+      if (lab) lab.textContent = t.value;
+    }
+  }));
+}
+function balanceMix() {
+  var dflt = { drums: 90, bass: 85, chords: 80, lead: 85, vocal: 95 }, k;
+  for (k in dflt) {
+    var f = $("mfx_" + k); if (f) { f.value = dflt[k]; var lab = $("mval_" + k); if (lab) lab.textContent = dflt[k]; }
+  }
+  $("m_info").textContent = "Done — I set a balanced mix: voice up front, drums and bass strong, everything else sitting nicely. Slide anything and ▶ again.";
+}
+function previewMix() {
+  $("m_info").textContent = "Rendering your full mix…";
+  var like = songLike(0);
+  St.renderSongBuffer(like, mixOf()).then(function (buf) {
+    M2.buf.full = buf;
+    $("m_info").textContent = "Playing your full mix — " + like.bars + " bars at " + like.bpm + " BPM.";
+    play(buf, "Full mix preview", $("m_info"));
+  }).catch(function (e) { $("m_info").textContent = "Couldn't render the mix: " + e.message; });
+}
+
+/* ---------------- stage 6 : finish ---------------- */
+function stampKey() { return "jah-maker2-stamp"; }
+function nextStamp() { var n = 1; try { n = parseInt(localStorage.getItem(stampKey()) || "1", 10) || 1; } catch (e) {} return n; }
+function renderFinishStamp() {
+  var el = $("f_stamp");
+  if (M2.song.id) el.innerHTML = "Stamped: <b>" + esc(M2.song.id) + "</b> — made on this device.";
+  else el.textContent = "Your stamp will appear here (next: JAH-MYSONG-" + pad6(nextStamp()) + ").";
+}
+function stampSong() {
+  M2.song.title = ($("f_title").value || "").trim() || "My Song";
+  var n = nextStamp();
+  M2.song.id = "JAH-MYSONG-" + pad6(n);
+  try { localStorage.setItem(stampKey(), String(n + 1)); } catch (e) {}
+  renderFinishStamp();
+  $("f_info").textContent = "Stamped! “" + M2.song.title + "” is now " + M2.song.id + " — made on this device.";
+  return M2.song.id;
+}
+function ensureFull() {
+  if (M2.buf.full) return Promise.resolve(M2.buf.full);
+  var like = songLike(0);
+  return St.renderSongBuffer(like, mixOfSafe()).then(function (buf) { M2.buf.full = buf; return buf; });
+}
+function finishSong() {
+  if (!M2.song.id) stampSong();
+  var n = St.myProjects.push({
+    kind: "mysong", id: M2.song.id, title: M2.song.title, seed: M2.seed,
+    genre: M2.beat.genre, bpm: M2.beat.bpm, bars: M2.beat.bars,
+    voiceId: M2.vocal.voiceId, mix: mixOfSafe(),
+    lyrics: $("l_text").value, instrumental: $("l_inst").checked,
+    madeOn: "this device", created: new Date().toISOString()
+  });
+  $("f_info").textContent = "Finished! “" + M2.song.title + "” (" + M2.song.id + ") is saved in My Songs on this device — you have " + n + " song" + (n === 1 ? "" : "s") + " there.";
+}
+/* --- tiny stored-zip writer (no compression) + crc32, for the CD disc image --- */
+function crc32(u8) {
+  if (!crc32.t) { var t = [], c, n, k; for (n = 0; n < 256; n++) { c = n; for (k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1); t[n] = c >>> 0; } crc32.t = t; }
+  var crc = 0xFFFFFFFF, i;
+  for (i = 0; i < u8.length; i++) crc = crc32.t[(crc ^ u8[i]) & 255] ^ (crc >>> 8);
+  return (crc ^ 0xFFFFFFFF) >>> 0;
+}
+function u16le(n) { return [n & 255, (n >> 8) & 255]; }
+function u32le(n) { return [n & 255, (n >> 8) & 255, (n >> 16) & 255, (n >> 24) & 255]; }
+function zipStore(files) {
+  var parts = [], central = [], offset = 0, i, f;
+  for (i = 0; i < files.length; i++) {
+    f = files[i];
+    var nameB = new TextEncoder().encode(f.name), crc = crc32(f.data), len = f.data.length;
+    var lh = [0x50, 0x4b, 0x03, 0x04].concat(u16le(20), u16le(0), u16le(0), u16le(0), u16le(0), u32le(crc), u32le(len), u32le(len), u16le(nameB.length), u16le(0));
+    parts.push(new Uint8Array(lh)); parts.push(nameB); parts.push(f.data);
+    central.push({ head: [0x50, 0x4b, 0x01, 0x02].concat(u16le(20), u16le(20), u16le(0), u16le(0), u16le(0), u16le(0), u16le(0), u32le(crc), u32le(len), u32le(len), u16le(nameB.length), u16le(0), u16le(0), u16le(0), u16le(0), u32le(0), u32le(offset)), name: nameB });
+    offset += lh.length + nameB.length + len;
+  }
+  var cdStart = offset, cdSize = 0;
+  for (i = 0; i < central.length; i++) {
+    var rec = new Uint8Array(central[i].head.concat(Array.prototype.slice.call(central[i].name)));
+    parts.push(rec); cdSize += rec.length;
+  }
+  parts.push(new Uint8Array([0x50, 0x4b, 0x05, 0x06].concat(u16le(0), u16le(0), u16le(files.length), u16le(files.length), u32le(cdSize), u32le(cdStart), u16le(0))));
+  return new Blob(parts, { type: "application/zip" });
+}
+function cueSheet() {
+  var title = M2.song.title || "My Song";
+  return 'FILE "' + (M2.song.id || "mysong") + '.wav" WAVE\n' +
+    "  TRACK 01 AUDIO\n" +
+    '    TITLE "' + title.replace(/"/g, "") + '"\n' +
+    '    PERFORMER "Made with Signature Music Studio"\n' +
+    "    INDEX 01 00:00:00\n";
+}
+
+/* ---------------- wiring ---------------- */
+function wire() {
+  $("s1_ai").onclick = tap(aiPickSounds);
+  $("b_make").onclick = tap(function () { makeBeat(false); });
+  $("b_ai").onclick = tap(function () { makeBeat(true); });
+  $("b_preview").onclick = tap(previewBeat);
+  $("b_grid").addEventListener("click", tap(function (e) {
+    var td = e.target.closest ? e.target.closest("[data-lane]") : null;
+    if (!td || !M2.beat.pattern) return;
+    var lane = td.getAttribute("data-lane"), st = +td.getAttribute("data-step");
+    M2.beat.pattern.steps[lane][st] = M2.beat.pattern.steps[lane][st] ? 0 : 1;
+    drawGrid();
+  }));
+  $("b_grid").addEventListener("keydown", tap(function (e) {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    var td = e.target.closest ? e.target.closest("[data-lane]") : null;
+    if (!td || !M2.beat.pattern) return;
+    if (e.preventDefault) e.preventDefault();
+    var lane = td.getAttribute("data-lane"), st = +td.getAttribute("data-step");
+    M2.beat.pattern.steps[lane][st] = M2.beat.pattern.steps[lane][st] ? 0 : 1;
+    drawGrid();
+  }));
+  $("l_ai").onclick = tap(writeLyricsGo);
+  $("l_inst").addEventListener("change", tap(function () { M2.lyrics.instrumental = $("l_inst").checked; }));
+  $("v_preview").onclick = tap(previewVocal);
+  $("v_ai").onclick = tap(aiPickVoice);
+  $("v_rec").onclick = tap(recVoice);
+  $("v_up").addEventListener("change", tap(function () {
+    var f = $("v_up").files && $("v_up").files[0];
+    if (!f) return;
+    if (f.size > 10 * 1024 * 1024) { $("v_info").textContent = "That file is over 10 MB — pick a shorter one."; return; }
+    $("v_info").textContent = "Decoding your voice…";
+    decodeVoiceBlob(f, $("v_info"));
+  }));
+  $("v_own_preview").onclick = tap(previewOwnVoice);
+  $("m_preview").onclick = tap(previewMix);
+  $("m_ai").onclick = tap(balanceMix);
+  $("f_stampbtn").onclick = tap(stampSong);
+  $("f_play").onclick = tap(function () {
+    $("f_info").textContent = "Rendering your finished song…";
+    ensureFull().then(function (buf) {
+      $("f_info").textContent = "Playing “" + (M2.song.title || "My Song") + "”" + (M2.song.id ? " (" + M2.song.id + ")" : "") + ".";
+      play(buf, M2.song.title || "My finished song", $("f_info"));
+    }).catch(function (e) { $("f_info").textContent = "Couldn't render it: " + e.message; });
+  });
+  $("f_wav").onclick = tap(function () {
+    if (!M2.song.id) stampSong();
+    $("f_info").textContent = "Rendering your .wav…";
+    ensureFull().then(function (buf) {
+      St.download(St.wavBlob(buf), M2.song.id + ".wav");
+      $("f_info").textContent = "Downloaded " + M2.song.id + ".wav — your song, best quality.";
+    }).catch(function (e) { $("f_info").textContent = "Couldn't render it: " + e.message; });
+  });
+  $("f_mp3").onclick = tap(function () {
+    if (!M2.song.id) stampSong();
+    $("f_info").textContent = "Rendering your .mp3…";
+    ensureFull().then(function (buf) {
+      return St.mp3Blob(buf).then(function (blob) {
+        St.download(blob, M2.song.id + ".mp3");
+        $("f_info").textContent = "Downloaded " + M2.song.id + ".mp3.";
+      });
+    }).catch(function (e) { $("f_info").textContent = e.message; });
+  });
+  $("f_save").onclick = tap(finishSong);
+  $("f_cd").onclick = tap(function () {
+    if (!M2.song.id) stampSong();
+    var box = $("f_cdbox"), open = box.style.display === "none";
+    box.style.display = open ? "block" : "none";
+    $("f_cd").textContent = open ? "Hide CD steps" : "Show CD steps";
+    if (open) $("f_cue").value = cueSheet();
+  });
+  $("f_cuedl").onclick = tap(function () {
+    if (!M2.song.id) stampSong();
+    St.download(new Blob([cueSheet()], { type: "text/plain" }), M2.song.id + ".cue");
+    $("f_info").textContent = "Downloaded your cue sheet.";
+  });
+  $("f_pkgdl").onclick = tap(function () {
+    if (!M2.song.id) stampSong();
+    $("f_info").textContent = "Building your disc image…";
+    ensureFull().then(function (buf) {
+      var wav = St.wavBlob(buf);
+      return wav.arrayBuffer().then(function (ab) {
+        var files = [
+          { name: M2.song.id + ".wav", data: new Uint8Array(ab) },
+          { name: M2.song.id + ".cue", data: new TextEncoder().encode(cueSheet()) }
+        ];
+        St.download(zipStore(files), M2.song.id + "-disc-image.zip");
+        $("f_info").textContent = "Downloaded your disc image (.zip) — song .wav + cue sheet inside. Take it to your CD burner program.";
+      });
+    }).catch(function (e) { $("f_info").textContent = "Couldn't build it: " + e.message; });
+  });
+  $("backbtn").onclick = tap(function () { if (M2.stage > 1) go(M2.stage - 1); });
+  $("nextbtn").onclick = tap(function () { if (M2.stage < 6) go(M2.stage + 1); });
+  var dots = $("dots").querySelectorAll("li"), i;
+  for (i = 0; i < dots.length; i++) (function (d) {
+    d.addEventListener("click", tap(function () {
+      var s = +d.getAttribute("data-s");
+      if (s <= M2.maxStage) go(s);
+      else if (hostApi && hostApi.say) hostApi.say("Finish the earlier steps first — or tap Next to walk through them in order.");
+    }));
+  })(dots[i]);
+}
+
+/* ---------------- boot ---------------- */
+function boot() {
+  if (!S || !D) {
+    $("hostbox").innerHTML = '<p class="honest">The studio engine could not load. Check your connection and reload the page.</p>';
+    return;
+  }
+  try { St.jahNav("jahnet"); } catch (e) {}
+  try { St.jahNav("jahnet2"); } catch (e) {}
+  try { St.nav("maker2.html"); } catch (e) {}
+  M2.seed = (S.hashSeed("maker2:" + Date.now()) % 1000000) + 1;
+  renderStage1();
+  renderStage2controls();
+  renderStage4();
+  renderStage5();
+  wire();
+  try {
+    hostApi = St.host($("hostbox"), { greeting: NARR[0], onAsk: askHost, actions: [{ label: "🤖 AI: do this stage for me", fn: aiForStage }] }) || null;
+  } catch (e) { hostApi = null; }
+  var q = 1;
+  try { q = parseInt(new URLSearchParams(location.search).get("stage"), 10); } catch (e) {}
+  go((q >= 1 && q <= 6) ? q : 1);
+}
+
+/* test hooks (harmless in the browser) */
+window.__m2 = {
+  state: M2, go: go, mix: mixOf, mixSafe: mixOfSafe, songLike: songLike,
+  pickSound: pickSound, makeBeat: makeBeat, drawGrid: drawGrid, previewBeat: previewBeat,
+  writeLyricsGo: writeLyricsGo, readLyrics: readLyrics,
+  aiPickSounds: aiPickSounds, aiPickVoice: aiPickVoice, balanceMix: balanceMix,
+  previewVocal: previewVocal, previewMix: previewMix, previewOwnVoice: previewOwnVoice, recVoice: recVoice,
+  stampSong: stampSong, finishSong: finishSong, ensureFull: ensureFull,
+  cueSheet: cueSheet, zipStore: zipStore, crc32: crc32,
+  askHost: askHost, boot: boot, NARR: NARR
+};
+
+if (document.readyState === "complete" || document.readyState === "interactive") boot();
+else document.addEventListener("DOMContentLoaded", boot);
+})();
+</script>
+</body>
+</html>

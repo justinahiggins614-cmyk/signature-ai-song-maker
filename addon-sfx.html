@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>✨ Add-on: Sound Effects — Signature Music Studio</title>
+<meta name="description" content="Add studio sound effects to any Signature song — echo, reverb, warmth and more. Kid-simple.">
+<link rel="canonical" href="https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/addon-sfx.html">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/studio-theme.css">
+<script>try{if(localStorage.getItem("jah-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+</head>
+<body>
+<nav class="jahnet"><div class="wrap" id="jahnet"></div></nav>
+<div id="studionav"></div>
+<header class="hero"><div class="wrap">
+<h1>✨ Add-on: Sound Effects</h1>
+<p class="tag">Dress your song up with studio magic — echo, big halls, tape warmth and more.</p>
+</div></header>
+<main class="wrap">
+
+<section class="sec" id="sec-song">
+<h2>1 · Get your song in here</h2>
+<p class="seqlab" id="songstatus" role="status">No song yet — pick one below.</p>
+<div class="grid">
+  <div class="card">
+    <h3>🎵 My Songs</h3>
+    <p>Songs you saved on this device.</p>
+    <button class="btn" id="btn-mylist">Show my songs</button>
+    <div id="mylist"></div>
+  </div>
+  <div class="card">
+    <h3>📀 From the archive</h3>
+    <p>Type a song ID, like <b>JAH-SONG-0000001</b>.</p>
+    <p><input id="in-archiveid" placeholder="JAH-SONG-0000001" size="20">
+    <button class="btn" id="btn-archive">Pull it in</button></p>
+  </div>
+  <div class="card">
+    <h3>📁 Drop your own file</h3>
+    <p>Your file never leaves this device. Max 10&nbsp;MB.</p>
+    <p><input type="file" id="in-dropfile" accept="audio/*"></p>
+  </div>
+</div>
+<p class="honest">Dropped files are decoded right here in your browser — they never leave your device.</p>
+</section>
+
+<section class="sec" id="sec-fx">
+<h2>2 · Pick your effects</h2>
+<p>Turn each one on or off, and slide the knob for how much. They run in order, top to bottom.</p>
+<div id="fxlist"></div>
+<p class="seqlab">Your chain (first → last): <span id="chainorder">—</span></p>
+<p>
+<button class="btn" id="btn-preview">▶ Preview add-on</button>
+<button class="btn ghost" id="btn-stop">⏹ Stop</button>
+<button class="btn" id="btn-wav">⬇ .wav</button>
+<button class="btn" id="btn-mp3">⬇ .mp3</button>
+</p>
+<p class="seqlab" id="status" role="status">Ready.</p>
+</section>
+
+<section class="sec" id="sec-ai">
+<h2>3 · Your AI studio buddy</h2>
+<p>Stuck? Let the AI host set it up and finish it for you.</p>
+<div id="aibox"></div>
+</section>
+
+</main>
+<footer><div class="wrap"><p class="seqlab">Signature Music Studio · every effect here is the studio's own real FX engine.</p></div></footer>
+
+<script src="assets/synth.js"></script>
+<script src="assets/engine.js"></script>
+<script src="assets/lyrics.js"></script>
+<script src="assets/lame.min.js"></script>
+<script src="assets/studio-core.js"></script>
+<script>
+(function () {
+"use strict";
+var $ = function (id) { return document.getElementById(id); };
+function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+function status(t) { var e = $("status"); if (e) e.textContent = t; }
+
+/* ================= Studio core bridge =================
+   Uses the real SigStudio when it exists (assets/studio-core.js);
+   otherwise an honest local fallback wired to the real shipped
+   engine (SigSynth / SigData) and the real archive index. */
+function makeBridge() {
+  if (window.SigStudio) return window.SigStudio;
+  var S = window.SigSynth || {}, D = window.SigData || {};
+  function fetchT(url, ms) {
+    return new Promise(function (res, rej) {
+      var done = false;
+      var to = setTimeout(function () { if (!done) { done = true; rej(new Error("timeout")); } }, ms || 25000);
+      fetch(url).then(function (r) {
+        if (done) return; done = true; clearTimeout(to);
+        if (!r.ok) rej(new Error("HTTP " + r.status)); else res(r);
+      }, function (e) { if (!done) { done = true; clearTimeout(to); rej(e); } });
+    });
+  }
+  function gunzip(url) {
+    return fetchT(url).then(function (r) { return r.arrayBuffer(); })
+      .then(function (ab) { return new Response(new Blob([ab]).stream().pipeThrough(new DecompressionStream("gzip"))).text(); });
+  }
+  var idxCache = null;
+  function loadIdx() {
+    if (idxCache) return Promise.resolve(idxCache);
+    return gunzip("data/index/index.json.gz").then(function (t) {
+      idxCache = t.split("\n").filter(Boolean).map(JSON.parse);
+      return idxCache;
+    });
+  }
+  function findRecord(id) {
+    id = String(id || "").trim().toUpperCase();
+    if (!id) return Promise.resolve(null);
+    return loadIdx().then(function (rows) {
+      var row = null, i;
+      for (i = 0; i < rows.length; i++) if (String(rows[i][0]).toUpperCase() === id) row = rows[i];
+      if (!row) return null;
+      return gunzip("data/records/" + row[3]).then(function (t) {
+        var ls = t.split("\n"), j;
+        for (j = 0; j < ls.length; j++) {
+          if (!ls[j]) continue;
+          var r = JSON.parse(ls[j]);
+          if (r.id === id) return r;
+        }
+        return null;
+      });
+    }, function () { return null; });
+  }
+  function host(el, opts) {
+    opts = opts || {};
+    var acts = opts.actions || [];
+    var h = '<div class="aibox"><p class="aimsg"><b>AI host:</b> ' + esc(opts.greeting || "Hi! I'm here to help.") + "</p>" +
+      '<p class="aiacts">' + acts.map(function (a, i) { return '<button class="btn ghost" data-aact="' + i + '">' + esc(a.label) + "</button>"; }).join(" ") + "</p>" +
+      '<p><input id="aiq" placeholder="Ask me anything…" size="30"> <button class="btn" id="aisend">Ask</button></p>' +
+      '<div class="aichat" id="aichat"></div></div>';
+    el.innerHTML = h;
+    function say(q, a) {
+      var c = el.querySelector("#aichat");
+      if (c) c.innerHTML += '<p class="aimsg"><b>You:</b> ' + esc(q) + '</p><p class="aimsg"><b>AI host:</b> ' + esc(a) + "</p>";
+    }
+    var btns = el.querySelectorAll("[data-aact]"), i;
+    function wire(b) {
+      b.onclick = function () {
+        SC.unlock();
+        try { acts[+b.getAttribute("data-aact")].run(); } catch (e) { say("button", "Hmm, that hiccuped: " + e.message); }
+      };
+    }
+    for (i = 0; i < btns.length; i++) wire(btns[i]);
+    el.querySelector("#aisend").onclick = function () {
+      SC.unlock();
+      var q = el.querySelector("#aiq").value;
+      var a = opts.onAsk ? opts.onAsk(q) : "Try one of the buttons above — I'll handle the rest.";
+      say(q, a);
+    };
+  }
+  return {
+    jahNav: function (id) { var e = document.getElementById(id); if (e) e.innerHTML = '<a href="index.html">🎵 Music Studio</a> · <a href="songs.html">Songs</a> · <a href="studio-setup.html">🔌 Studio Setup</a>'; },
+    nav: function () { var e = document.getElementById("studionav"); if (e) e.innerHTML = '<div class="wrap"><a class="btn ghost" href="index.html">Song Makers</a> <a class="btn ghost" href="addon-sfx.html">✨ Sound Effects</a> <a class="btn ghost" href="addon-backup.html">🎤 Backup Singers</a> <a class="btn ghost" href="addon-chorus.html">🎵 Chorus</a> <a class="btn ghost" href="studio-setup.html">🔌 Studio Setup</a></div>'; },
+    unlock: function () { try { if (S.unlockAudio) S.unlockAudio(); } catch (e) {} },
+    renderSongBuffer: function (song, seconds) {
+      if (S.renderSong) return S.renderSong(song, seconds || 60, null);
+      return Promise.reject(new Error("song engine is not loaded"));
+    },
+    renderBeatBuffer: function () { return Promise.reject(new Error("beat render is not wired on this page")); },
+    wavBlob: function (buf) { return S.bufferToWav(buf); },
+    mp3Blob: function () { return Promise.reject(new Error("MP3 encoder is not built into this studio yet — the .wav plays everywhere, use that.")); },
+    download: function (blob, name) {
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob); a.download = name;
+      document.body.appendChild(a); a.click();
+      setTimeout(function () { try { URL.revokeObjectURL(a.href); } catch (e) {} a.remove(); }, 4000);
+    },
+    findRecord: findRecord,
+    indexRows: loadIdx,
+    myProjects: {
+      list: function () {
+        try { return Promise.resolve(JSON.parse(localStorage.getItem("sigstudio_projects") || "[]")); }
+        catch (e) { return Promise.resolve([]); }
+      }
+    },
+    host: host
+  };
+}
+var SC = makeBridge();
+try { SC.jahNav("jahnet"); } catch (e) {}
+try { SC.nav("addon-sfx.html"); } catch (e) {}
+
+/* ================= state + song pull-in ================= */
+var state = { song: null, base: null };
+function songLabel() {
+  if (!state.song) return "No song yet — pick one below.";
+  return "🎵 In the studio: " + state.song.title + " (" + state.song.id + ")";
+}
+function setSong(s) {
+  state.song = s; state.base = null;
+  $("songstatus").textContent = songLabel();
+}
+function pullById(id) {
+  SC.unlock();
+  if (!id) { $("songstatus").textContent = "Type a song ID first."; return; }
+  $("songstatus").textContent = "Looking up " + id + "…";
+  SC.findRecord(id).then(function (r) {
+    if (!r) { $("songstatus").textContent = "Couldn't find " + id + " — check the ID and try again."; return; }
+    setSong(r);
+    $("songstatus").textContent = songLabel() + " — ready for effects.";
+  });
+}
+$("btn-archive").onclick = function () { SC.unlock(); pullById($("in-archiveid").value); };
+$("btn-mylist").onclick = function () {
+  SC.unlock();
+  SC.myProjects.list().then(function (list) {
+    var box = $("mylist");
+    if (!list.length) { box.innerHTML = "<p class=\"seqlab\">No saved songs on this device yet.</p>"; return; }
+    box.innerHTML = list.map(function (p, i) {
+      return '<p><button class="btn ghost" data-mp="' + i + '">Use</button> ' + esc(p.title) + ' <span class="seqlab">' + esc(p.id) + "</span></p>";
+    }).join("");
+    var bs = box.querySelectorAll("[data-mp]"), i;
+    function wire(b) {
+      b.onclick = function () {
+        SC.unlock();
+        var p = list[+b.getAttribute("data-mp")];
+        if (p && p.id && p.id.indexOf("JAH-") === 0) pullById(p.id);
+        else if (p) setSong({ id: p.id || "local", title: p.title || "My song", genre: "pop", tempo: 100 });
+      };
+    }
+    for (i = 0; i < bs.length; i++) wire(bs[i]);
+  });
+};
+$("in-dropfile").addEventListener("change", function () {
+  SC.unlock();
+  var f = $("in-dropfile").files && $("in-dropfile").files[0];
+  if (!f) return;
+  if (f.size > 10 * 1024 * 1024) { $("songstatus").textContent = "That file is over 10 MB — pick a smaller one."; return; }
+  $("songstatus").textContent = "Reading your file…";
+  var AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) { $("songstatus").textContent = "This browser can't decode audio."; return; }
+  var reader = new FileReader();
+  reader.onload = function () {
+    var ac = new AC();
+    ac.decodeAudioData(reader.result, function (buf) {
+      state.song = { id: "dropped", title: f.name.replace(/\.[^.]+$/, ""), genre: "pop", tempo: 120 };
+      state.base = buf;
+      $("songstatus").textContent = "🎵 In the studio: " + state.song.title + " (your file — ready for effects).";
+    }, function () { $("songstatus").textContent = "Couldn't read that file — try a .wav or .mp3."; });
+  };
+  reader.readAsArrayBuffer(f);
+});
+(function deepLink() {
+  try {
+    var q = new URLSearchParams(window.location.search).get("songid");
+    if (q) pullById(q);
+  } catch (e) {}
+})();
+
+/* ================= effects ================= */
+var KID = {
+  normalize: "Volume — evens the loudness out to a safe level",
+  glue: "Glue — gently squishes the mix so everything sticks together",
+  limiter: "Louder — raises the ceiling so it sounds big and radio-ready",
+  tape: "Tape warmth — cozy old-tape sound, soft on the ears",
+  vinyl: "Vinyl — crackle like a record player",
+  stage: "Big hall — like singing in a huge concert hall",
+  room: "Small room — like singing in a cozy room",
+  delay: "Echo — repeats the sound like a canyon",
+  chorus: "Shimmer — wide and sparkly",
+  phaser: "Whoosh — sweeping jet-plane swoosh",
+  distort: "Drive — crunchy amp growl",
+  bitcrush: "Pixel sound — lo-fi video-game grit",
+  eqbright: "Sparkle — airy brightness on top",
+  eqwarm: "Warmth — cozy body, tames harsh sounds",
+  wide: "Super wide — stretches the sound left and right",
+  radio: "Radio voice — thin old-radio sound"
+};
+var order = [];
+function fxDefs() { return (window.SigSynth && window.SigSynth.FX_DEFS) || []; }
+function paintFX() {
+  var defs = fxDefs(), box = $("fxlist");
+  if (!defs.length) { box.innerHTML = '<p class="honest">The FX engine did not load — reload the page.</p>'; return; }
+  if (!order.length) order = defs.map(function (d) { return d.id; });
+  var h = "", i, d, kid;
+  for (i = 0; i < order.length; i++) {
+    d = null;
+    var j;
+    for (j = 0; j < defs.length; j++) if (defs[j].id === order[i]) d = defs[j];
+    if (!d) continue;
+    kid = KID[d.id] || d.desc || d.name;
+    h += '<div class="card"><p><label><input type="checkbox" id="fx-on-' + d.id + '"> <b>' + esc(d.name) + "</b></label> " +
+      '<button class="btn ghost" data-fxup="' + d.id + '" title="move up">↑</button>' +
+      '<button class="btn ghost" data-fxdn="' + d.id + '" title="move down">↓</button></p>' +
+      "<p>" + esc(kid) + "</p>" +
+      '<p><label>How much <input type="range" id="fx-amt-' + d.id + '" min="0" max="100" value="60"></label></p></div>';
+  }
+  box.innerHTML = h;
+  var ups = box.querySelectorAll("[data-fxup]"), dns = box.querySelectorAll("[data-fxdn]"), k;
+  function move(b, dir) {
+    b.onclick = function () {
+      SC.unlock();
+      var id = b.getAttribute(dir > 0 ? "data-fxdn" : "data-fxup"), ix = order.indexOf(id), jx = ix + dir;
+      if (ix < 0 || jx < 0 || jx >= order.length) return;
+      var t = order[ix]; order[ix] = order[jx]; order[jx] = t;
+      paintFX(); refreshChain();
+    };
+  }
+  for (k = 0; k < ups.length; k++) move(ups[k], -1);
+  for (k = 0; k < dns.length; k++) move(dns[k], 1);
+  box.addEventListener("change", refreshChain);
+  refreshChain();
+}
+function fxList() {
+  var defs = fxDefs(), out = [], i;
+  for (i = 0; i < order.length; i++) {
+    var c = $("fx-on-" + order[i]);
+    if (c && c.checked) out.push({ id: order[i], amount: ($("fx-amt-" + order[i]).value / 100) });
+  }
+  return out;
+}
+function refreshChain() {
+  var names = [], defs = fxDefs(), i, j;
+  for (i = 0; i < order.length; i++) {
+    var c = $("fx-on-" + order[i]);
+    if (c && c.checked) {
+      for (j = 0; j < defs.length; j++) if (defs[j].id === order[i]) names.push(defs[j].name);
+    }
+  }
+  $("chainorder").textContent = names.length ? names.join(" → ") : "—";
+}
+function ensureBase(done) {
+  if (state.base) { done(null); return; }
+  if (!state.song) { status("Pick a song first — step 1 up top."); done(new Error("no song")); return; }
+  status("Cooking your song… (takes a moment)");
+  SC.renderSongBuffer(state.song, 60).then(function (b) {
+    state.base = b; status("Song ready. Now pick effects and preview.");
+    done(null);
+  }, function (e) { status("Could not cook the song here: " + e.message); done(e); });
+}
+function withFX(done) {
+  ensureBase(function (err) {
+    if (err) { done(err); return; }
+    var fx = fxList();
+    if (!fx.length) { status("Turn on at least one effect first."); done(new Error("no fx")); return; }
+    status("Adding effects…");
+    window.SigSynth.applyFXChain(state.base, fx).then(function (b) { done(null, b); },
+      function (e) { status("The FX engine hiccuped: " + e.message); done(e); });
+  });
+}
+function play(buf) {
+  SC.unlock();
+  try {
+    if (window.SigSynth.stopLive) window.SigSynth.stopLive("sfx");
+    window.SigSynth.playBuffer(buf, "sfx");
+    status("Playing — with your effects on.");
+  } catch (e) { status("Couldn't play here: " + e.message); }
+}
+$("btn-preview").onclick = function () { SC.unlock(); withFX(function (e, b) { if (!e) play(b); }); };
+$("btn-stop").onclick = function () { SC.unlock(); try { window.SigSynth.stopLive("sfx"); } catch (e) {} status("Stopped."); };
+$("btn-wav").onclick = function () {
+  SC.unlock();
+  withFX(function (e, b) {
+    if (e) return;
+    status("Making your .wav…");
+    try {
+      var blob = SC.wavBlob(b);
+      SC.download(blob, "sfx-" + (state.song ? state.song.id : "song") + ".wav");
+      status("Downloaded! Check your downloads folder.");
+    } catch (err) { status("Couldn't make the .wav: " + err.message); }
+  });
+};
+$("btn-mp3").onclick = function () {
+  SC.unlock();
+  withFX(function (e, b) {
+    if (e) return;
+    status("Making your .mp3…");
+    SC.mp3Blob(b).then(function (blob) {
+      SC.download(blob, "sfx-" + (state.song ? state.song.id : "song") + ".mp3");
+      status("Downloaded! Check your downloads folder.");
+    }, function (err) { status("MP3 didn't work: " + err.message); });
+  });
+};
+
+/* ================= AI host ================= */
+function aiDoIt() {
+  var mood = (state.song && state.song.mood) || "";
+  var pick = mood === "bright" ? ["eqbright", "room", "glue", "normalize"] : ["room", "glue", "tape", "normalize"];
+  var i, id, c, amt = { eqbright: 70, room: 60, glue: 70, normalize: 100, tape: 65 };
+  for (i = 0; i < order.length; i++) {
+    id = order[i]; c = $("fx-on-" + id);
+    if (c) { c.checked = pick.indexOf(id) >= 0; $("fx-amt-" + id).value = amt[id] || 60; }
+  }
+  refreshChain();
+  withFX(function (e, b) { if (!e) play(b); });
+  return "Done — I set " + pick.length + " effects that suit a " + (mood || "regular") + " song, and I'm playing it for you now.";
+}
+SC.host($("aibox"), {
+  greeting: "Hi! I'm your FX buddy. Pull in a song, or just tell me — and I'll set the effects for you.",
+  onAsk: function (q) {
+    q = String(q || "").toLowerCase();
+    if (/echo|canyon/.test(q)) return "Echo is the 'delay' effect — turn it on and slide the knob. Try 50 for a little, 80 for a lot.";
+    if (/big|hall|loud/.test(q)) return "For a BIG sound: Big hall + Louder (limiter) + Glue. I'll set it if you tap 'AI: do it for me'.";
+    if (/warm|cozy|tape/.test(q)) return "Tape warmth + Warmth (EQ) = cozy. Turn those two on.";
+    if (/radio|phone/.test(q)) return "The 'Radio voice' effect makes it sound like an old radio.";
+    return "Pick effects in step 2, or tap 'AI: do it for me' and I'll choose for your song.";
+  },
+  actions: [
+    { label: "AI: do it for me", run: function () { say2(aiDoIt()); } },
+    { label: "AI: finish it", run: function () { say2(aiDoIt()); $("btn-wav").click(); } }
+  ]
+});
+function say2(t) { var c = $("aibox").querySelector("#aichat"); if (c) c.innerHTML += '<p class="aimsg"><b>AI host:</b> ' + esc(t) + "</p>"; }
+
+paintFX();
+})();
+</script>
+</body>
+</html>

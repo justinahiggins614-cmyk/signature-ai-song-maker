@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Song Maker — Option 3: Full Workstation | Signature Music Studio</title>
+<meta name="description" content="Song Maker Option 3: the full workstation — 5 track lanes, mixer, sound library, AI arranger, WAV export. All synthesis is Web Audio in your browser.">
+<link rel="canonical" href="https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/maker3.html">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/studio-theme.css">
+<style>
+/* ---- maker3 local styles (workstation) ---- */
+#studionav{background:#0b0a10;border-bottom:1px solid #2e2a3d;padding:.45rem 0}
+#studionav .wrap{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center}
+#studionav a{color:#e8dcc0;text-decoration:none;padding:.3rem .7rem;border:1px solid #3a3350;border-radius:8px;font-size:.92rem}
+#studionav a.here{border-color:var(--gold);color:var(--gold);box-shadow:0 0 10px rgba(245,197,66,.35)}
+.lane{margin-bottom:1rem}
+.lanehead{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.6rem}
+.lanehead .tname{font-weight:bold;font-size:1.08rem;min-width:8.5rem}
+.tbtn{border:1px solid #4a4266;background:#1a1724;color:#e8dcc0;border-radius:6px;padding:.28rem .6rem;cursor:pointer;font-size:.9rem}
+.tbtn.on-m{background:#7a1f1f;border-color:#c33;color:#fff}
+.tbtn.on-s{background:#1f5c1f;border-color:#3c3;color:#fff}
+.lanehead select,.lanehead input[type=range]{background:#14121b;color:#e8dcc0;border:1px solid #3a3350;border-radius:6px;padding:.25rem .4rem}
+.grid16{display:grid;grid-template-columns:64px repeat(16,minmax(0,1fr));gap:3px;align-items:center;margin-top:.35rem}
+.grid16 .llab{font-size:.8rem;color:#b9aede;text-align:right;padding-right:4px}
+.stepcell{height:24px;border:1px solid #3a3350;border-radius:4px;background:#14121b;cursor:pointer;padding:0}
+.stepcell.on{background:linear-gradient(180deg,#f7cd5a,#b98a1e);box-shadow:0 0 8px rgba(245,197,66,.55);border-color:#f7cd5a}
+.stepcell.beat4{border-left:2px solid rgba(245,197,66,.5)}
+.barblocks{display:flex;gap:.6rem;margin-top:.35rem}
+.barblock{flex:1;min-height:64px;border:1px solid #3a3350;border-radius:8px;background:#14121b;padding:.4rem;cursor:pointer;position:relative}
+.barblock.off{opacity:.32}
+.barblock .btag{font-size:.78rem;color:#b9aede;margin-bottom:.25rem}
+.barnote{display:inline-block;background:linear-gradient(180deg,#8f7bff,#5a4bc7);border-radius:3px;margin:1px;padding:1px 5px;font-size:.72rem;color:#fff}
+.barnote.b{background:linear-gradient(180deg,#5ac8f7,#1e7ab9)}
+.barnote.c{background:linear-gradient(180deg,#7bf79a,#1eb95a)}
+.mixrow{display:flex;gap:1.1rem;flex-wrap:wrap;align-items:flex-end}
+.chan{text-align:center;min-width:110px}
+.chan label{display:block;font-size:.85rem;margin-bottom:.25rem}
+.chan input[type=range]{width:110px}
+.chan .fval{font-size:.8rem;color:#b9aede}
+#vucanvas{width:100%;height:26px;background:#0a0910;border:1px solid #3a3350;border-radius:6px;display:block;margin-top:.4rem}
+.librow{display:flex;gap:.5rem;align-items:center;padding:.4rem .2rem;border-bottom:1px solid #221e30}
+.librow .lname{flex:1}
+.librow .lcat{font-size:.78rem;color:#b9aede}
+#ailog{background:#0a0910;border:1px solid #2e2a3d;border-radius:8px;padding:.6rem;max-height:220px;overflow:auto;margin:.5rem 0}
+#ailog .am{color:#8f7bff;margin:.3rem 0}
+#ailog .au{color:#e8dcc0;margin:.3rem 0}
+#ailog .as{color:#9a8f6a;font-size:.82rem;margin:.3rem 0}
+.projrow{display:flex;gap:.5rem;align-items:center;padding:.3rem 0;border-bottom:1px solid #221e30}
+.projrow .pname{flex:1}
+.transport{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
+#pos{font-family:monospace;font-size:1.05rem;color:var(--gold);min-width:11rem}
+.hintline{font-size:.85rem;color:#b9aede}
+input.txt,select.txt{background:#14121b;color:#e8dcc0;border:1px solid #3a3350;border-radius:6px;padding:.4rem .6rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}.grid16{grid-template-columns:44px repeat(16,minmax(0,1fr))}.lanehead .tname{min-width:6.5rem}}
+</style>
+</head>
+<body>
+<nav class="jahnet" aria-label="JAH Network Global Ecosystem"><div class="wrap" id="jahnet"></div></nav>
+<div id="studionav"><div class="wrap" id="studionavinner"></div></div>
+<header class="hero"><div class="wrap">
+  <h1>SONG MAKER &mdash; OPTION 3</h1>
+  <p class="sub">The full workstation &mdash; 5 track lanes, mixer, sound library, AI arranger, export. Everything is synthesized live in your browser with Web Audio. Nothing is uploaded anywhere.</p>
+</div></header>
+<main class="wrap">
+
+<section class="sec" id="sectransport">
+  <h2>&#127911; Transport &amp; Song</h2>
+  <p><label for="aidesc"><b>Describe your song:</b></label><br>
+  <input class="txt" id="aidesc" type="text" size="46" value="my first workstation song" aria-label="Song description">
+  <button class="btn" id="btnarrange" type="button">&#129302; AI: Arrange for me</button>
+  <button class="btn ghost" id="btnfinish" type="button">&#129302; Finish my song</button></p>
+  <p class="hintline">Seed: <b id="seedline">m3:my first workstation song</b> &mdash; same description + same tweaks = same music, every time. Deep link: <code>?arrange=your words here</code></p>
+  <div class="transport">
+    <button class="btn big" id="btnplay" type="button">&#9654; Play all</button>
+    <button class="btn ghost" id="btnstop" type="button">&#9632; Stop</button>
+    <span id="pos" aria-live="polite">Bar &ndash; &middot; Beat &ndash;</span>
+    <label class="hintline" for="mastervol">Master</label>
+    <input type="range" id="mastervol" min="0" max="100" value="90" aria-label="Master volume">
+  </div>
+  <canvas id="vucanvas" width="900" height="26" aria-label="Master level meter"></canvas>
+  <p class="hintline">Tweak the music, then play: <label>BPM <input class="txt" id="ed-bpm" type="number" min="60" max="180" value="100" style="width:4.5rem"></label>
+  <label>Style <select class="txt" id="ed-genre"></select></label>
+  <label>Key <select class="txt" id="ed-key"></select></label></p>
+</section>
+
+<section class="sec" id="sectracks">
+  <h2>&#127909; Track lanes</h2>
+  <p class="hintline">M = mute, S = solo. Drums: tap steps on/off. Pitched tracks: tap a bar block to switch that bar off/on. The little &#9654; previews one track.</p>
+  <div id="lanes"></div>
+</section>
+
+<section class="sec" id="secmixer">
+  <h2>&#127908; Mixer</h2>
+  <div class="mixrow" id="mixer"></div>
+  <p class="hintline">Faders set each track&rsquo;s level, knobs set left/right pan. Changes apply to play and to the WAV export.</p>
+</section>
+
+<div class="grid2">
+<section class="sec" id="seclib">
+  <h2>&#128366; Sound library</h2>
+  <p><input class="txt" id="libq" type="text" size="24" placeholder="search sounds, e.g. kick" aria-label="Search sounds">
+  <button class="btn" id="libgo" type="button">Search</button>
+  <label class="hintline" for="seltrack">Use on track:</label>
+  <select class="txt" id="seltrack">
+    <option value="drums">&#129345; Drums</option>
+    <option value="bass">&#127928; Bass</option>
+    <option value="chords">&#127929; Chords</option>
+    <option value="lead" selected>&#127889; Lead</option>
+    <option value="vocal">&#127908; Vocal</option>
+  </select></p>
+  <div id="libres"></div>
+  <p class="hintline">Real archive sounds (JAH-SOUND records), generated deterministically &mdash; the same record, every visit.</p>
+</section>
+
+<section class="sec" id="secai">
+  <h2>&#129302; AI host</h2>
+  <div id="aihost"></div>
+  <h3>AI choices (all editable above)</h3>
+  <p class="hintline" id="aichoices"></p>
+</section>
+</div>
+
+<section class="sec" id="secexport">
+  <h2>&#128190; Export &amp; projects</h2>
+  <p>
+    <button class="btn" id="btnexpwav" type="button">&#11015; Download .wav (full mix)</button>
+    <button class="btn ghost" id="btnexpmp3" type="button">&#11015; Download .mp3</button>
+    <button class="btn ghost" id="btnexpjson" type="button">&#11015; Pattern JSON</button>
+  </p>
+  <p><input class="txt" id="projname" type="text" size="28" placeholder="project name" aria-label="Project name">
+  <button class="btn" id="btnsave" type="button">&#128190; Save project</button></p>
+  <div id="projlist"></div>
+  <p class="honest" id="status" aria-live="polite">Ready.</p>
+</section>
+
+<p class="honest"><b>Honest notes.</b> All music on this page is synthesized in your browser with Web Audio &mdash; drums, instruments and the four built-in created voices (Nova, Ember, Drift, Stone; all synthesized, no human singers). Nothing is uploaded. MP3 export needs an encoder that browsers don&rsquo;t ship &mdash; the page tells you plainly and offers WAV instead. Every sound, pattern and arrangement is deterministic: same description + same tweaks = same music. All content is original Signature material.</p>
+
+</main>
+<nav class="jahnet" aria-label="JAH Network (footer)" style="border:none;background:none"><div class="wrap" id="jahnet2" style="justify-content:center"></div></nav>
+<script src="assets/synth.js"></script>
+<script src="assets/engine.js"></script>
+<script src="assets/lame.min.js"></script>
+<script src="assets/studio-core.js"></script>
+<script id="m3app">
+/* ============================================================
+   Song Maker Option 3 — full workstation app (ES5-safe).
+   Engines: window.SigSynth (assets/synth.js), window.SigData (assets/engine.js).
+   window.SigStudio contract: assets/studio-core.js — DOES NOT EXIST YET.
+   A shim implementing the exact contract is defined below so this page
+   works standalone; the real studio-core.js, when shipped, wins.
+   ============================================================ */
+(function (W) {
+"use strict";
+var DOC = W.document;
+function $(id) { return DOC.getElementById(id); }
+function el(tag, cls, text) {
+  var e = DOC.createElement(tag);
+  if (cls) e.setAttribute("class", cls);
+  if (text != null) e.textContent = String(text);
+  return e;
+}
+function on(elm, ev, fn) { if (elm && elm.addEventListener) elm.addEventListener(ev, fn); }
+function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+var S = W.SigSynth, D = W.SigData;
+function hasEngine() { return !!(S && D && S.rngFrom && S.patternFor && S.renderBuffer); }
+
+/* ================= SigStudio shim (exact contract) ================= */
+function shimFindVoice(id) {
+  var vs = (S && S.CREATED_VOICES) || [], i;
+  for (i = 0; i < vs.length; i++) if (vs[i].id === id) return vs[i];
+  return vs[0] || null;
+}
+var StudioShim = {
+  CORE: "shim-2026-10-04",
+  jahNav: function (elId) {
+    var box = $(elId); if (!box) return;
+    var links = [
+      ["Studio home", "index.html"], ["Song archive", "songs.html"],
+      ["Signature Math", "https://justinahiggins614-cmyk.github.io/signature-math/"],
+      ["Calculator", "https://justinahiggins614-cmyk.github.io/jah-calculator/"],
+      ["Dictionary", "https://justinahiggins614-cmyk.github.io/jah-dictionary/"],
+      ["JAH Wiki", "https://justinahiggins614-cmyk.github.io/jah-wiki/"],
+      ["Signature Llama", "https://justinahiggins614-cmyk.github.io/signature-llama/"],
+      ["AI Phone Book", "https://justinahiggins614-cmyk.github.io/jah-ai-models/"],
+      ["Patent Catalog", "https://justinahiggins614-cmyk.github.io/cyber-patent-catalog/"],
+      ["Spec Catalog", "https://justinahiggins614-cmyk.github.io/signature-one-archive/"]
+    ];
+    var h = "", i;
+    for (i = 0; i < links.length; i++) h += '<a href="' + links[i][1] + '">' + esc(links[i][0]) + "</a>";
+    box.innerHTML = h;
+  },
+  nav: function (cur) {
+    var box = $("studionavinner"); if (!box) return;
+    var items = [
+      ["\uD83C\uDFE0 Studio home", "index.html", ""],
+      ["\uD83D\uDCBF Song archive", "songs.html", ""],
+      ["\uD83C\uDF9B Maker 1", "maker1.html", "Song Maker Option 1 (coming soon)"],
+      ["\uD83C\uDF9A Maker 2", "maker2.html", "Song Maker Option 2 (coming soon)"],
+      ["\uD83C\uDF9B Maker 3 \u2014 Full workstation", "maker3.html", ""]
+    ];
+    var h = "", i;
+    for (i = 0; i < items.length; i++) {
+      var here = (items[i][1] === cur);
+      h += '<a href="' + items[i][1] + '"' + (here ? ' class="here" aria-current="page"' : "") +
+           (items[i][2] ? ' title="' + esc(items[i][2]) + '"' : "") + ">" + esc(items[i][0]) + "</a>";
+    }
+    box.innerHTML = h;
+  },
+  unlock: function () { try { if (S && S.unlockAudio) S.unlockAudio(); } catch (e) {} },
+  renderSongBuffer: function (songLike, mix) { return renderArr(songLike && songLike.tracks ? songLike : buildArrangement((songLike && songLike.title) || "song"), mix); },
+  renderBeatBuffer: function (beatLike, bars) {
+    bars = bars || 4;
+    var pat = beatLike.pattern, bpm = beatLike.bpm || pat.bpm || 100;
+    var step = 60 / bpm / 4, dur = bars * 16 * step + 0.5;
+    return S.renderBuffer(dur, function (c, dest, t0) {
+      var mx = S.makeBuses(c, dest, { drums: 1 });
+      S.scheduleBeat(c, dest, t0, pat, bars, 1, mx);
+    });
+  },
+  wavBlob: function (buf) { return S.bufferToWav(buf); },
+  mp3Blob: function (buf) {
+    return Promise.reject(new Error("MP3 export is not available in this browser — browsers do not ship an MP3 encoder. Download the WAV instead: it is the same full mix, uncompressed."));
+  },
+  download: function (blob, filename) {
+    var a = DOC.createElement("a");
+    a.href = W.URL.createObjectURL(blob);
+    a.setAttribute("download", filename || "download.bin");
+    DOC.body.appendChild(a); a.click();
+    setTimeout(function () { try { W.URL.revokeObjectURL(a.href); a.remove(); } catch (e) {} }, 4000);
+  },
+  findRecord: function (id) {
+    if (!id || !D || !D.gen) return null;
+    var m = /^JAH-(SONG|SOUND|GEAR)-(\d{1,7})$/.exec(String(id));
+    if (!m) return null;
+    try { return D.gen(m[1].toLowerCase(), parseInt(m[2], 10)); } catch (e) { return null; }
+  },
+  myProjects: {
+    KEY: "jah-m3-projects",
+    _read: function () {
+      try { return JSON.parse(W.localStorage.getItem(this.KEY) || "[]"); } catch (e) { return []; }
+    },
+    _write: function (list) { W.localStorage.setItem(this.KEY, JSON.stringify(list)); },
+    push: function (name, arr) {
+      var list = this._read();
+      list = list.filter(function (p) { return p.name !== name; });
+      list.unshift({ name: name, saved: new Date().toISOString(), arr: arr });
+      this._write(list); return list.length;
+    },
+    list: function () { return this._read(); },
+    get: function (name) {
+      var list = this._read(), i;
+      for (i = 0; i < list.length; i++) if (list[i].name === name) return list[i];
+      return null;
+    },
+    remove: function (name) { this._write(this._read().filter(function (p) { return p.name !== name; })); }
+  },
+  host: function (box, opts) {
+    opts = opts || {};
+    box.innerHTML = "";
+    var log = el("div"); log.setAttribute("id", "ailog");
+    var line = el("p", "am", opts.greeting || "Hi — I'm the studio helper.");
+    log.appendChild(line); box.appendChild(log);
+    var row = el("p"); box.appendChild(row);
+    var inp = el("input"); inp.setAttribute("class", "txt"); inp.setAttribute("id", "aiq");
+    inp.setAttribute("type", "text"); inp.setAttribute("size", "30");
+    inp.setAttribute("placeholder", "Ask the studio helper…"); inp.setAttribute("aria-label", "Ask the studio helper");
+    var go = el("button", "btn", "Ask"); go.setAttribute("type", "button");
+    row.appendChild(inp); row.appendChild(DOC.createTextNode(" ")); row.appendChild(go);
+    var acts = el("p"); box.appendChild(acts);
+    (opts.actions || []).forEach(function (a) {
+      var b = el("button", "btn ghost", a.label); b.setAttribute("type", "button");
+      (function (fn) { on(b, "click", function () { say("user", a.label); fn(); }); })(a.fn);
+      acts.appendChild(b); acts.appendChild(DOC.createTextNode(" "));
+    });
+    function say(who, text) {
+      var p = el("p", who === "user" ? "au" : "am", (who === "user" ? "You: " : "Helper: ") + text);
+      log.appendChild(p); log.scrollTop = log.scrollHeight;
+    }
+    function ask() {
+      var q = inp.value; if (!q) return;
+      say("user", q); inp.value = "";
+      var ans = opts.onAsk ? opts.onAsk(q) : "I can arrange, finish, and explain — try the buttons below.";
+      say("ai", ans);
+    }
+    on(go, "click", ask);
+    on(inp, "keydown", function (ev) { if (ev.key === "Enter") ask(); });
+    return { say: say, ask: ask };
+  }
+};
+/* The real studio-core.js, when shipped, wins; the shim only fills the gap. */
+var Studio = W.SigStudio || StudioShim;
+if (!W.SigStudio) W.SigStudio = Studio;
+/* Adapter: if the real studio-core.js is present, bend it to the workstation
+   contract without breaking its own pages. Workstation renders stay local —
+   the core's renderSongBuffer expects SigData song records, not ARR objects. */
+(function adaptStudio() {
+  if (Studio === StudioShim || !Studio) return;
+  var coreRender = Studio.renderSongBuffer;
+  Studio.renderSongBuffer = function (songLike, mix) {
+    if (songLike && songLike.tracks) return renderArr(songLike, mix);
+    if (typeof coreRender === "function") return coreRender.call(Studio, songLike, mix);
+    return renderArr(buildArrangement((songLike && songLike.title) || "song"), mix);
+  };
+  Studio.renderBeatBuffer = StudioShim.renderBeatBuffer;
+  if (!Studio.myProjects) {
+    var PKEY = "jah-m3-projects";
+    Studio.myProjects = {
+      KEY: PKEY,
+      _read: function () { try { return JSON.parse(W.localStorage.getItem(PKEY) || "[]"); } catch (e) { return []; } },
+      _write: function (list) { W.localStorage.setItem(PKEY, JSON.stringify(list)); },
+      push: function (name, arr) {
+        var list = this._read().filter(function (p) { return p.name !== name; });
+        list.unshift({ name: name, saved: new Date().toISOString(), arr: arr });
+        this._write(list); return list.length;
+      },
+      list: function () { return this._read(); },
+      get: function (name) {
+        var list = this._read(), i;
+        for (i = 0; i < list.length; i++) if (list[i].name === name) return list[i];
+        return null;
+      },
+      remove: function (name) { this._write(this._read().filter(function (p) { return p.name !== name; })); }
+    };
+  }
+})();
+function paintStudioNav() {
+  /* shim injects itself and returns undefined; the real core returns HTML */
+  var r = Studio.nav("maker3.html");
+  if (typeof r === "string") { var sn = $("studionavinner"); if (sn) sn.innerHTML = r; }
+}
+
+/* ================= arrangement model (pure, deterministic) ================= */
+var TRACKS = ["drums", "bass", "chords", "lead", "vocal"];
+var TRACK_LABEL = { drums: "\uD83E\uDD41 Drums", bass: "\uD83C\uDFB8 Bass", chords: "\uD83C\uDFB9 Chords", lead: "\uD83C\uDFBA Lead", vocal: "\uD83C\uDFA4 Vocal" };
+var TRACK_PLAIN = { drums: "Drums", bass: "Bass", chords: "Chords", lead: "Lead", vocal: "Vocal" };
+var DRUM_LANES = ["kick", "snare", "hat", "clap", "tom", "shaker"];
+var DRUM_NAMES = { kick: "Kick", snare: "Snare", hat: "Hat", clap: "Clap", tom: "Tom", shaker: "Shaker" };
+var TRACK_VOICES = {
+  drums: [], bass: ["sub", "bass"], chords: ["keys", "epiano", "pad", "strings"],
+  lead: ["lead", "pluck", "flute", "brass", "marimba"], vocal: ["nova", "ember", "drift", "stone"]
+};
+var VOICE_NAMES = { sub: "Deep sub", bass: "Saw bass", keys: "Grand keys", epiano: "Rhodes", pad: "Analog pad", strings: "Strings", lead: "Saw lead", pluck: "Pluck", flute: "Flute", brass: "Brass", marimba: "Marimba", nova: "Nova (bright)", ember: "Ember (warm)", drift: "Drift (soft)", stone: "Stone (deep)" };
+var FULL_SECTIONS = [["Intro", 4, 0.6], ["Verse", 8, 0.9], ["Chorus", 8, 1], ["Verse", 8, 0.95], ["Chorus", 8, 1], ["Bridge", 4, 0.85], ["Chorus", 8, 1], ["Outro", 4, 0.7]];
+var DRUM_VOICE_SET = { kick: 1, snare: 1, hat: 1, clap: 1, tom: 1, shaker: 1 };
+
+function fullSections() {
+  return FULL_SECTIONS.map(function (x) { return { name: x[0], bars: x[1], vol: x[2] }; });
+}
+function totalBars(arr) {
+  var n = 0, i; for (i = 0; i < arr.sections.length; i++) n += arr.sections[i].bars; return n;
+}
+function leadBarsFor(chords, seed, nonce) {
+  var mel = S.melodyFor(chords, 4, S.rngFrom("m3lead:" + seed + ":" + nonce));
+  var bars = [], b, i;
+  for (b = 0; b < 4; b++) {
+    var bar = [];
+    for (i = 0; i < 4; i++) { var n = mel[b * 4 + i]; bar.push(n.midi > 0 ? { midi: n.midi, len: n.len } : null); }
+    bars.push(bar);
+  }
+  return bars;
+}
+/* Build one track's material. Pure — no DOM, no audio. */
+function buildTrack(name, seed, genre, bpm, chords, nonce) {
+  var t = { mute: false, solo: false, vol: 1, pan: 0, src: "ai", varn: nonce, barOn: [1, 1, 1, 1] }, b, ch;
+  if (name === "drums") {
+    var p = S.patternFor("m3:" + seed + ":drums:" + nonce, genre, bpm);
+    t.steps = p.steps; t.accentLane = null;
+  } else if (name === "bass") {
+    t.voice = "sub"; t.bars = [];
+    for (b = 0; b < 4; b++) { ch = chords[b % chords.length]; t.bars.push([ch[0] - 12, ch[0] - 12, ch[2] - 12, ch[0] - 12]); }
+  } else if (name === "chords") {
+    t.voice = "pad"; t.bars = [];
+    for (b = 0; b < 4; b++) { ch = chords[b % chords.length]; t.bars.push([ch[0], ch[1], ch[2]]); }
+  } else if (name === "lead") {
+    t.voice = "lead"; t.bars = leadBarsFor(chords, seed, nonce);
+  } else if (name === "vocal") {
+    t.voice = "nova"; t.oct = -12;
+  }
+  return t;
+}
+/* The AI arranger: description -> full deterministic arrangement. */
+function buildArrangement(desc) {
+  var seed = String(desc == null ? "" : desc).replace(/^\s+|\s+$/g, "") || "my song";
+  var rng = S.rngFrom("m3:" + seed);
+  var genre = S.pick(rng, S.GENRES), mood = S.pick(rng, S.MOODS);
+  var bpm = 80 + Math.floor(rng() * 50);
+  var keyRoot = 48 + Math.floor(rng() * 12);
+  var chords = S.chordsFor(keyRoot, genre, rng);
+  var arr = {
+    seed: seed, desc: seed, genre: genre, mood: mood, bpm: bpm,
+    keyRoot: keyRoot, keyName: S.noteName(keyRoot).replace(/[0-9-]/g, ""),
+    sections: fullSections(), tracks: {},
+    aiNote: "Arranged by the built-in helper from your description."
+  };
+  var i;
+  for (i = 0; i < TRACKS.length; i++) arr.tracks[TRACKS[i]] = buildTrack(TRACKS[i], seed, genre, bpm, chords, 0);
+  return arr;
+}
+/* AI: write one part again (variation #n). Keeps mixer settings + voice choice. */
+function reRollTrack(arr, name) {
+  var old = arr.tracks[name];
+  var nonce = (old.varn || 0) + 1;
+  var chords = currentChords(arr);
+  var t = buildTrack(name, arr.seed, arr.genre, arr.bpm, chords, nonce);
+  t.mute = old.mute; t.solo = old.solo; t.vol = old.vol; t.pan = old.pan;
+  if (old.voice && TRACK_VOICES[name].indexOf(old.voice) >= 0) t.voice = old.voice;
+  t.barOn = old.barOn && old.barOn.length === 4 ? old.barOn.slice() : [1, 1, 1, 1];
+  t.src = "ai"; t.varn = nonce;
+  arr.tracks[name] = t;
+  return t;
+}
+function currentChords(arr) { return S.chordsFor(arr.keyRoot, arr.genre, S.rngFrom("m3:" + arr.seed)); }
+function toggleStep(arr, track, lane, step) {
+  var st = arr.tracks[track].steps;
+  st[lane][step] = st[lane][step] ? 0 : 1;
+  arr.tracks[track].src = "you";
+  return st[lane][step];
+}
+function toggleBar(arr, track, barIx) {
+  var b = arr.tracks[track].barOn;
+  b[barIx] = b[barIx] ? 0 : 1;
+  arr.tracks[track].src = "you";
+  return b[barIx];
+}
+function trackEmpty(name, t) {
+  var i, j;
+  if (name === "drums") {
+    for (i = 0; i < DRUM_LANES.length; i++) for (j = 0; j < 16; j++) if (t.steps[DRUM_LANES[i]][j]) return false;
+    return true;
+  }
+  if (name === "vocal") return !t.voice;
+  for (i = 0; i < 4; i++) if (t.barOn[i]) {
+    if (name === "lead") { for (j = 0; j < 4; j++) if (t.bars[i][j]) return false; }
+    else return false;
+  }
+  return true;
+}
+/* Mute/solo/volume -> per-track gain+pan. Pure. */
+function mixOf(arr) {
+  var anySolo = false, i;
+  for (i = 0; i < TRACKS.length; i++) if (arr.tracks[TRACKS[i]].solo) anySolo = true;
+  var m = { master: 1 };
+  for (i = 0; i < TRACKS.length; i++) {
+    var n = TRACKS[i], t = arr.tracks[n];
+    var aud = t.mute ? 0 : (anySolo ? (t.solo ? 1 : 0) : 1);
+    m[n] = { v: Math.round(aud * t.vol * 1000) / 1000, pan: t.pan || 0 };
+  }
+  return m;
+}
+
+/* ================= offline multitrack render (the honest engine) ================= */
+function renderArr(arr, mix) {
+  var bpm = arr.bpm, step = 60 / bpm / 4, bsec = 4 * 60 / bpm;
+  var tb = totalBars(arr), dur = tb * bsec + 2;
+  return S.renderBuffer(dur, function (c, dest, t0) {
+    var ch = {}, i;
+    for (i = 0; i < TRACKS.length; i++) {
+      var n = TRACKS[i], g = c.createGain();
+      g.gain.value = (mix && mix[n] && mix[n].v != null) ? mix[n].v : 1;
+      var pan = (mix && mix[n] && mix[n].pan != null) ? mix[n].pan : 0, out = g;
+      if (c.createStereoPanner) { var sp = c.createStereoPanner(); sp.pan.value = Math.max(-1, Math.min(1, pan)); g.connect(sp); out = sp; }
+      out.connect(dest); ch[n] = g;
+    }
+    var s, b, gb = 0, t = t0;
+    var voice = shimFindVoice(arr.tracks.vocal.voice);
+    for (s = 0; s < arr.sections.length; s++) {
+      var sec = arr.sections[s], sv = (sec.vol != null ? sec.vol : 1);
+      for (b = 0; b < sec.bars; b++, gb++) {
+        var bt = t + b * bsec, bi = gb % 4, k;
+        /* drums */
+        var dst = arr.tracks.drums, st = dst.steps;
+        for (k = 0; k < 16; k++) {
+          var ht = bt + k * step, vv = sv * (dst.accentLane && st[dst.accentLane][k] ? 1.15 : 1);
+          if (st.kick[k]) S.kick(c, ch.drums, ht, vv);
+          if (st.snare[k]) S.snare(c, ch.drums, ht, vv);
+          if (st.hat[k]) S.hat(c, ch.drums, ht, vv * 0.9, k % 4 === 3);
+          if (st.clap[k]) S.clap(c, ch.drums, ht, vv);
+          if (st.tom[k]) S.tom(c, ch.drums, ht, vv, 50);
+          if (st.shaker[k]) S.shaker(c, ch.drums, ht, vv);
+        }
+        /* bass */
+        if (arr.tracks.bass.barOn[bi]) {
+          var bn = arr.tracks.bass.bars[bi];
+          for (k = 0; k < bn.length; k++) if (bn[k] > 0) S.tone(c, ch.bass, bt + k * (60 / bpm), bn[k], (60 / bpm) * 0.92, arr.tracks.bass.voice, 0.9);
+        }
+        /* chords */
+        if (arr.tracks.chords.barOn[bi]) {
+          var cn = arr.tracks.chords.bars[bi];
+          for (k = 0; k < cn.length; k++) if (cn[k] > 0) S.tone(c, ch.chords, bt, cn[k], bsec * 0.95, arr.tracks.chords.voice, 0.5);
+        }
+        /* lead + vocal (vocal sings the lead line an octave down) */
+        if (arr.tracks.lead.barOn[bi]) {
+          var lb = arr.tracks.lead.bars[bi];
+          for (k = 0; k < lb.length; k++) {
+            var cell = lb[k];
+            if (cell && cell.midi > 0) {
+              S.tone(c, ch.lead, bt + k * step, cell.midi, cell.len * step * 0.92, arr.tracks.lead.voice, 0.75);
+              if (voice && arr.tracks.vocal.barOn[bi]) S.singNote(c, ch.vocal, bt + k * step, cell.midi + (arr.tracks.vocal.oct || -12), cell.len * step * 0.92, voice, 0.8);
+            }
+          }
+        }
+      }
+      t += sec.bars * bsec;
+    }
+  });
+}
+
+/* ================= app state ================= */
+var ARR = null;
+var playing = false, playT0 = 0, playDur = 0, rafId = 0;
+var SELTRACK = "lead";
+function status(msg) { var s = $("status"); if (s) s.textContent = msg; }
+function seedLabel() { return "m3:" + ARR.seed + " | " + ARR.genre + " " + ARR.mood + " | " + ARR.bpm + " BPM | key " + ARR.keyName; }
+function syncSeed() { var s = $("seedline"); if (s) s.textContent = seedLabel(); }
+function aiChoices() {
+  var parts = [], i;
+  for (i = 0; i < TRACKS.length; i++) {
+    var n = TRACKS[i], t = ARR.tracks[n];
+    parts.push(TRACK_PLAIN[n] + " " + (t.src === "ai" ? "ai#" + t.varn : "your edit") + (t.mute ? " (muted)" : ""));
+  }
+  var secs = ARR.sections.map(function (x) { return x.name + " " + x.bars; }).join(" \u00B7 ");
+  var box = $("aichoices");
+  if (box) box.innerHTML = "<b>Seed</b> \u201C" + esc(ARR.seed) + "\u201D &mdash; same description + same tweaks = same music.<br>" +
+    "<b>Sections:</b> " + esc(secs) + " (" + totalBars(ARR) + " bars).<br><b>Parts:</b> " + esc(parts.join(" \u00B7 ")) + ".<br>" +
+    "<span class=\u0022hintline\u0022>" + esc(ARR.aiNote || "") + "</span>";
+}
+
+/* ================= track lanes ================= */
+function voiceSelect(name, cur) {
+  var vwrap = el("span");
+  if (name === "drums") { vwrap.appendChild(el("span", "hintline", "Standard kit")); return vwrap; }
+  var sel = DOC.createElement("select");
+  sel.setAttribute("id", "i-" + name);
+  sel.setAttribute("aria-label", TRACK_PLAIN[name] + " sound");
+  var opts = TRACK_VOICES[name], i;
+  for (i = 0; i < opts.length; i++) {
+    var o = DOC.createElement("option");
+    o.setAttribute("value", opts[i]); o.value = opts[i]; o.textContent = VOICE_NAMES[opts[i]] || opts[i];
+    if (opts[i] === cur) o.setAttribute("selected", "selected");
+    sel.appendChild(o);
+  }
+  sel.value = cur;
+  vwrap.appendChild(sel);
+  return vwrap;
+}
+function buildLanes() {
+  var box = $("lanes"); if (!box) return;
+  box.innerHTML = "";
+  var i;
+  for (i = 0; i < TRACKS.length; i++) (function (name) {
+    var t = ARR.tracks[name];
+    var lane = el("div", "lane card"); lane.setAttribute("id", "lane-" + name);
+    var head = el("div", "lanehead"); lane.appendChild(head);
+    head.appendChild(el("span", "tname", TRACK_LABEL[name]));
+    var mb = el("button", "tbtn" + (t.mute ? " on-m" : ""), "M"); mb.setAttribute("id", "m-" + name); mb.setAttribute("type", "button"); mb.setAttribute("title", "Mute"); mb.setAttribute("aria-label", "Mute " + TRACK_PLAIN[name]);
+    var sb = el("button", "tbtn" + (t.solo ? " on-s" : ""), "S"); sb.setAttribute("id", "s-" + name); sb.setAttribute("type", "button"); sb.setAttribute("title", "Solo"); sb.setAttribute("aria-label", "Solo " + TRACK_PLAIN[name]);
+    var vol = DOC.createElement("input"); vol.setAttribute("type", "range"); vol.setAttribute("id", "v-" + name);
+    vol.setAttribute("min", "0"); vol.setAttribute("max", "100"); vol.value = String(Math.round(t.vol * 100));
+    vol.setAttribute("aria-label", TRACK_PLAIN[name] + " volume");
+    var ai = el("button", "btn ghost", "\uD83E\uDD16 AI: write this part"); ai.setAttribute("id", "a-" + name); ai.setAttribute("type", "button");
+    var pv = el("button", "btn ghost", "\u25B6"); pv.setAttribute("id", "p-" + name); pv.setAttribute("type", "button"); pv.setAttribute("title", "Preview this track"); pv.setAttribute("aria-label", "Preview " + TRACK_PLAIN[name]);
+    head.appendChild(mb); head.appendChild(sb); head.appendChild(vol);
+    head.appendChild(voiceSelect(name, t.voice));
+    head.appendChild(ai); head.appendChild(pv);
+    var body = el("div"); body.setAttribute("id", "grid-" + name); lane.appendChild(body);
+    box.appendChild(lane);
+    on(mb, "click", function () { Studio.unlock(); t.mute = !t.mute; mb.setAttribute("class", "tbtn" + (t.mute ? " on-m" : "")); syncMixer(); aiChoices(); });
+    on(sb, "click", function () { Studio.unlock(); t.solo = !t.solo; sb.setAttribute("class", "tbtn" + (t.solo ? " on-s" : "")); syncMixer(); aiChoices(); });
+    on(vol, "input", function () { t.vol = (parseInt(vol.value, 10) || 0) / 100; syncMixer(); });
+    var vsel = head.querySelector("select");
+    if (vsel) on(vsel, "change", function () { t.voice = vsel.value; t.src = "you"; aiChoices(); status(TRACK_PLAIN[name] + " sound: " + (VOICE_NAMES[t.voice] || t.voice)); });
+    on(ai, "click", function () { Studio.unlock(); reRollTrack(ARR, name); refreshLane(name); syncMixer(); aiChoices(); status("AI wrote a new " + TRACK_PLAIN[name] + " part (variation #" + ARR.tracks[name].varn + ")."); });
+    on(pv, "click", function () { previewTrack(name); });
+    renderLaneBody(name);
+  })(TRACKS[i]);
+}
+function refreshLane(name) {
+  var t = ARR.tracks[name];
+  var mb = $("m-" + name), sb = $("s-" + name), vol = $("v-" + name);
+  if (mb) mb.setAttribute("class", "tbtn" + (t.mute ? " on-m" : ""));
+  if (sb) sb.setAttribute("class", "tbtn" + (t.solo ? " on-s" : ""));
+  if (vol) vol.value = String(Math.round(t.vol * 100));
+  var lane = $("lane-" + name);
+  if (lane) { var vsel = lane.querySelector("select"); if (vsel && t.voice) vsel.value = t.voice; }
+  renderLaneBody(name);
+}
+function renderLaneBody(name) {
+  var body = $("grid-" + name); if (!body) return;
+  var t = ARR.tracks[name], i, k;
+  body.innerHTML = "";
+  if (name === "drums") {
+    for (i = 0; i < DRUM_LANES.length; i++) (function (lane, li) {
+      var lab = el("span", "llab", DRUM_NAMES[lane]); body.appendChild(lab);
+      for (k = 0; k < 16; k++) (function (st) {
+        var c = el("button", "stepcell" + (t.steps[lane][st] ? " on" : "") + (st % 4 === 0 ? " beat4" : ""));
+        c.setAttribute("type", "button"); c.setAttribute("data-t", name); c.setAttribute("data-l", lane); c.setAttribute("data-s", String(st));
+        c.setAttribute("aria-label", DRUM_NAMES[lane] + " step " + (st + 1));
+        on(c, "click", function () { Studio.unlock(); var v = toggleStep(ARR, name, lane, st); c.setAttribute("class", "stepcell" + (v ? " on" : "") + (st % 4 === 0 ? " beat4" : "")); aiChoices(); });
+        body.appendChild(c);
+      })(k);
+    })(DRUM_LANES[i], i);
+  } else {
+    var wrap = el("div", "barblocks"); body.appendChild(wrap);
+    for (i = 0; i < 4; i++) (function (bi) {
+      var bb = el("div", "barblock" + (t.barOn[bi] ? "" : " off"));
+      bb.setAttribute("data-t", name); bb.setAttribute("data-b", String(bi));
+      bb.appendChild(el("div", "btag", "Bar " + (bi + 1)));
+      var notes;
+      if (name === "bass" || name === "chords") notes = t.bars[bi];
+      else if (name === "lead") notes = t.bars[bi].filter(function (x) { return x; }).map(function (x) { return x.midi; });
+      else notes = (ARR.tracks.lead.bars[bi].filter(function (x) { return x; }).map(function (x) { return x.midi + (t.oct || -12); }));
+      for (k = 0; k < notes.length; k++) bb.appendChild(el("span", "barnote" + (name === "bass" ? " b" : name === "chords" ? " c" : ""), S.noteName(notes[k])));
+      bb.setAttribute("title", "Tap to switch bar " + (bi + 1) + " " + (t.barOn[bi] ? "off" : "on"));
+      on(bb, "click", function () { Studio.unlock(); var v = toggleBar(ARR, name, bi); bb.setAttribute("class", "barblock" + (v ? "" : " off")); bb.setAttribute("title", "Tap to switch bar " + (bi + 1) + " " + (v ? "off" : "on")); aiChoices(); });
+      wrap.appendChild(bb);
+    })(i);
+  }
+}
+/* ================= mixer ================= */
+function buildMixer() {
+  var box = $("mixer"); if (!box) return;
+  box.innerHTML = "";
+  var i;
+  for (i = 0; i < TRACKS.length; i++) (function (name) {
+    var t = ARR.tracks[name];
+    var ch = el("div", "chan");
+    ch.appendChild(el("label", "", TRACK_LABEL[name]));
+    var f = DOC.createElement("input"); f.setAttribute("type", "range"); f.setAttribute("id", "f-" + name);
+    f.setAttribute("min", "0"); f.setAttribute("max", "100"); f.value = String(Math.round(t.vol * 100));
+    f.setAttribute("aria-label", TRACK_PLAIN[name] + " fader");
+    var fv = el("div", "fval", Math.round(t.vol * 100) + ""); fv.setAttribute("id", "fv-" + name);
+    var pl = el("label", "hintline", "Pan"); pl.setAttribute("for", "pan-" + name);
+    var p = DOC.createElement("input"); p.setAttribute("type", "range"); p.setAttribute("id", "pan-" + name);
+    p.setAttribute("min", "-50"); p.setAttribute("max", "50"); p.value = String(Math.round((t.pan || 0) * 50));
+    p.setAttribute("aria-label", TRACK_PLAIN[name] + " pan");
+    ch.appendChild(f); ch.appendChild(fv); ch.appendChild(pl); ch.appendChild(p);
+    box.appendChild(ch);
+    on(f, "input", function () { t.vol = (parseInt(f.value, 10) || 0) / 100; fv.textContent = f.value; var v = $("v-" + name); if (v) v.value = f.value; });
+    on(p, "input", function () { t.pan = (parseInt(p.value, 10) || 0) / 50; });
+  })(TRACKS[i]);
+}
+function syncMixer() {
+  var i;
+  for (i = 0; i < TRACKS.length; i++) {
+    var name = TRACKS[i], t = ARR.tracks[name];
+    var f = $("f-" + name), fv = $("fv-" + name), p = $("pan-" + name);
+    if (f) f.value = String(Math.round(t.vol * 100));
+    if (fv) fv.textContent = String(Math.round(t.vol * 100));
+    if (p) p.value = String(Math.round((t.pan || 0) * 50));
+  }
+}
+
+/* ================= transport ================= */
+function stopPlay() {
+  playing = false;
+  try { if (S && S.stopLive) S.stopLive("m3"); } catch (e) {}
+  if (rafId) { try { W.cancelAnimationFrame(rafId); } catch (e2) {} rafId = 0; }
+  var pos = $("pos"); if (pos) pos.textContent = "Bar \u2013 \u00B7 Beat \u2013";
+}
+function drawVU() {
+  var cv = $("vucanvas"); if (!cv || !cv.getContext) return;
+  var g = cv.getContext("2d"), lvl = 0;
+  try { lvl = S.meterLevel ? S.meterLevel() : 0; } catch (e) {}
+  g.clearRect(0, 0, cv.width, cv.height);
+  var w = Math.max(2, Math.min(1, lvl) * cv.width);
+  var grad = g.createLinearGradient ? g.createLinearGradient(0, 0, cv.width, 0) : null;
+  g.fillStyle = "#2a2410"; g.fillRect(0, 0, cv.width, cv.height);
+  if (grad) { grad.addColorStop(0, "#3fd97b"); grad.addColorStop(0.7, "#f5c542"); grad.addColorStop(1, "#e05252"); g.fillStyle = grad; }
+  else g.fillStyle = "#f5c542";
+  g.fillRect(0, 0, w, cv.height);
+}
+function tick() {
+  if (!playing) return;
+  var now = 0;
+  try { now = S.ensureCtx().currentTime; } catch (e) {}
+  var el2 = now - playT0, spb = 60 / ARR.bpm, spbar = spb * 4;
+  var bar = Math.floor(el2 / spbar) + 1, beat = Math.floor(el2 / spb) % 4 + 1;
+  var pos = $("pos");
+  if (pos) pos.textContent = el2 >= playDur ? "Done" : "Bar " + bar + " \u00B7 Beat " + beat;
+  drawVU();
+  if (el2 < playDur + 1) { try { rafId = W.requestAnimationFrame(tick); } catch (e2) {} }
+  else stopPlay();
+}
+function playAll() {
+  Studio.unlock();
+  stopPlay();
+  status("Rendering your mix\u2026");
+  var mv = $("mastervol");
+  Studio.renderSongBuffer(ARR, mixOf(ARR)).then(function (buf) {
+    try {
+      var master = (mv ? (parseInt(mv.value, 10) || 90) : 90) / 100;
+      S.playBuffer(buf, "m3");
+      if (S.setMasterVolume) { try { S.setMasterVolume(master); } catch (e) {} }
+      playing = true; playDur = buf.duration;
+      try { playT0 = S.ensureCtx().currentTime; } catch (e2) { playT0 = 0; }
+      status("Playing \u2014 " + totalBars(ARR) + " bars at " + ARR.bpm + " BPM.");
+      tick();
+    } catch (e3) { status("Couldn't play the audio: " + e3.message); }
+  }, function (err) {
+    status("Couldn't render: " + (err && err.message ? err.message : err) + " (sound needs a real browser \u2014 try it on your device).");
+  });
+}
+function previewTrack(name) {
+  Studio.unlock();
+  status("Rendering " + TRACK_PLAIN[name] + " preview\u2026");
+  var mix = { master: 1 }, i;
+  for (i = 0; i < TRACKS.length; i++) mix[TRACKS[i]] = { v: TRACKS[i] === name ? 1 : 0, pan: 0 };
+  var slim = { seed: ARR.seed, desc: ARR.desc, genre: ARR.genre, mood: ARR.mood, bpm: ARR.bpm, keyRoot: ARR.keyRoot, keyName: ARR.keyName, tracks: ARR.tracks, sections: [{ name: "Preview", bars: 8, vol: 1 }] };
+  Studio.renderSongBuffer(slim, mix).then(function (buf) {
+    try { S.playBuffer(buf, "m3"); status("Previewing " + TRACK_PLAIN[name] + "."); }
+    catch (e) { status("Couldn't play the preview: " + e.message); }
+  }, function (err) { status("Couldn't render the preview: " + (err && err.message ? err.message : err) + "."); });
+}
+/* ================= sound library ================= */
+function searchLibrary(q) {
+  q = String(q || "").toLowerCase().replace(/^\s+|\s+$/g, "");
+  var out = [], n;
+  for (n = 1; n <= 240 && out.length < 40; n++) {
+    var r = D.gen("sound", n);
+    if (!q || r.name.toLowerCase().indexOf(q) >= 0 || r.cat.toLowerCase().indexOf(q) >= 0 || r.id.toLowerCase().indexOf(q) >= 0) out.push(r);
+  }
+  return out;
+}
+function previewSound(rec) {
+  Studio.unlock();
+  try {
+    if (DRUM_VOICE_SET[rec.voice]) {
+      var map = { kick: "kick", snare: "snare", hat: "hat", clap: "clap" };
+      S.playDrum(map[rec.voice] || "kick");
+    } else if (rec.voice === "riser" || rec.voice === "impact" || rec.voice === "vinyl") {
+      S.playTone(48, 0.8, "keys");
+    } else {
+      S.playTone(64, 1.4, rec.voice || "keys");
+    }
+  } catch (e) { status("Couldn't preview that sound: " + e.message); }
+}
+function useOnTrack(rec) {
+  var name = SELTRACK, t = ARR.tracks[name];
+  if (name === "drums") {
+    if (!DRUM_VOICE_SET[rec.voice]) { status("\u201C" + rec.name + "\u201D is a " + rec.cat + " sound \u2014 it doesn't fit the Drums track. Try Bass, Chords or Lead."); return; }
+    t.accentLane = rec.voice; t.src = "you"; aiChoices();
+    status("\u201C" + rec.name + "\u201D now accents the " + DRUM_NAMES[rec.voice] + " lane (+15% hit).");
+    return;
+  }
+  if (name === "vocal") { status("The Vocal track uses the four built-in created voices (Nova, Ember, Drift, Stone) \u2014 pick one in the lane above."); return; }
+  if (TRACK_VOICES[name].indexOf(rec.voice) < 0) {
+    status("\u201C" + rec.name + "\u201D (" + rec.voice + ") doesn't fit the " + TRACK_PLAIN[name] + " track \u2014 try a track whose sound list includes it.");
+    return;
+  }
+  t.voice = rec.voice; t.src = "you"; refreshLane(name); aiChoices();
+  status("\u201C" + rec.name + "\u201D is now the " + TRACK_PLAIN[name] + " sound (" + rec.id + ").");
+}
+function renderLib(q) {
+  var box = $("libres"); if (!box) return;
+  box.innerHTML = "";
+  var hits = searchLibrary(q), i;
+  if (!hits.length) { box.appendChild(el("p", "hintline", "No sounds match \u201C" + q + "\u201D \u2014 try \u201Ckick\u201D, \u201Cbass\u201D or \u201Cpad\u201D.")); return; }
+  for (i = 0; i < hits.length; i++) (function (rec) {
+    var row = el("div", "librow");
+    row.appendChild(el("span", "lname", rec.name + " "));
+    var cat = el("span", "lcat", rec.cat + " \u00B7 " + rec.id); row.appendChild(cat);
+    var pv = el("button", "tbtn", "\u25B6"); pv.setAttribute("type", "button"); pv.setAttribute("aria-label", "Preview " + rec.name);
+    var use = el("button", "btn ghost", "Use on track"); use.setAttribute("type", "button");
+    on(pv, "click", function () { previewSound(rec); });
+    on(use, "click", function () { useOnTrack(rec); });
+    row.appendChild(pv); row.appendChild(use);
+    box.appendChild(row);
+  })(hits[i]);
+}
+/* ================= AI host ================= */
+var AITIPS = [
+  "Start with drums + bass, then let the AI write chords and lead over them.",
+  "Choruses hit harder when the verse is quieter \u2014 try muting the lead in the verse.",
+  "A 100 BPM hip-hop groove with a sub bass and a Rhodes chord bed almost always works.",
+  "Give the vocal track a different created voice than you expect \u2014 Stone on a bright song surprises people.",
+  "Tap a few drum steps off in the intro so the full beat lands like a drop."
+];
+var tipIx = 0;
+function aiAnswer(q) {
+  var s = String(q).toLowerCase();
+  if (/arrange/.test(s)) return "Type a one-line description above (like \u201Crainy night drive\u201D) and press \u201CAI: Arrange for me\u201D. I build all 5 tracks, the sections and the mix from your words \u2014 same words, same song, every time.";
+  if (/finish|complete/.test(s)) return "Press \u201CFinish my song\u201D and I'll fill any empty tracks and expand the arrangement to the full intro\u2013verse\u2013chorus\u2013bridge\u2013outro form, keeping your edits.";
+  if (/tip|idea|stuck/.test(s)) { var t = AITIPS[tipIx % AITIPS.length]; tipIx++; return t; }
+  if (/mix|volume|loud/.test(s)) return "Use the mixer faders per track \u2014 drums usually sit at 80\u2013100, bass at 90\u2013100, and the vocal a touch above the lead. Mute/solo are in each lane header.";
+  if (/export|wav|mp3|download/.test(s)) return "Export the full mix as WAV (uncompressed, same as you hear), grab the Pattern JSON to share the arrangement, or save the project to come back later. MP3 needs an encoder browsers don't ship \u2014 that's why the button says so honestly.";
+  if (/voice|sing/.test(s)) return "The Vocal track sings your lead line with one of four built-in created voices \u2014 Nova, Ember, Drift, Stone. All synthesized in your browser, no human singers, nothing uploaded.";
+  return "I'm the built-in studio helper \u2014 I arrange, finish and explain right here in your browser (no cloud, nothing leaves your device). Try \u201Cgive me a tip\u201D, or press \u201CAI: Arrange for me\u201D above.";
+}
+function buildAI() {
+  var box = $("aihost"); if (!box) return;
+  /* actions carry both fn (shim) and run (real studio-core host) */
+  function act(label, fn) { return { label: label, fn: fn, run: function () { fn(); } }; }
+  Studio.host(box, {
+    greeting: "I'm the studio helper. I arrange full songs from a one-line description and finish half-built ones \u2014 all computed in your browser.",
+    actions: [
+      act("\uD83E\uDD16 Arrange for me", doArrange),
+      act("\uD83E\uDD16 Finish my song", doFinish),
+      act("\uD83D\uDCA1 Give me a tip", function () { hostSay(aiAnswer("tip")); })
+    ],
+    onAsk: aiAnswer
+  });
+}
+function hostSay(text) {
+  var hb = $("aihost"), log = null;
+  if (hb && hb.querySelector) log = hb.querySelector("#ailog") || hb.querySelector(".hostlog");
+  if (!log) return;
+  log.appendChild(el("p", "am", "Helper: " + text)); log.scrollTop = log.scrollHeight;
+}
+function doArrange() {
+  Studio.unlock();
+  var desc = $("aidesc") ? $("aidesc").value : "my song";
+  ARR = buildArrangement(desc);
+  buildLanes(); buildMixer(); syncEditors(); syncSeed(); aiChoices();
+  hostSay("Arranged \u201C" + ARR.desc + "\u201D \u2014 " + ARR.genre + ", " + ARR.bpm + " BPM, key " + ARR.keyName + ", " + totalBars(ARR) + " bars. Every part is editable: tap steps, switch bars, change sounds, move faders.");
+  status("Arranged \u201C" + ARR.desc + "\u201D. Press \u25B6 Play all.");
+}
+function doFinish() {
+  Studio.unlock();
+  var done = [], i;
+  for (i = 0; i < TRACKS.length; i++) {
+    var n = TRACKS[i];
+    if (trackEmpty(n, ARR.tracks[n])) { reRollTrack(ARR, n); done.push(TRACK_PLAIN[n]); }
+  }
+  if (totalBars(ARR) < 16 || ARR.sections.length < 3) { ARR.sections = fullSections(); done.push("full arrangement"); }
+  ARR.aiNote = "Finished by the helper: " + (done.length ? done.join(", ") + " completed." : "nothing was missing.");
+  buildLanes(); buildMixer(); syncSeed(); aiChoices();
+  hostSay(done.length ? "Finished your song: " + done.join(", ") + ". Your edits were kept." : "Your song was already complete \u2014 nothing to finish.");
+  status(done.length ? "Finished: " + done.join(", ") + "." : "Song already complete.");
+}
+/* ================= export & projects ================= */
+function safeName() { return "workstation-" + ARR.seed.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40); }
+function exportWav() {
+  Studio.unlock();
+  status("Rendering full mix to WAV\u2026 (this can take a few seconds)");
+  Studio.renderSongBuffer(ARR, mixOf(ARR)).then(function (buf) {
+    try {
+      var blob = Studio.wavBlob(buf);
+      Studio.download(blob, safeName() + ".wav");
+      status("WAV downloaded: " + safeName() + ".wav (" + Math.round(blob.size / 1024) + " KB).");
+    } catch (e) { status("Couldn't build the WAV: " + e.message); }
+  }, function (err) { status("Couldn't render the mix: " + (err && err.message ? err.message : err) + " (sound needs a real browser)."); });
+}
+function exportMp3() {
+  Studio.unlock();
+  status("Rendering full mix\u2026");
+  Studio.renderSongBuffer(ARR, mixOf(ARR)).then(function (buf) {
+    return Studio.mp3Blob(buf);
+  }).then(function (blob) {
+    Studio.download(blob, safeName() + ".mp3"); status("MP3 downloaded.");
+  }, function (err) {
+    status("MP3 export: " + (err && err.message ? err.message : err));
+  });
+}
+function exportJson() {
+  try {
+    var payload = JSON.stringify({ format: "JAH-WORKSTATION/1.0", exported: new Date().toISOString(), arrangement: ARR }, null, 2);
+    Studio.download(new W.Blob([payload], { type: "application/json" }), safeName() + ".json");
+    status("Pattern JSON downloaded \u2014 reload it any time via a saved project.");
+  } catch (e) { status("Couldn't build the JSON: " + e.message); }
+}
+function saveProject() {
+  var name = $("projname") ? $("projname").value.replace(/^\s+|\s+$/g, "") : "";
+  if (!name) name = ARR.desc + " " + new Date().toLocaleDateString();
+  try {
+    Studio.myProjects.push(name, ARR);
+    renderProjects();
+    status("Saved project \u201C" + name + "\u201D.");
+  } catch (e) { status("Couldn't save: " + e.message); }
+}
+function renderProjects() {
+  var box = $("projlist"); if (!box) return;
+  box.innerHTML = "";
+  var list = Studio.myProjects.list(), i;
+  if (!list.length) { box.appendChild(el("p", "hintline", "No saved projects yet.")); return; }
+  for (i = 0; i < list.length; i++) (function (p) {
+    var row = el("div", "projrow");
+    row.appendChild(el("span", "pname", p.name + " "));
+    row.appendChild(el("span", "hintline", (p.saved || "").slice(0, 10) + " "));
+    var load = el("button", "btn ghost", "Load"); load.setAttribute("type", "button");
+    var del = el("button", "tbtn", "Delete"); del.setAttribute("type", "button");
+    on(load, "click", function () {
+      var rec = Studio.myProjects.get(p.name);
+      if (rec && rec.arr) { ARR = rec.arr; if ($("aidesc")) $("aidesc").value = ARR.desc || ""; buildLanes(); buildMixer(); syncEditors(); syncSeed(); aiChoices(); status("Loaded \u201C" + p.name + "\u201D."); }
+    });
+    on(del, "click", function () { Studio.myProjects.remove(p.name); renderProjects(); status("Deleted \u201C" + p.name + "\u201D."); });
+    row.appendChild(load); row.appendChild(del);
+    box.appendChild(row);
+  })(list[i]);
+}
+/* ================= editors ================= */
+function syncEditors() {
+  var b = $("ed-bpm"); if (b) b.value = String(ARR.bpm);
+  var g = $("ed-genre");
+  if (g && !g.options.length) {
+    var i;
+    for (i = 0; i < S.GENRES.length; i++) { var o = DOC.createElement("option"); o.value = S.GENRES[i]; o.textContent = S.GENRES[i]; g.appendChild(o); }
+  }
+  if (g) g.value = ARR.genre;
+  var k = $("ed-key");
+  if (k && !k.options.length) {
+    var names = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"], j;
+    for (j = 0; j < 12; j++) { var o2 = DOC.createElement("option"); o2.value = String(48 + j); o2.textContent = names[j]; k.appendChild(o2); }
+  }
+  if (k) k.value = String(ARR.keyRoot);
+}
+function bindEditors() {
+  on($("ed-bpm"), "change", function () {
+    var v = parseInt($("ed-bpm").value, 10);
+    if (isNaN(v)) v = ARR.bpm;
+    ARR.bpm = Math.max(60, Math.min(180, v)); $("ed-bpm").value = String(ARR.bpm);
+    ARR.aiNote = "BPM changed by you to " + ARR.bpm + " (seed kept: " + ARR.seed + ").";
+    syncSeed(); aiChoices();
+  });
+  on($("ed-genre"), "change", function () {
+    ARR.genre = $("ed-genre").value;
+    var old = ARR.tracks.drums, nonce = (old.varn || 0);
+    var t = buildTrack("drums", ARR.seed, ARR.genre, ARR.bpm, currentChords(ARR), nonce);
+    t.mute = old.mute; t.solo = old.solo; t.vol = old.vol; t.pan = old.pan; t.varn = nonce; t.src = "ai";
+    ARR.tracks.drums = t; refreshLane("drums");
+    ARR.aiNote = "Style changed by you to " + ARR.genre + " \u2014 drums rewritten to match.";
+    syncSeed(); aiChoices(); status("Style: " + ARR.genre + ". Drums rewritten to match.");
+  });
+  on($("ed-key"), "change", function () {
+    ARR.keyRoot = parseInt($("ed-key").value, 10) || 48;
+    ARR.keyName = S.noteName(ARR.keyRoot).replace(/[0-9-]/g, "");
+    ARR.aiNote = "Key changed by you to " + ARR.keyName + " (seed kept).";
+    syncSeed(); aiChoices(); status("Key: " + ARR.keyName + ".");
+  });
+}
+/* ================= boot ================= */
+function boot() {
+  if (!hasEngine()) {
+    status("The studio engines didn't load (assets/synth.js / assets/engine.js). Check your connection and reload.");
+    return;
+  }
+  Studio.jahNav("jahnet"); Studio.jahNav("jahnet2"); paintStudioNav();
+  var desc = "my first workstation song";
+  try {
+    var m = /[?&]arrange=([^&]+)/.exec(W.location.search || "");
+    if (m) desc = decodeURIComponent(m[1].replace(/\+/g, " "));
+  } catch (e) {}
+  if ($("aidesc")) $("aidesc").value = desc;
+  ARR = buildArrangement(desc);
+  buildLanes(); buildMixer(); bindEditors(); syncEditors(); syncSeed(); aiChoices();
+  buildAI();
+  on($("btnarrange"), "click", doArrange);
+  on($("btnfinish"), "click", doFinish);
+  on($("btnplay"), "click", playAll);
+  on($("btnstop"), "click", function () { stopPlay(); status("Stopped."); });
+  on($("libgo"), "click", function () { renderLib($("libq").value); });
+  on($("libq"), "keydown", function (ev) { if (ev.key === "Enter") renderLib($("libq").value); });
+  on($("seltrack"), "change", function () { SELTRACK = $("seltrack").value; });
+  on($("btnexpwav"), "click", exportWav);
+  on($("btnexpmp3"), "click", exportMp3);
+  on($("btnexpjson"), "click", exportJson);
+  on($("btnsave"), "click", saveProject);
+  renderLib(""); renderProjects();
+  status("Ready \u2014 press \u25B6 Play all, or describe a song and press \u201CAI: Arrange for me\u201D.");
+}
+/* test hooks (used by the Node functional harness; harmless in the browser) */
+W.__m3 = {
+  buildArrangement: buildArrangement, buildTrack: buildTrack, reRollTrack: reRollTrack,
+  mixOf: mixOf, toggleStep: toggleStep, toggleBar: toggleBar, trackEmpty: trackEmpty,
+  searchLibrary: searchLibrary, currentChords: currentChords, totalBars: totalBars,
+  getArr: function () { return ARR; }, setArr: function (a) { ARR = a; },
+  Studio: function () { return Studio; }, TRACKS: TRACKS
+};
+if (DOC.readyState === "complete" || DOC.readyState === "interactive") boot();
+else on(DOC, "DOMContentLoaded", boot);
+})(typeof window !== "undefined" ? window : this);
+</script>
+</body>
+</html>
