@@ -5,20 +5,35 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Song Archive — Signature Music Studio</title>
-<meta name="description" content="The Signature Music Studio Song Archive: every finished original song — searchable, filterable by genre, playable in your browser. Marching to one million songs.">
+<meta name="description" content="The Signature Music Studio Song Archive: every finished original song — A–Z list, searchable, playable in your browser. Marching to one million songs.">
 <link rel="canonical" href="https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/songs.html">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Song Archive — Signature Music Studio">
-<meta property="og:description" content="Every finished original Signature song — search, filter by genre, play the demo mix. Marching to one million songs.">
+<meta property="og:description" content="Every finished original Signature song — A–Z list, search, one-tap play. Marching to one million songs.">
 <meta property="og:url" content="https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/songs.html">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Song Archive — Signature Music Studio">
-<meta name="twitter:description" content="Every finished original Signature song — search, filter by genre, play the demo mix.">
+<meta name="twitter:description" content="Every finished original Signature song — A–Z list, search, one-tap play.">
 <link rel="stylesheet" href="assets/style.css">
 <link rel="stylesheet" href="assets/studio-theme.css">
+<style>
+/* page-scoped A–Z archive bits — the site look itself stays as the theme defines */
+.azsec{border:1px solid var(--line,#3a2f5a);border-radius:10px;margin:.45rem 0;background:rgba(255,255,255,.02)}
+.azsec>summary{cursor:pointer;padding:.7rem .9rem;display:flex;justify-content:space-between;align-items:center;list-style:none;font-size:1rem}
+.azsec>summary::-webkit-details-marker{display:none}
+.azletter{font-size:1.35rem;font-weight:700;color:var(--gold,#f5c542);min-width:2.2rem}
+.azcount{font-size:.85rem;opacity:.85}
+.azbody{padding:0 .9rem .9rem}
+.azrow{display:flex;gap:.5rem;align-items:center;padding:.4rem 0;border-top:1px solid rgba(255,255,255,.06)}
+.azrow .azitem{flex:1;min-width:0;text-decoration:none;color:inherit;display:block}
+.azrow .azitem .t{font-weight:600}
+.azrow .azmeta{font-size:.78rem;opacity:.7}
+.azload{opacity:.7;font-size:.9rem}
+.azmore{margin-top:.6rem}
+</style>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
-{"@type":"WebPage","name":"Song Archive — Signature Music Studio","url":"https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/songs.html","description":"Searchable, playable archive of every finished original Signature song.","author":{"@type":"Person","name":"Justin Addam Higgins"},"isPartOf":{"@type":"WebSite","name":"Signature Music Studio","url":"https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/"}},
+{"@type":"WebPage","name":"Song Archive — Signature Music Studio","url":"https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/songs.html","description":"A–Z list of every finished original Signature song — searchable, playable.","author":{"@type":"Person","name":"Justin Addam Higgins"},"isPartOf":{"@type":"WebSite","name":"Signature Music Studio","url":"https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/"}},
 {"@type":"Dataset","name":"Signature Song Archive","description":"Deterministic archive of original Signature songs — marching to one million.","creator":{"@type":"Person","name":"Justin Addam Higgins"},"url":"https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/data/music-catalog.json"}
 ]}
 </script>
@@ -31,7 +46,7 @@
 <div class="kick">SITE 23 OF 27 · THE JAH NETWORK</div>
 <h1>📀 SONG ARCHIVE</h1>
 <div><span class="official">OFFICIAL SIGNATURE SITE — within the Signature/JAH system</span></div>
-<p class="sub">Every song fully made — lyrics, chords, structure, tempo, key — and <b>ready to play</b>: one click renders the demo mix. Marching to one million.</p>
+<p class="sub">Every song fully made — lyrics, chords, structure, tempo, key — and <b>ready to play</b>: tap a song to open it, or hit ▶ to play it right from the list. Marching to one million.</p>
 <p class="counter" id="songcount" data-stamp="2026-10-04"><!-- SONGARCHIVE-STAMP-START -->📀 <b>11,700</b> / 1,000,000 songs<!-- SONGARCHIVE-STAMP-END --> <span class="seqlab">last published count — loading live…</span></p>
 <p><a class="btn ghost" href="./" style="text-decoration:none">← Back to the Studio</a></p>
 <div class="honest">Every sound on this site is synthesized live in your browser with the Web Audio API — no samples, no downloads needed to play. All voices are synthesized; there are no human singers here. All songs are original Signature compositions.</div>
@@ -39,15 +54,19 @@
 
 <div class="wrap" id="main">
 <section class="sec" id="browser" aria-label="Song browser">
+<h2>📚 Every song, A–Z</h2>
+<p class="seqlab">Tap a letter — that letter's songs load only when you open it, so the page stays fast on your phone.</p>
+<div id="azletters"><p class="azload">Loading the letter list…</p></div>
+
+<h2 style="margin-top:1.2rem">🔎 Search the archive</h2>
 <div class="filterbar"><div class="row">
 <div><label>Search songs</label><input type="text" id="aq" placeholder="Search title or ID…" aria-label="Search songs"></div>
 <div><label>Genre</label><select id="agenre" aria-label="Filter songs by genre"><option value="">All genres</option></select></div>
 <div><label>Order</label><select id="aorder" aria-label="Sort songs"><option value="new">Newest first</option><option value="old">Oldest first</option></select></div>
 <div style="flex:0"><label>&nbsp;</label><button class="btn violet" id="arandom" type="button">🎲 Random song</button></div>
 </div></div>
-<div class="az" id="aaz" aria-label="Browse by first letter"></div>
 <p class="seqlab" id="acount" role="status"></p>
-<div class="grid" id="agrid"><div class="card" role="status">Loading the archive…</div></div>
+<div class="grid" id="agrid"></div>
 <div class="row" id="apages" style="margin-top:10px"></div>
 </section>
 
@@ -62,6 +81,38 @@
 <script src="assets/lame.min.js"></script>
 <script src="assets/studio-core.js"></script>
 <script>try { var sn = document.getElementById("studionav"); if (sn && window.SigStudio) sn.innerHTML = SigStudio.nav("songs.html"); } catch (e) {}</script>
+<script>
+/* ==== JAH global audio controller (one per page): play() stops everything
+   first, double-tap never stacks, stop kills everything. Same pattern as the
+   rest of the network. ==== */
+(function(){
+if(window.__JAHREAD)return;
+var R={audios:[],lastTap:0,lastLabel:""};
+R.stopAll=function(){
+ try{if(window.speechSynthesis)window.speechSynthesis.cancel();}catch(e){}
+ try{if(window.responsiveVoice&&window.responsiveVoice.cancel)window.responsiveVoice.cancel();}catch(e){}
+ var i,a;
+ for(i=0;i<R.audios.length;i++){a=R.audios[i];try{a.pause();}catch(e){}try{a.removeAttribute("src");}catch(e){}try{a.load();}catch(e){}}
+ R.audios.length=0;
+ try{if(window.SigSynth&&window.SigSynth.stopAllLive)window.SigSynth.stopAllLive();}catch(e){}
+ var els=document.querySelectorAll("audio");
+ for(i=0;i<els.length;i++){try{els[i].pause();}catch(e){}}
+};
+R.reg=function(a){if(a&&R.audios.indexOf(a)<0)R.audios.push(a);return a;};
+R.playGuard=function(label){
+ var now=Date.now();
+ if(now-R.lastTap<450&&label===R.lastLabel){R.lastTap=0;R.lastLabel="";R.stopAll();return false;}
+ R.lastTap=now;R.lastLabel=String(label||"");
+ R.stopAll();return true;
+};
+try{
+ var NativeAudio=window.Audio;
+ window.Audio=function(src){var a=src===undefined?new NativeAudio():new NativeAudio(src);R.reg(a);return a;};
+ window.Audio.prototype=NativeAudio.prototype;
+}catch(e){}
+window.__JAHREAD=R;
+})();
+</script>
 <script>
 (function () {
   "use strict";
@@ -79,7 +130,7 @@
     ["The Signature Global Newspaper Archive", "signature-newspapers"], ["The Signature AI Mad Scientist Creation Lab", "signature-backend"], ["The Signature Boundless Generator Archive", "signature-boundless-generators"],
     ["The Signature AI Mix Lab", "signature-ai-mixlab"], ["AI Olypics", "signature-ai-olypics"], ["The Signature Computer Chip Maker and Archive", "signature-chip-maker"],
     ["The Signature App Archive", "signature-app-archive"], ["The Signature AI Robot Matcher", "signature-ai-robot-matcher"], ["The Signature Experiment Solver", "signature-experiment-solver"],
-    ["Signature AI Pixel", "signature-ai-image-video-maker"], ["The Signature Mr Fix-It", "signature-fixit"], ["The Signature University", "signature-university"],
+    ["Signature AI Pixel", "signature-ai-image-video-maker"], ["Signature Music Studio", "signature-ai-song-maker"], ["The Signature Mr Fix-It", "signature-fixit"], ["The Signature University", "signature-university"],
     ["The Signature Cyber Mega-Mall", "signature-cyber-mega-mall"], ["The Signature 3D Print Mega Mall", "signature-3d-print"]
   ];
   (function buildNav() {
@@ -88,6 +139,14 @@
     h += '<span class="here">23 Signature Music Studio · Song Archive — YOU ARE HERE</span>';
     $("jahnet").innerHTML = h;
   })();
+
+  /* ---------- one global audio rule: play() stops everything first ---------- */
+  function stopAllAudio() { try { if (window.__JAHREAD) window.__JAHREAD.stopAll(); } catch (e) {} }
+  function playBuf(buf, id) {
+    stopAllAudio();
+    try { S.unlockAudio(); } catch (e) {}
+    return S.playBuffer(buf, id || "song");
+  }
 
   /* ---------- tiered read-aloud (site pattern: speechSynthesis -> Google TTS audio) ---------- */
   var readText = "";
@@ -101,7 +160,6 @@
     googleChunks(text, done);
   }
   function googleChunks(text, done) {
-    // Google TTS caps a request — split into sentence-safe chunks, play in order
     var parts = [], t = String(text);
     while (t.length > 170) {
       var cut = t.lastIndexOf(". ", 170); if (cut < 60) cut = t.lastIndexOf(" ", 170); if (cut < 60) cut = 170;
@@ -118,15 +176,17 @@
     })();
   }
   function readAloud(text, label) {
+    var g = window.__JAHREAD;
+    if (g && !g.playGuard(label || "read")) return; /* double-tap = stop, never stacks */
+    stopAllAudio();
     readText = text; $("readlabel").textContent = "Reading: " + (label || "selection"); $("readbar").style.display = "block";
     speakTier(text, function () { $("readbar").style.display = "none"; });
   }
-  function stopReading() { try { speechSynthesis.cancel(); } catch (e) {} readText = ""; $("readbar").style.display = "none"; }
+  function stopReading() { stopAllAudio(); readText = ""; $("readbar").style.display = "none"; }
   $("readstop").onclick = stopReading; $("readclose").onclick = stopReading;
   $("readplay").onclick = function () { if (readText) readAloud(readText); };
 
-  /* ---------- data: compact index, chunk fetch on demand ---------- */
-  var SONGS = [], IDX_OK = false;
+  /* ---------- data: fetch helpers ---------- */
   function fetchT(url, ms) {
     return new Promise(function (res, rej) {
       var done = false;
@@ -141,8 +201,6 @@
     return fetchT(url).then(function (r) { return r.arrayBuffer(); })
       .then(function (ab) { return new Response(new Blob([ab]).stream().pipeThrough(new DecompressionStream("gzip"))).text(); });
   }
-  // Retry wrapper: phones on flaky connections get 3 attempts with backoff
-  // before we show an error. Never fails silently.
   function gunzipRetry(url, tries) {
     tries = tries || 3;
     function attempt(n) {
@@ -155,61 +213,167 @@
     }
     return attempt(1);
   }
-  function loadIndex() {
+  function findSong(id) {
+    return gunzip("data/records/" + chunkFor(id)).then(function (t) {
+      var lines = t.split("\n"), j;
+      for (j = 0; j < lines.length; j++) { if (!lines[j]) continue; var r = JSON.parse(lines[j]); if (r.id === id) return r; }
+      throw new Error("not in chunk");
+    });
+  }
+  function chunkFor(id) {
+    var s = allSongs[id];
+    if (s) return s.chunk;
+    return null;
+  }
+
+  /* ---------- A–Z collapsible archive ----------
+     Per-letter files at data/index/az/<LETTER>.json.gz (+ manifest.json),
+     built by code/build_song_az.py on every drip. A letter's file loads only
+     when its <details> opens, so phones never pull the whole archive. */
+  var AZLETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ#".split("");
+  var AZ = { counts: null, total: 0, rows: {}, shown: {}, loading: {} };
+  var AZ_PAGE = 60;
+  var allSongs = {}; /* id -> {title, chunk} for chunk lookup */
+
+  function genreOfId(id) {
+    try {
+      var n = parseInt(String(id).slice(-7), 10) || 0;
+      return (D && D.genSong(n).genre || "").replace(/-/g, " ");
+    } catch (e) { return ""; }
+  }
+  function azRowHtml(r) {
+    var g = genreOfId(r[0]);
+    return '<div class="azrow"><a class="azitem" href="songs.html?song=' + esc(r[0]) + '">' +
+      '<span class="t">' + esc(r[1]) + '</span><br><span class="azmeta">' + esc(r[0]) +
+      (g ? " · " + esc(g) : "") + '</span></a>' +
+      '<button class="btn ghost" type="button" data-azplay="' + esc(r[0]) + '">▶</button></div>';
+  }
+  function azRenderPage(L) {
+    var rows = AZ.rows[L] || [], shown = AZ.shown[L] || 0;
+    var body = document.querySelector('[data-azbody="' + L + '"]');
+    if (!body) return;
+    var h = "", i;
+    for (i = 0; i < shown && i < rows.length; i++) h += azRowHtml(rows[i]);
+    if (shown < rows.length) {
+      h += '<button type="button" class="btn ghost azmore" data-azmore="' + L + '">Show more (' +
+        (rows.length - shown).toLocaleString() + ' remaining)</button>';
+    } else {
+      h += '<p class="azload">End of letter ' + esc(L) + ' — ' + rows.length.toLocaleString() + ' songs shown.</p>';
+    }
+    body.innerHTML = h;
+  }
+  function azLoadLetter(L) {
+    if (AZ.rows[L] || AZ.loading[L]) return;
+    AZ.loading[L] = true;
+    var body = document.querySelector('[data-azbody="' + L + '"]');
+    gunzipRetry("data/index/az/" + L + ".json.gz").then(function (text) {
+      var rows = [];
+      text.split("\n").forEach(function (ln) {
+        ln = ln.trim(); if (!ln) return;
+        try {
+          var r = JSON.parse(ln);
+          rows.push(r);
+          allSongs[r[0]] = { title: r[1], chunk: r[2] };
+        } catch (x) {}
+      });
+      AZ.rows[L] = rows;
+      AZ.shown[L] = Math.min(AZ_PAGE, rows.length);
+      delete AZ.loading[L];
+      azRenderPage(L);
+    }).catch(function () {
+      delete AZ.loading[L];
+      if (body) body.innerHTML = '<p class="azload">Could not load letter ' + esc(L) +
+        ' — check your connection and try again.</p>';
+    });
+  }
+  function renderAzLetters() {
+    var box = $("azletters");
+    if (!box || !AZ.counts) return;
+    var h = "";
+    AZLETTERS.forEach(function (L) {
+      var n = AZ.counts[L] || 0;
+      h += '<details class="azsec" data-letter="' + L + '">' +
+        '<summary><span class="azletter">' + L + '</span>' +
+        '<span class="azcount">' + n.toLocaleString() + ' song' + (n === 1 ? "" : "s") + '</span></summary>' +
+        '<div class="azbody" data-azbody="' + L + '">' +
+        '<p class="azload">Open to load this letter…</p></div></details>';
+    });
+    box.innerHTML = h;
+    var L0 = null;
+    try { L0 = new URLSearchParams(location.search).get("letter"); } catch (e) {}
+    if (L0) {
+      L0 = String(L0).trim().toUpperCase();
+      var d = box.querySelector('details[data-letter="' + L0 + '"]');
+      if (d) { d.open = true; azLoadLetter(L0); }
+    }
+  }
+  function initAz() {
+    fetchT("data/index/az/manifest.json", 15000).then(function (r) { return r.json(); }).then(function (m) {
+      AZ.counts = m.counts || {}; AZ.total = m.total || 0;
+      var c = $("songcount");
+      c.innerHTML = '📀 <b>' + AZ.total.toLocaleString() + '</b> / 1,000,000 songs <span class="seqlab">· live</span>';
+      renderAzLetters();
+    }).catch(function () {
+      $("azletters").innerHTML = '<p class="azload">The letter list did not load — check your connection, then <a href="songs.html">retry</a>.</p>';
+    });
+    $("azletters").addEventListener("toggle", function (e) {
+      var d = e.target && e.target.closest ? e.target.closest("details[data-letter]") : null;
+      if (d && d.open) azLoadLetter(d.getAttribute("data-letter"));
+    }, true);
+    $("azletters").addEventListener("click", function (e) {
+      var m = e.target.closest ? e.target.closest("[data-azmore]") : null;
+      if (m) {
+        var L = m.getAttribute("data-azmore");
+        AZ.shown[L] = (AZ.shown[L] || 0) + AZ_PAGE;
+        azRenderPage(L);
+        return;
+      }
+      var p = e.target.closest ? e.target.closest("[data-azplay]") : null;
+      if (!p) return;
+      var id = p.getAttribute("data-azplay");
+      p.textContent = "…"; p.disabled = true;
+      stopAllAudio();
+      try { S.unlockAudio(); } catch (e2) {}
+      findSong(id).then(function (rec) {
+        return S.renderSong(rec, 150, null);
+      }).then(function (buf) {
+        playBuf(buf, "az-" + id);
+        p.textContent = "▶"; p.disabled = false;
+      }).catch(function () { p.textContent = "▶"; p.disabled = false; });
+    });
+  }
+
+  /* ---------- search (full compact index, one small fetch) ---------- */
+  var SONGS = [];
+  function loadSearchIndex() {
     return gunzipRetry("data/index/index.json.gz").then(function (t) {
-      var rows = t.split("\n").filter(Boolean).map(JSON.parse);
-      SONGS = rows.filter(function (r) { return r[2] === "song"; })
-        .map(function (r) { return { id: r[0], title: r[1], chunk: r[3], n: parseInt(r[0].slice(-7), 10) || 0 }; });
-      IDX_OK = true;
-      paintCount();
-      try { localStorage.setItem("sigstudio_songidx_v1", JSON.stringify({ at: new Date().toISOString(), rows: rows })); } catch (e) {}
+      SONGS = [];
+      t.split("\n").forEach(function (ln) {
+        if (!ln.trim()) return;
+        try {
+          var r = JSON.parse(ln);
+          if (r[2] === "song") SONGS.push({ id: r[0], title: r[1], chunk: r[3], n: parseInt(r[0].slice(-7), 10) || 0 });
+        } catch (e) {}
+      });
     }).catch(function () {
       try {
         var c = JSON.parse(localStorage.getItem("sigstudio_songidx_v1") || "null");
         if (c && c.rows && c.rows.length) {
           SONGS = c.rows.filter(function (r) { return r[2] === "song"; })
             .map(function (r) { return { id: r[0], title: r[1], chunk: r[3], n: parseInt(r[0].slice(-7), 10) || 0 }; });
-          IDX_OK = true; paintCount();
-          $("acount").textContent = "Showing the last saved copy — check your connection, then reload.";
           return;
         }
       } catch (e) {}
       throw new Error("index failed");
     });
   }
-  function paintCount() {
-    var c = $("songcount");
-    c.innerHTML = '📀 <b>' + SONGS.length.toLocaleString() + '</b> / 1,000,000 songs <span class="seqlab">· live</span>';
-  }
-  function findSong(id) {
-    var s = null, i;
-    for (i = 0; i < SONGS.length; i++) if (SONGS[i].id === id) s = SONGS[i];
-    if (!s) return Promise.reject(new Error("not in archive"));
-    return gunzip("data/records/" + s.chunk).then(function (t) {
-      var lines = t.split("\n"), j;
-      for (j = 0; j < lines.length; j++) { if (!lines[j]) continue; var r = JSON.parse(lines[j]); if (r.id === id) return r; }
-      throw new Error("not in chunk");
-    });
-  }
-
-  /* ---------- genre (deterministic from the engine — same as the studio) ---------- */
-  var genreCache = null;
-  function genreOf(s) {
-    if (!genreCache) {
-      genreCache = {};
-      for (var i = 0; i < SONGS.length; i++) { try { genreCache[SONGS[i].id] = D.genSong(SONGS[i].n).genre; } catch (e) { genreCache[SONGS[i].id] = ""; } }
-    }
-    return genreCache[s.id] || "";
-  }
-
-  /* ---------- browser grid ---------- */
-  var PER = 60, page = 0, letter = "";
+  var PER = 60, page = 0;
   function filtered() {
     var q = ($("aq").value || "").toLowerCase(), gf = $("agenre").value, order = $("aorder").value, list = [], i, s;
+    if (!q && !gf) return null; /* search grid stays quiet until used */
     for (i = 0; i < SONGS.length; i++) {
       s = SONGS[i];
-      if (letter && (s.title[0] || "#").toUpperCase() !== letter) continue;
-      if (gf && genreOf(s) !== gf) continue;
+      if (gf && genreOfId(s.id) !== gf.replace(/-/g, " ")) continue;
       if (q && (s.title + " " + s.id).toLowerCase().indexOf(q) === -1) continue;
       list.push(s);
     }
@@ -217,7 +381,9 @@
     return list;
   }
   function draw() {
-    var list = filtered(), pages = Math.max(1, Math.ceil(list.length / PER));
+    var list = filtered();
+    if (!list) { $("agrid").innerHTML = ""; $("acount").textContent = ""; $("apages").innerHTML = ""; return; }
+    var pages = Math.max(1, Math.ceil(list.length / PER));
     if (page >= pages) page = pages - 1;
     var slice = list.slice(page * PER, page * PER + PER), h = "", i, s;
     for (i = 0; i < slice.length; i++) {
@@ -236,14 +402,11 @@
     }
     $("apages").innerHTML = ph;
     var pv = $("pprev"), nx = $("pnext");
-    if (pv) pv.onclick = function () { if (page > 0) { page--; draw(); window.scrollTo(0, 0); } };
-    if (nx) nx.onclick = function () { if (page < pages - 1) { page++; draw(); window.scrollTo(0, 0); } };
+    if (pv) pv.onclick = function () { if (page > 0) { page--; draw(); } };
+    if (nx) nx.onclick = function () { if (page < pages - 1) { page++; draw(); } };
   }
   function refilter() { page = 0; draw(); }
-
-  function initBrowser() {
-    var az = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-    $("aaz").innerHTML = az.map(function (l) { return '<button data-az="' + l + '">' + l + "</button>"; }).join("");
+  function initSearch() {
     try {
       var gs = (S && S.GENRES) || ["hip-hop", "house", "trap", "pop", "rock", "lofi", "techno", "jazz", "ambient", "drum-and-bass", "reggae", "funk"];
       gs.forEach(function (g) { var o = document.createElement("option"); o.value = g; o.textContent = g.replace(/-/g, " "); $("agenre").appendChild(o); });
@@ -251,21 +414,8 @@
     $("aq").addEventListener("input", refilter);
     $("agenre").addEventListener("change", refilter);
     $("aorder").addEventListener("change", refilter);
-    $("aaz").addEventListener("click", function (e) {
-      var b = e.target.closest ? e.target.closest("[data-az]") : null; if (!b) return;
-      Array.prototype.forEach.call($("aaz").querySelectorAll("button"), function (x) { x.classList.remove("on"); });
-      var l = b.getAttribute("data-az");
-      if (letter === l) { letter = ""; } else { letter = l; b.classList.add("on"); }
-      refilter();
-    });
     $("arandom").onclick = function () {
-      if (!SONGS.length) {
-        $("acount").textContent = "Archive still loading — retrying…";
-        loadIndex().then(function () { initBrowser(); draw(); $("arandom").click(); }, function () {
-          $("acount").textContent = "Archive failed to load — check your connection, then tap Retry below.";
-        });
-        return;
-      }
+      if (!SONGS.length) { $("acount").textContent = "Archive still loading — one moment…"; return; }
       var s = SONGS[Math.floor(Math.random() * SONGS.length)];
       location.href = "songs.html?song=" + s.id;
     };
@@ -275,13 +425,20 @@
       var p = e.target.closest ? e.target.closest("[data-splay]") : null;
       if (!p) return;
       var id = p.getAttribute("data-splay");
-      p.textContent = "Rendering…"; p.disabled = true;
+      p.textContent = "…"; p.disabled = true;
+      stopAllAudio();
       try { S.unlockAudio(); } catch (e2) {}
-      findSong(id).then(function (rec) {
-        try { S.setPlayerLabel(rec.title || rec.id); S.setBusy("Rendering song…"); } catch (e3) {}
-        return S.renderSong(rec, 150, null);
+      var rec = null;
+      for (var i = 0; i < SONGS.length; i++) if (SONGS[i].id === id) rec = SONGS[i];
+      (rec ? gunzip("data/records/" + rec.chunk).then(function (t) {
+        var lines = t.split("\n");
+        for (var j = 0; j < lines.length; j++) { if (!lines[j]) continue; var r = JSON.parse(lines[j]); if (r.id === id) return r; }
+        throw new Error("not in chunk");
+      }) : Promise.reject(new Error("not in archive"))).then(function (full) {
+        return S.renderSong(full, 150, null);
       }).then(function (buf) {
-        S.playBuffer(buf, "songcard"); p.textContent = "▶ Play"; p.disabled = false;
+        playBuf(buf, "search-" + id);
+        p.textContent = "▶ Play"; p.disabled = false;
       }).catch(function () { p.textContent = "▶ Play"; p.disabled = false; });
     });
   }
@@ -331,7 +488,8 @@
     d.appendChild(s);
     var detBuf = null;
     function detRender(btn, label) {
-      btn.textContent = "Rendering…"; btn.disabled = true;
+      btn.textContent = "…"; btn.disabled = true;
+      stopAllAudio();
       try { S.unlockAudio(); } catch (e) {}
       var p = detBuf ? Promise.resolve(detBuf) :
         S.renderFullSong(rec, null, null).then(function (buf) { detBuf = buf; return buf; });
@@ -340,8 +498,7 @@
     }
     $("dplay").onclick = function () {
       var b = this;
-      try { S.setPlayerLabel(rec.title || rec.id); S.setBusy("Rendering song…"); } catch (e2) {}
-      detRender(b, "▶ Play demo mix").then(function (buf) { S.playBuffer(buf, "song"); }, function () {});
+      detRender(b, "▶ Play demo mix").then(function (buf) { playBuf(buf, "song"); }, function () {});
     };
     $("dwav").onclick = function () {
       var b = this, SS = window.SigStudio;
@@ -366,24 +523,35 @@
   }
 
   /* ---------- boot ---------- */
-  function bootError() {
-    $("agrid").innerHTML = '<div class="card" role="alert"><h4>⚠️ Song Archive unavailable</h4>' +
-      '<p class="seqlab">The archive index did not load — check your connection, then retry.</p>' +
-      '<p><button class="btn" onclick="location.reload()">↻ Retry</button></p></div>';
-  }
-  loadIndex().then(function () {
-    initBrowser(); draw();
-    var q = new URLSearchParams(location.search), id = q.get("song");
-    if (id) {
-      $("agrid").innerHTML = '<div class="card" role="status">Loading ' + esc(id) + '…</div>';
-      findSong(id).then(showDetail, function () {
-        $("browser").style.display = "none";
-        var d = $("detail"); d.style.display = "block";
-        d.innerHTML = '<p><a class="btn ghost" href="songs.html" style="text-decoration:none">← Back to the Song Archive</a></p>' +
-          '<div class="card" role="alert"><h4>Song not found</h4><p class="seqlab">No archive record for ' + esc(id) + '.</p></div>';
+  var q = null;
+  try { q = new URLSearchParams(location.search); } catch (e) {}
+  var songId = q ? q.get("song") : null;
+  if (songId) {
+    $("browser").style.display = "none";
+    var d0 = $("detail"); d0.style.display = "block";
+    d0.innerHTML = '<div class="card" role="status">Loading ' + esc(songId) + '…</div>';
+    loadSearchIndex().then(function () {
+      var rec = null, i;
+      for (i = 0; i < SONGS.length; i++) if (SONGS[i].id === songId) rec = SONGS[i];
+      if (!rec) throw new Error("not in archive");
+      return gunzip("data/records/" + rec.chunk).then(function (t) {
+        var lines = t.split("\n");
+        for (var j = 0; j < lines.length; j++) { if (!lines[j]) continue; var r = JSON.parse(lines[j]); if (r.id === songId) return r; }
+        throw new Error("not in chunk");
       });
-    }
-  }, bootError);
+    }).then(showDetail, function () {
+      d0.innerHTML = '<p><a class="btn ghost" href="songs.html" style="text-decoration:none">← Back to the Song Archive</a></p>' +
+        '<div class="card" role="alert"><h4>Song not found</h4><p class="seqlab">No archive record for ' + esc(songId) + '.</p></div>';
+    });
+  } else {
+    initAz();
+    loadSearchIndex().then(function () {
+      initSearch();
+      try { localStorage.setItem("sigstudio_songidx_v1", JSON.stringify({ at: new Date().toISOString(), rows: SONGS.map(function (s) { return [s.id, s.title, "song", s.chunk]; }) })); } catch (e) {}
+    }, function () {
+      $("acount").textContent = "Search index failed to load — the A–Z list above still works.";
+    });
+  }
 })();
 </script>
 </body>

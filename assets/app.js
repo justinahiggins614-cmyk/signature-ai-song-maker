@@ -1,3 +1,30 @@
+/* ==== JAH global read-aloud controller (one per page): no stacked voices, no orphan audio ==== */
+(function(){
+if(window.__JAHREAD)return;
+var R={audios:[],lastTap:0,lastLabel:""};
+R.stopAll=function(){
+ try{if(window.speechSynthesis)window.speechSynthesis.cancel();}catch(e){}
+ try{if(window.responsiveVoice&&window.responsiveVoice.cancel)window.responsiveVoice.cancel();}catch(e){}
+ var i,a;
+ for(i=0;i<R.audios.length;i++){a=R.audios[i];try{a.pause();}catch(e){}try{a.removeAttribute("src");}catch(e){}try{a.load();}catch(e){}}
+ R.audios.length=0;
+ var els=document.querySelectorAll("audio");
+ for(i=0;i<els.length;i++){try{els[i].pause();}catch(e){}}
+};
+R.reg=function(a){if(a&&R.audios.indexOf(a)<0)R.audios.push(a);return a;};
+R.playGuard=function(label){
+ var now=Date.now();
+ if(now-R.lastTap<450&&label===R.lastLabel){R.lastTap=0;R.lastLabel="";R.stopAll();return false;}
+ R.lastTap=now;R.lastLabel=String(label||"");
+ R.stopAll();return true;
+};
+try{
+ var NativeAudio=window.Audio;
+ window.Audio=function(src){var a=src===undefined?new NativeAudio():new NativeAudio(src);R.reg(a);return a;};
+ window.Audio.prototype=NativeAudio.prototype;
+}catch(e){}
+window.__JAHREAD=R;
+})();
 /* ============================================================
    Signature Music Studio — app wiring.
    ============================================================ */
@@ -69,7 +96,7 @@
     ["The Signature Global Newspaper Archive", "signature-newspapers"], ["The Signature AI Mad Scientist Creation Lab", "signature-backend"], ["The Signature Boundless Generator Archive", "signature-boundless-generators"],
     ["The Signature AI Mix Lab", "signature-ai-mixlab"], ["AI Olypics", "signature-ai-olypics"], ["The Signature Computer Chip Maker and Archive", "signature-chip-maker"],
     ["The Signature App Archive", "signature-app-archive"], ["The Signature AI Robot Matcher", "signature-ai-robot-matcher"], ["The Signature Experiment Solver", "signature-experiment-solver"],
-    ["Signature AI Pixel", "signature-ai-image-video-maker"], ["The Signature Mr Fix-It", "signature-fixit"], ["The Signature University", "signature-university"],
+    ["Signature AI Pixel", "signature-ai-image-video-maker"], ["Signature Music Studio", "signature-ai-song-maker"], ["The Signature Mr Fix-It", "signature-fixit"], ["The Signature University", "signature-university"],
     ["The Signature Cyber Mega-Mall", "signature-cyber-mega-mall"], ["The Signature 3D Print Mega Mall", "signature-3d-print"]
   ];
   function buildNav(el, selfIx) {
@@ -100,6 +127,7 @@
      the tap gesture. */
   var readQueue = [], reading = false, readText = "";
   function speakTier(text, done) {
+    if(window.__JAHREAD&&!window.__JAHREAD.playGuard("speakTier"))return;
     try {
       if ("speechSynthesis" in window && window.speechSynthesis) {
         var u = new SpeechSynthesisUtterance(text); u.rate = 1; u.onend = done; u.onerror = done;
@@ -126,14 +154,15 @@
     } catch (e) { done(); }
   }
   function readAloud(text, label) {
+    if(window.__JAHREAD&&!window.__JAHREAD.playGuard("readAloud"))return;
     readText = text; $("readlabel").textContent = "Reading: " + (label || "selection"); $("readbar").style.display = "block";
     speakTier(text, function () { if (reading) nextChunk(); });
     reading = true;
   }
   function nextChunk() { reading = false; $("readbar").style.display = "none"; }
-  $("readstop").onclick = function () { try { speechSynthesis.cancel(); } catch (e) {} try { responsiveVoice.cancel(); } catch (e) {} reading = false; $("readbar").style.display = "none"; };
+  $("readstop").onclick = function () { try{if(window.__JAHREAD)window.__JAHREAD.stopAll();}catch(e){} try { speechSynthesis.cancel(); } catch (e) {} try { responsiveVoice.cancel(); } catch (e) {} reading = false; $("readbar").style.display = "none"; };
   $("readclose").onclick = $("readstop").onclick;
-  $("readplay").onclick = function () { if (readText) readAloud(readText); };
+  $("readplay").onclick = function () { if(window.__JAHREAD&&!window.__JAHREAD.playGuard("readplay"))return; if (readText) readAloud(readText); };
 
   /* ---------- data ----------
      2026-10-03: authoritative boot. music-manifest.json (tiny) is fetched
