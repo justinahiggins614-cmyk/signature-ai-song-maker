@@ -258,12 +258,18 @@ function fileNameFor(like, ext) {
 var cur = { r: null, extras: "", bars: 4, seed: "", like: null, buffer: null, playing: false, busy: false };
 
 function renderCurrent(lines) {
-  cur.seed = seedFor(cur.r, cur.extras);
-  cur.like = beatLikeFor(cur.r, cur.extras);
-  cur.buffer = null; cur.playing = false;
-  for (var i = 0; i < lines.length; i++) sayHost(lines[i]);
-  infoLine("Making your beat…");
-  return Studio.renderBeatBuffer(cur.like, cur.bars).then(function (buf) {
+  /* 2026-10-04: the whole make runs inside the promise chain — a synchronous
+     throw anywhere (seed math, pattern build) used to escape the tap handler
+     uncaught and the page just sat there. Now every failure lands in the
+     catch below with a plain-words message. Nothing fails silently. */
+  return Promise.resolve().then(function () {
+    cur.seed = seedFor(cur.r, cur.extras);
+    cur.like = beatLikeFor(cur.r, cur.extras);
+    cur.buffer = null; cur.playing = false;
+    for (var i = 0; i < lines.length; i++) sayHost(lines[i]);
+    infoLine("Making your beat…");
+    return Studio.renderBeatBuffer(cur.like, cur.bars);
+  }).then(function (buf) {
     cur.buffer = buf;
     sayHost("Done! Your beat is ready — " + cur.bars + " bars of " + cur.r.style + " at " + cur.r.bpm + " BPM.");
     sayHost("Seed note: \u201Csame words = same beat every time\u201D. Your seed is: " + cur.seed);
@@ -272,6 +278,7 @@ function renderCurrent(lines) {
     infoLine("Beat ready — press play!");
   }).catch(function (e) {
     var msg = (e && e.message) || String(e);
+    try { if (window.console && console.error) console.error("[maker1] beat failed:", e); } catch (e2) {}
     infoLine("Couldn't make the beat: " + msg);
     sayHost("Uh oh — I couldn't make the beat (" + msg + "). Tap \u201CMake my beat\u201D again and I'll try once more.");
   });
@@ -470,7 +477,19 @@ function init() {
   initChips();
   initHost();
   if (typeof Studio.stampCounts === "function") { try { Studio.stampCounts(); } catch (e) {} }
-  $("mk1make").addEventListener("click", function () { Studio.unlock(); onMake(); });
+  $("mk1make").addEventListener("click", function () {
+    Studio.unlock();
+    try {
+      var p = onMake();
+      if (p && p.catch) p.catch(function (e) {
+        try { if (window.console && console.error) console.error("[maker1] unhandled:", e); } catch (e2) {}
+        infoLine("Couldn't make the beat: " + ((e && e.message) || e));
+      });
+    } catch (e) {
+      infoLine("Couldn't make the beat: " + ((e && e.message) || e));
+      sayHost("Uh oh — something stopped me (" + ((e && e.message) || e) + "). Tap \u201CMake my beat\u201D again.");
+    }
+  });
   $("mk1prompt").addEventListener("keydown", function (ev) {
     if (ev && (ev.key === "Enter") && (ev.ctrlKey || ev.metaKey)) { Studio.unlock(); onMake(); }
   });

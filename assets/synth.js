@@ -647,8 +647,19 @@
 
   /* ---------- live playback helpers ---------- */
   var _live = {};
+  /* 2026-10-04 (his order): ONE global audio rule — play() always stops
+     EVERYTHING first (every live voice on any id, any speech/TTS, any
+     <audio> element). Double-tap can never stack voices, and stop kills all. */
+  function stopAllLive() {
+    var id;
+    for (id in _live) { if (Object.prototype.hasOwnProperty.call(_live, id)) stopLive(id); }
+    try { if (root.speechSynthesis) root.speechSynthesis.cancel(); } catch (e) {}
+    try { if (root.responsiveVoice && root.responsiveVoice.cancel) root.responsiveVoice.cancel(); } catch (e) {}
+    /* NOTE: never call root.__JAHREAD.stopAll() here — it calls back into
+       stopAllLive, which would recurse forever. __JAHREAD already calls us. */
+  }
   function playBuffer(buf, id) {
-    stopLive(id || "main");
+    stopAllLive();
     var c = unlockAudio();
     if (!c) { audioToast("Audio is not available in this browser."); return null; }
     if (c.state === "suspended") {
@@ -676,7 +687,7 @@
     CREATED_VOICES: CREATED_VOICES, BACKUP_TYPES: BACKUP_TYPES,
     renderVocal: renderVocal, renderOwnVoice: renderOwnVoice,
     detectPitch: detectPitch, nearestMidi: nearestMidi, cleanupVocal: cleanupVocal,
-    playBuffer: playBuffer, stopLive: stopLive, playTone: playTone, playDrum: playDrum,
+    playBuffer: playBuffer, stopLive: stopLive, stopAllLive: stopAllLive, playTone: playTone, playDrum: playDrum,
     kick: kick, snare: snare, hat: hat, clap: clap, tom: tom, shaker: shaker,
     tone: tone, riser: riser, singNote: singNote,
     ensureCtx: ac, unlockAudio: unlockAudio, meterLevel: meterLevel, makeBuses: makeBuses

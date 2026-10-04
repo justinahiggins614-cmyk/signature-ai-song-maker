@@ -121,6 +121,8 @@ def main():
     json.dump(state, open(state_path, "w"))
     # rebuild sitemap + api counts
     subprocess.run(["python3", "code/build_site_files.py"], cwd=HERE, check=True)
+    # A-Z song archive (songs.html): per-letter lazy index, rebuilt every drip
+    subprocess.run(["python3", "code/build_song_az.py"], cwd=HERE, check=True)
     size = data_size()
     print("drip: +%d songs (%s..%s), +%d library (%s..%s), +%d beats (%s..%s), total records %d, data %.1fMB" % (
         N, songs[0]["id"], songs[-1]["id"], N, lib[0]["id"], lib[-1]["id"], NB, beats[0]["id"], beats[-1]["id"],

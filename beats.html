@@ -72,6 +72,7 @@ R.stopAll=function(){
  var i,a;
  for(i=0;i<R.audios.length;i++){a=R.audios[i];try{a.pause();}catch(e){}try{a.removeAttribute("src");}catch(e){}try{a.load();}catch(e){}}
  R.audios.length=0;
+ try{if(window.SigSynth&&window.SigSynth.stopAllLive)window.SigSynth.stopAllLive();}catch(e){}
  var els=document.querySelectorAll("audio");
  for(i=0;i<els.length;i++){try{els[i].pause();}catch(e){}}
 };

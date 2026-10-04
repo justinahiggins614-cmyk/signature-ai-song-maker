@@ -57,7 +57,7 @@
     ["The Signature Global Newspaper Archive", "signature-newspapers"], ["The Signature AI Mad Scientist Creation Lab", "signature-backend"], ["The Signature Boundless Generator Archive", "signature-boundless-generators"],
     ["The Signature AI Mix Lab", "signature-ai-mixlab"], ["AI Olypics", "signature-ai-olypics"], ["The Signature Computer Chip Maker and Archive", "signature-chip-maker"],
     ["The Signature App Archive", "signature-app-archive"], ["The Signature AI Robot Matcher", "signature-ai-robot-matcher"], ["The Signature Experiment Solver", "signature-experiment-solver"],
-    ["Signature AI Pixel", "signature-ai-image-video-maker"], ["The Signature Mr Fix-It", "signature-fixit"], ["The Signature University", "signature-university"],
+    ["Signature AI Pixel", "signature-ai-image-video-maker"], ["Signature Music Studio", "signature-ai-song-maker"], ["The Signature Mr Fix-It", "signature-fixit"], ["The Signature University", "signature-university"],
     ["The Signature Cyber Mega-Mall", "signature-cyber-mega-mall"], ["The Signature 3D Print Mega Mall", "signature-3d-print"]
   ];
   function jahNav(elId, hereLabel) {
@@ -74,23 +74,44 @@
   /* ---------- audio unlock (in-app browsers start suspended) ---------- */
   function unlock() { try { if (S && S.unlockAudio) S.unlockAudio(); } catch (e) {} }
 
-  /* ---------- deterministic renders ---------- */
+  /* ---------- deterministic renders ----------
+     2026-10-04 (his "Make my beat does nothing" report): these must NEVER
+     throw synchronously and NEVER hang silently. A sync throw inside a tap
+     handler used to die uncaught with zero feedback. Now: every failure —
+     bad engine state, missing OfflineAudioContext, or a render that never
+     settles — becomes a rejected promise with a plain-words message, and a
+     60s watchdog guarantees the promise always settles. */
+  function withWatchdog(promise, what) {
+    var ms = 60000;
+    return new Promise(function (res, rej) {
+      var done = false;
+      var to = setTimeout(function () {
+        if (!done) { done = true; rej(new Error(what + " is taking too long — your browser may have paused background audio. Tap again.")); }
+      }, ms);
+      promise.then(function (v) { if (!done) { done = true; clearTimeout(to); res(v); } },
+        function (e) { if (!done) { done = true; clearTimeout(to); rej(e); } });
+    });
+  }
   function renderSongBuffer(songLike, mix) {
     // songLike: {id,title,genre,mood,tempo,key,lyrics,chords,structure,desc}
-    return Promise.resolve().then(function () {
+    return withWatchdog(Promise.resolve().then(function () {
+      if (!S || !S.renderFullSong) throw new Error("The sound engine did not load — reload the page and try again.");
       return S.renderFullSong(songLike, mix || {}, null);
-    });
+    }), "Rendering the song");
   }
   function renderBeatBuffer(beatLike, bars) {
     // beatLike: {id,name,style,bpm,desc}
-    var style = beatLike.style || "hiphop";
-    var bpm = Math.max(60, Math.min(200, +beatLike.bpm || 92));
-    var b = Math.max(1, Math.min(32, +bars || 4));
-    var pat = S.patternFor(String(beatLike.desc || beatLike.name || "signature beat"), style, bpm);
-    var secs = b * 16 * (60 / pat.bpm / 4) + 0.3;
-    return S.renderBuffer(secs, function (c, dest, t0) {
-      S.scheduleBeat(c, dest, t0, pat, b, 1);
-    }).then(function (buf) { buf._seed = pat.seed; buf._bpm = pat.bpm; return buf; });
+    return withWatchdog(Promise.resolve().then(function () {
+      if (!S || !S.patternFor || !S.renderBuffer) throw new Error("The sound engine did not load — reload the page and try again.");
+      var style = beatLike.style || "hiphop";
+      var bpm = Math.max(60, Math.min(200, +beatLike.bpm || 92));
+      var b = Math.max(1, Math.min(32, +bars || 4));
+      var pat = S.patternFor(String(beatLike.desc || beatLike.name || "signature beat"), style, bpm);
+      var secs = b * 16 * (60 / pat.bpm / 4) + 0.3;
+      return S.renderBuffer(secs, function (c, dest, t0) {
+        S.scheduleBeat(c, dest, t0, pat, b, 1);
+      }).then(function (buf) { buf._seed = pat.seed; buf._bpm = pat.bpm; return buf; });
+    }), "Making the beat");
   }
   function playBuffer(buf, id) { unlock(); return S.playBuffer(buf, id || "studio"); }
   function stopLive(id) { try { S.stopLive(id || "studio"); } catch (e) {} }

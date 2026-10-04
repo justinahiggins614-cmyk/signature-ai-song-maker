@@ -67,6 +67,8 @@ class El {
     if (sel[0] === ".") { const c = sel.slice(1); return this._desc.find((e) => (e.getAttribute("class") || "").split(" ").indexOf(c) >= 0) || null; }
     const am = /^\[data-([a-z0-9_-]+)\]$/.exec(sel);
     if (am) return this._desc.find((e) => e.getAttribute("data-" + am[1]) !== null) || null;
+    const amv = /^\[data-([a-z0-9_-]+)="([^"]*)"\]$/.exec(sel);
+    if (amv) return this._desc.find((e) => e.getAttribute("data-" + amv[1]) === amv[2]) || null;
     return this._desc.find((e) => e.tagName.toLowerCase() === sel.toLowerCase()) || null;
   }
   querySelectorAll(sel) {
@@ -77,6 +79,8 @@ class El {
     if (sel[0] === ".") { const c = sel.slice(1); this._desc.forEach((e) => { if ((e.getAttribute("class") || "").split(" ").indexOf(c) >= 0) push(e); }); return out; }
     const am = /^\[data-([a-z0-9_-]+)\]$/.exec(sel);
     if (am) { this._desc.forEach((e) => { if (e.getAttribute("data-" + am[1]) !== null) push(e); }); return out; }
+    const amv = /^\[data-([a-z0-9_-]+)="([^"]*)"\]$/.exec(sel);
+    if (amv) { this._desc.forEach((e) => { if (e.getAttribute("data-" + amv[1]) === amv[2]) push(e); }); return out; }
     this._desc.forEach((e) => { if (e.tagName.toLowerCase() === sel.toLowerCase()) push(e); });
     return out;
   }
@@ -128,6 +132,9 @@ const fetchStub = (url) => {
   if (u.includes("music-manifest.json")) return ok(fs.readFileSync(path.join(HERE, "music-manifest.json"), "utf8"));
   if (u.includes("data/manifest.json")) return ok(fs.readFileSync(path.join(HERE, "data", "manifest.json"), "utf8"));
   if (u.includes("data/index/index.json.gz")) return ok(gzSingle(path.join(HERE, "data", "index", "index.json.gz")));
+  if (u.includes("data/index/az/manifest.json")) return ok(fs.readFileSync(path.join(HERE, "data", "index", "az", "manifest.json"), "utf8"));
+  const maz = u.match(/data\/index\/az\/([A-Z#])\.json\.gz$/);
+  if (maz) { const p2 = path.join(HERE, "data", "index", "az", maz[1] + ".json.gz"); if (fs.existsSync(p2)) return ok(gzSingle(p2)); return Promise.resolve({ ok: false, status: 404 }); }
   const m = /data\/records\/([\w.-]+\.json\.gz)$/.exec(u);
   if (m) { const p = path.join(HERE, "data", "records", m[1]); if (fs.existsSync(p)) return ok(gzSingle(p)); return Promise.resolve({ ok: false, status: 404 }); }
   return Promise.reject(new Error("fetch stub: unknown " + u));
@@ -501,6 +508,85 @@ async function main() {
     await sleep(2600);
     const h = idmap2["counters"] ? idmap2["counters"].innerHTML : "";
     assert(/INDEX ERROR/.test(h) && /Retry/.test(h), "got: " + h.slice(0, 160));
+  });
+
+  /* ---------- songs.html A-Z archive (fresh sandbox) ---------- */
+  async function songsSandbox(search) {
+    const storeX = {};
+    const lsX = { getItem: (k) => (k in storeX ? storeX[k] : null), setItem: (k, v) => { storeX[k] = String(v); }, removeItem: (k) => { delete storeX[k]; } };
+    const idmapX = {}; const bodyX = new El("body");
+    const docX = Object.create(documentStub);
+    docX.getElementById = (id) => { if (!idmapX[id]) { const e = new El("div", id); e.parentNode = bodyX; idmapX[id] = e; } return idmapX[id]; };
+    docX.body = bodyX;
+    const sbX = { console, window: {}, document: docX, localStorage: lsX,
+      navigator: { onLine: true }, location: { search: search || "", hash: "", pathname: "/", origin: "https://t", reload() {} },
+      fetch: fetchStub, URL: sandbox.URL, URLSearchParams, Blob, Response, DecompressionStream, TextEncoder,
+      requestAnimationFrame: () => 0, setTimeout, clearTimeout, setInterval, clearInterval };
+    sbX.window = Object.assign(sbX.window, { document: docX, localStorage: lsX, navigator: sbX.navigator, location: sbX.location, fetch: fetchStub,
+      Blob, Response, DecompressionStream, TextEncoder, Audio: function () { throw new Error("no audio el"); }, scrollTo() {}, scroll() {} });
+    sbX.window.Audio.prototype = {};
+    vm.createContext(sbX);
+    ["synth.js", "engine.js"].forEach((f) => vm.runInContext(fs.readFileSync(path.join(HERE, "assets", f), "utf8"), sbX, { filename: f }));
+    vm.runInContext(fs.readFileSync(path.join(HERE, "assets", "studio-core.js"), "utf8"), sbX, { filename: "studio-core.js" });
+    const html = fs.readFileSync(path.join(HERE, "songs.html"), "utf8");
+    const blocks = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]).filter((s) => s.trim());
+    blocks.forEach((code, i) => vm.runInContext(code, sbX, { filename: "songs-inline-" + i + ".js" }));
+    return { sbX, idmapX, docX, elX: (id) => docX.getElementById(id) };
+  }
+  await t("songs az: 27 collapsible letters with per-letter counts", async () => {
+    const { idmapX, elX } = await songsSandbox("");
+    await sleep(1200);
+    const box = elX("azletters");
+    const dets = box._desc.filter((e) => e.tagName === "DETAILS");
+    assert(dets.length === 27, "details count: " + dets.length);
+    const man = JSON.parse(fs.readFileSync(path.join(HERE, "data", "index", "az", "manifest.json"), "utf8"));
+    assert(box.innerHTML.indexOf('data-letter="A"') >= 0, "letter A section missing");
+    assert(box.innerHTML.indexOf(man.counts.A.toLocaleString()) >= 0, "A count missing from summaries");
+    const c = elX("songcount").innerHTML;
+    assert(c.indexOf(man.total.toLocaleString()) >= 0 && /live/.test(c), "live count: " + c.slice(0, 80));
+  });
+  await t("songs az: opening a letter lazy-loads its songs with play buttons", async () => {
+    const { elX } = await songsSandbox("");
+    await sleep(1200);
+    const box = elX("azletters");
+    const det = box._desc.find((e) => e.tagName === "DETAILS" && e.getAttribute("data-letter") === "A");
+    det.open = true;
+    box._fire("toggle", { target: det });
+    await sleep(1200);
+    const body = box.querySelector('[data-azbody="A"]');
+    assert(body, "azbody A missing");
+    const rows = body._desc.filter((e) => e.getAttribute("class") === "azrow");
+    assert(rows.length === 60, "page-1 rows: " + rows.length);
+    assert(/songs\.html\?song=JAH-SONG-/.test(body.innerHTML), "song links missing");
+    assert(/data-azplay="JAH-SONG-/.test(body.innerHTML), "play buttons missing");
+    const more = body._desc.find((e) => e.getAttribute("data-azmore") === "A");
+    assert(more, "show-more missing");
+    box._fire("click", { target: more });
+    const rows2 = body._desc.filter((e) => e.getAttribute("class") === "azrow");
+    assert(rows2.length === 120, "page-2 rows: " + rows2.length);
+    const play = body._desc.find((e) => e.getAttribute("data-azplay"));
+    const pid = play.getAttribute("data-azplay");
+    play.closest = (s) => (s === "[data-azplay]" ? play : null); /* real closest() semantics */
+    box._fire("click", { target: play });
+    await sleep(1500);
+    assert(play.textContent === "\u25B6" && play.disabled === false, "play button did not recover honestly (no OfflineAudioContext in node)");
+    assert(pid.indexOf("JAH-SONG-") === 0, "play id: " + pid);
+  });
+  await t("songs az: search filters the archive", async () => {
+    const { elX } = await songsSandbox("");
+    await sleep(1500);
+    const q = elX("aq");
+    q.value = "amber harbor";
+    q._fire("input", { target: q });
+    await sleep(300);
+    const h = elX("agrid").innerHTML;
+    assert(/Amber Harbor/.test(h) && /JAH-SONG-0000001/.test(h), "search result missing: " + h.slice(0, 120));
+  });
+  await t("songs az: ?song= deep link opens the detail view", async () => {
+    const { elX } = await songsSandbox("?song=JAH-SONG-0000001");
+    await sleep(1500);
+    const d = elX("detail");
+    assert(/Amber Harbor/.test(d.innerHTML) && /Play demo mix/.test(d.innerHTML), "detail missing: " + d.innerHTML.slice(0, 120));
   });
 
   /* ---------- report ---------- */
