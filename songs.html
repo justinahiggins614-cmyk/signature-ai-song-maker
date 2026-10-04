@@ -82,9 +82,7 @@
 <script src="assets/studio-core.js"></script>
 <script>try { var sn = document.getElementById("studionav"); if (sn && window.SigStudio) sn.innerHTML = SigStudio.nav("songs.html"); } catch (e) {}</script>
 <script>
-/* ==== JAH global audio controller (one per page): play() stops everything
-   first, double-tap never stacks, stop kills everything. Same pattern as the
-   rest of the network. ==== */
+/* ==== JAH global read-aloud controller (one per page): no stacked voices, no orphan audio ==== */
 (function(){
 if(window.__JAHREAD)return;
 var R={audios:[],lastTap:0,lastLabel:""};
@@ -94,7 +92,6 @@ R.stopAll=function(){
  var i,a;
  for(i=0;i<R.audios.length;i++){a=R.audios[i];try{a.pause();}catch(e){}try{a.removeAttribute("src");}catch(e){}try{a.load();}catch(e){}}
  R.audios.length=0;
- try{if(window.SigSynth&&window.SigSynth.stopAllLive)window.SigSynth.stopAllLive();}catch(e){}
  var els=document.querySelectorAll("audio");
  for(i=0;i<els.length;i++){try{els[i].pause();}catch(e){}}
 };
@@ -151,6 +148,7 @@ window.__JAHREAD=R;
   /* ---------- tiered read-aloud (site pattern: speechSynthesis -> Google TTS audio) ---------- */
   var readText = "";
   function speakTier(text, done) {
+    if(window.__JAHREAD&&!window.__JAHREAD.playGuard("speakTier"))return;
     try {
       if ("speechSynthesis" in window && window.speechSynthesis) {
         var u = new SpeechSynthesisUtterance(text); u.rate = 1; u.onend = done; u.onerror = done;
@@ -176,15 +174,14 @@ window.__JAHREAD=R;
     })();
   }
   function readAloud(text, label) {
-    var g = window.__JAHREAD;
-    if (g && !g.playGuard(label || "read")) return; /* double-tap = stop, never stacks */
+    if(window.__JAHREAD&&!window.__JAHREAD.playGuard("readAloud"))return;
     stopAllAudio();
     readText = text; $("readlabel").textContent = "Reading: " + (label || "selection"); $("readbar").style.display = "block";
     speakTier(text, function () { $("readbar").style.display = "none"; });
   }
-  function stopReading() { stopAllAudio(); readText = ""; $("readbar").style.display = "none"; }
+  function stopReading() { try{if(window.__JAHREAD)window.__JAHREAD.stopAll();}catch(e){} stopAllAudio(); readText = ""; $("readbar").style.display = "none"; }
   $("readstop").onclick = stopReading; $("readclose").onclick = stopReading;
-  $("readplay").onclick = function () { if (readText) readAloud(readText); };
+  $("readplay").onclick = function () { if(window.__JAHREAD&&!window.__JAHREAD.playGuard("readplay"))return; if (readText) readAloud(readText); };
 
   /* ---------- data: fetch helpers ---------- */
   function fetchT(url, ms) {
@@ -250,7 +247,7 @@ window.__JAHREAD=R;
   }
   function azRenderPage(L) {
     var rows = AZ.rows[L] || [], shown = AZ.shown[L] || 0;
-    var body = document.querySelector('[data-azbody="' + L + '"]');
+    var body = $("azletters").querySelector('[data-azbody="' + L + '"]');
     if (!body) return;
     var h = "", i;
     for (i = 0; i < shown && i < rows.length; i++) h += azRowHtml(rows[i]);
@@ -265,7 +262,7 @@ window.__JAHREAD=R;
   function azLoadLetter(L) {
     if (AZ.rows[L] || AZ.loading[L]) return;
     AZ.loading[L] = true;
-    var body = document.querySelector('[data-azbody="' + L + '"]');
+    var body = $("azletters").querySelector('[data-azbody="' + L + '"]');
     gunzipRetry("data/index/az/" + L + ".json.gz").then(function (text) {
       var rows = [];
       text.split("\n").forEach(function (ln) {
