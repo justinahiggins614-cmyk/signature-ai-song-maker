@@ -30,7 +30,7 @@
     { file: "addon-backup.html", emoji: "\uD83C\uDF99\uFE0F", label: "Backup Singers", blurb: "Add backup singers to your song." },
     { file: "addon-chorus.html", emoji: "\uD83C\uDFB5", label: "Chorus", blurb: "Build a big chorus." },
     { file: "studio-setup.html", emoji: "\uD83D\uDD0C", label: "Studio Setup", blurb: "The complete studio: gear, wiring, presets." },
-    { file: "songs.html", emoji: "\uD83D\uDC80", label: "Song Archive", blurb: "Every finished song \u2014 search and play." },
+    { file: "songs.html", emoji: "\uD83D\uDC80", label: "📀 1 Million Archive", blurb: "Every finished song \u2014 search and play." },
     { file: "beats.html", emoji: "\uD83E\uDD41", label: "Beats", blurb: "Every beat \u2014 search and play." },
     { file: "library.html", emoji: "\uD83C\uDF9B\uFE0F", label: "Sound Library", blurb: "Every sound, instrument, set and pack." }
   ];
