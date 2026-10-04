@@ -155,7 +155,7 @@ function makeBridge() {
   }
   return {
     jahNav: function (id) { var e = document.getElementById(id); if (e) e.innerHTML = '<a href="index.html">🎵 Music Studio</a> · <a href="songs.html">Songs</a> · <a href="studio-setup.html">🔌 Studio Setup</a>'; },
-    nav: function () { var e = document.getElementById("studionav"); if (e) e.innerHTML = '<div class="wrap"><a class="btn ghost" href="index.html">Song Makers</a> <a class="btn ghost" href="addon-sfx.html">✨ Sound Effects</a> <a class="btn ghost" href="addon-backup.html">🎤 Backup Singers</a> <a class="btn ghost" href="addon-chorus.html">🎵 Chorus</a> <a class="btn ghost" href="studio-setup.html">🔌 Studio Setup</a></div>'; },
+    nav: function (file) { var e = document.getElementById("studionav"); if (e && typeof SigStudio !== "undefined" && SigStudio.nav) e.innerHTML = SigStudio.nav(file || "addon-sfx.html"); },
     unlock: function () { try { if (S.unlockAudio) S.unlockAudio(); } catch (e) {} },
     renderSongBuffer: function (song, seconds) {
       if (S.renderSong) return S.renderSong(song, seconds || 60, null);
