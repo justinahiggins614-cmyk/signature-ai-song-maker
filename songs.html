@@ -25,6 +25,7 @@
 </head>
 <body>
 <nav class="jahnet" aria-label="JAH Network Global Ecosystem"><div class="wrap" id="jahnet"></div></nav>
+<div class="wrap"><div id="studionav"></div></div>
 
 <header class="hero"><div class="wrap">
 <div class="kick">SITE 23 OF 27 · THE JAH NETWORK</div>
@@ -60,6 +61,7 @@
 <script src="assets/engine.js"></script>
 <script src="assets/lame.min.js"></script>
 <script src="assets/studio-core.js"></script>
+<script>try { var sn = document.getElementById("studionav"); if (sn && window.SigStudio) sn.innerHTML = SigStudio.nav("songs.html"); } catch (e) {}</script>
 <script>
 (function () {
   "use strict";
@@ -139,8 +141,22 @@
     return fetchT(url).then(function (r) { return r.arrayBuffer(); })
       .then(function (ab) { return new Response(new Blob([ab]).stream().pipeThrough(new DecompressionStream("gzip"))).text(); });
   }
+  // Retry wrapper: phones on flaky connections get 3 attempts with backoff
+  // before we show an error. Never fails silently.
+  function gunzipRetry(url, tries) {
+    tries = tries || 3;
+    function attempt(n) {
+      return gunzip(url).catch(function (e) {
+        if (n < tries) {
+          return new Promise(function (res) { setTimeout(res, 800 * n); }).then(function () { return attempt(n + 1); });
+        }
+        throw e;
+      });
+    }
+    return attempt(1);
+  }
   function loadIndex() {
-    return gunzip("data/index/index.json.gz").then(function (t) {
+    return gunzipRetry("data/index/index.json.gz").then(function (t) {
       var rows = t.split("\n").filter(Boolean).map(JSON.parse);
       SONGS = rows.filter(function (r) { return r[2] === "song"; })
         .map(function (r) { return { id: r[0], title: r[1], chunk: r[3], n: parseInt(r[0].slice(-7), 10) || 0 }; });
@@ -243,7 +259,13 @@
       refilter();
     });
     $("arandom").onclick = function () {
-      if (!SONGS.length) return;
+      if (!SONGS.length) {
+        $("acount").textContent = "Archive still loading — retrying…";
+        loadIndex().then(function () { initBrowser(); draw(); $("arandom").click(); }, function () {
+          $("acount").textContent = "Archive failed to load — check your connection, then tap Retry below.";
+        });
+        return;
+      }
       var s = SONGS[Math.floor(Math.random() * SONGS.length)];
       location.href = "songs.html?song=" + s.id;
     };

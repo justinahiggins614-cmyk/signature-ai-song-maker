@@ -30,300 +30,34 @@
 <div class="kick">SITE 23 OF 27 · THE JAH NETWORK</div>
 <h1>SIGNATURE MUSIC STUDIO</h1>
 <div><span class="official">OFFICIAL SIGNATURE SITE — within the Signature/JAH system</span></div>
-<p class="sub">The full music-making studio. Every sound, every instrument, all the studio equipment with real patch guides — make your music <b>on your own</b>, <b>via AI</b>, or <b>in collaboration with AI</b>.</p>
+<p class="sub">The full music-making studio. Every sound, every instrument, all the studio equipment — make your music <b>on your own</b>, <b>via AI</b>, or <b>in collaboration with AI</b>.</p>
+<div id="studionav"></div>
 <p style="margin:.6rem 0"><a class="btn big gold" href="songs.html" style="text-decoration:none">📀 Open the Song Archive</a> <span class="seqlab">Every finished song — search, filter, one-tap play.</span></p>
 <details class="statdrawer"><summary>📊 Archive counts</summary><p class="counter" id="counters" data-stamp="2026-10-04"><!-- COUNT-STAMP-START -->📀 <b>9,700</b> / 1,000,000 songs &nbsp;·&nbsp; 🎛️ <b>9,450</b> / 1,000,000 instruments, sets &amp; packs &nbsp;·&nbsp; 🥁 <b>4,750</b> beats &nbsp;·&nbsp; 🎚️ <b>350</b> equipment records<!-- COUNT-STAMP-END --> <span class="seqlab">last published count — loading live…</span></p></details>
 <div class="honest">Every sound on this site is synthesized live in your browser with the Web Audio API — no samples, no downloads needed to play. All voices are synthesized; there are no human singers here. What the AI makes, it makes from a deterministic seed: the same request always makes the same music.</div>
 </div></header>
 
 <div class="wrap">
-<div id="studionav"></div>
-
 <section class="sec" id="startdoor">
 <h2>🚪 Start here — pick how you want to make music</h2>
-<p class="seqlab">Three song makers, from the simplest to the full studio. Every one talks you through it.</p>
+<p class="seqlab">Three song makers, from the simplest to the full studio. Every one talks you through it in plain words.</p>
 <div class="grid">
-<div class="card"><h4>🎵 Song Maker Option 1</h4><p>The AI host makes you a beat <b>right now</b> — a couple of taps. Tell it what you want, it makes it.</p><p><a class="btn big" href="maker1.html" style="text-decoration:none">Make a beat →</a></p></div>
-<div class="card"><h4>🎤 Song Maker Option 2</h4><p>Walk me through it — build a <b>full song</b> step by step with the AI host: sounds, beat, lyrics, singing, mix, finish.</p><p><a class="btn big" href="maker2.html" style="text-decoration:none">Build a song →</a></p></div>
-<div class="card"><h4>🎚️ Song Maker Option 3</h4><p>The full workstation — track lanes, mixer, sound library. For when you want every control.</p><p><a class="btn big" href="maker3.html" style="text-decoration:none">Open the studio →</a></p></div>
-<div class="card"><h4>✨ Add-ons</h4><p>Finished a song? Add <a href="addon-sfx.html">sound effects</a>, <a href="addon-backup.html">backup singers</a>, or build a bigger <a href="addon-chorus.html">chorus</a>.</p></div>
-<div class="card"><h4>🔌 Full Studio Setup</h4><p>The complete studio — every piece of gear, how to wire it, ready-made setups.</p><p><a class="btn ghost" href="studio-setup.html" style="text-decoration:none">See the setup →</a></p></div>
+<div class="card"><h4>🎵 Quick Song</h4><p><b>Song Maker Option 1.</b> The AI host makes you a beat <b>right now</b> — a couple of taps. Tell it what you want, it makes it. So easy a kid can do it.</p><p><a class="btn big" href="maker1.html" style="text-decoration:none">Make a beat →</a></p></div>
+<div class="card"><h4>🎤 Guided Builder</h4><p><b>Song Maker Option 2.</b> Walk through it — build a <b>full song</b> step by step with the AI host: sounds, beat, lyrics, singing, mix, finish.</p><p><a class="btn big" href="maker2.html" style="text-decoration:none">Build a song →</a></p></div>
+<div class="card"><h4>🎚️ Full Studio</h4><p><b>Song Maker Option 3.</b> The full workstation — track lanes, piano roll, mixer, sound library, effects. For when you want every control.</p><p><a class="btn big" href="maker3.html" style="text-decoration:none">Open the studio →</a></p></div>
+<div class="card"><h4>✨ Sound Effects</h4><p>Finished a song? Add echo, reverb and more — pull in a song you made or drop your own file.</p><p><a class="btn ghost" href="addon-sfx.html" style="text-decoration:none">Add effects →</a></p></div>
+<div class="card"><h4>🎙️ Backup Singers</h4><p>Add backup singers to your song — every voice synthesized, never a human singer.</p><p><a class="btn ghost" href="addon-backup.html" style="text-decoration:none">Add singers →</a></p></div>
+<div class="card"><h4>🎵 Chorus</h4><p>Build a big chorus around your song.</p><p><a class="btn ghost" href="addon-chorus.html" style="text-decoration:none">Build chorus →</a></p></div>
+<div class="card"><h4>🔌 Studio Setup</h4><p>The complete studio — every piece of gear, how to wire it, ready-made setups.</p><p><a class="btn ghost" href="studio-setup.html" style="text-decoration:none">See the setup →</a></p></div>
 <div class="card"><h4>📀 Archives</h4><p>Every finished <a href="songs.html">song</a>, every <a href="beats.html">beat</a>, every <a href="library.html">sound</a> — search, play, download .wav + .mp3.</p></div>
 </div>
 </section>
-<script>try{ if(window.SigStudio){ document.getElementById("studionav").innerHTML = SigStudio.nav("index.html"); } }catch(e){}</script>
 
-<div class="modes" role="group" aria-label="How to make music">
-<button data-mode="self" class="on">🎸 Make it yourself</button>
-<button data-mode="ai">🤖 Let the AI make it</button>
-<button data-mode="collab">🤝 Collaborate with AI</button>
-</div>
-<p class="seqlab" id="modeline" style="text-align:center">Mode: make it yourself — you set every control.</p>
-
-<section class="sec" id="makestudio">
-<h2>✨ Make a Song</h2>
-<p class="seqlab">Describe it. One button. The studio does the rest — full song, 18-bar verses, four chorus breaks, rhyming lyrics that make sense.</p>
-<div><label for="promptbox" style="font-size:18px;color:var(--gold)">Describe your song — make any song you can imagine…</label>
-<textarea id="promptbox" rows="3" style="width:100%" placeholder="e.g. a dark hip-hop anthem about the midnight highway, gritty 90s boom-bap with a sung chorus…"></textarea></div>
-<div class="row">
-<div><label>Style</label><select id="promptstyle"><option value="">Any — surprise me</option></select></div>
-<div><label>Lyrics</label><select id="promptlyrics"><option value="ai">AI writes them (rhyming)</option><option value="typed">I'll type them</option><option value="none">Instrumental</option></select></div>
-</div>
-<p><button class="btn big" id="promptcreate">✨ Create my song</button> <span class="seqlab" id="promptinfo"></span></p>
-<div id="promptout"></div>
-<h3 style="color:var(--gold)">🔥 Explore — fresh from the studio</h3>
-<p class="seqlab">Tap ▶ on anything to hear it right here.</p>
-<div class="grid" id="exploregrid"><div class="card" role="status">Loading the archive…</div></div>
-<p style="text-align:center"><button class="btn ghost" id="walkopen2">🎧 Want the guided path? Open the Song Walkthrough →</button></p>
-</section>
-
-<div class="finder">
-<label for="finderq" style="color:var(--violet);font-size:16px">🔎 Finder AI — describe what you're looking for…</label>
-<input id="finderq" type="text" placeholder="e.g. a dark hip-hop beat, a warm condenser mic, a love song about the river…" aria-label="Describe what you're looking for">
-<div class="hits" id="finderhits"></div>
-</div>
-
-<div id="record"></div>
-
-<section class="sec" id="console">
-<h2>🎚️ Studio Console</h2>
-<p>State-of-the-art working console. The VU meter rides the master bus <b>live</b> while anything plays; the channel faders shape every demo mix and vocal render.</p>
-<div class="row">
-<div style="flex:0 0 280px;min-width:260px"><label>Master VU — live</label><canvas class="wave" id="vumaster" width="280" height="90"></canvas><p class="seqlab">Needle follows the master bus in real time.</p></div>
-<div><label>Channel faders — applied to demo mixes &amp; vocal renders</label>
-<div class="checklist" id="faders">
-<div><label>🥁 Drums <span data-fv="drums">100</span>%</label><input type="range" min="0" max="150" value="100" data-bus="drums" style="width:100%"></div>
-<div><label>🎸 Bass <span data-fv="bass">100</span>%</label><input type="range" min="0" max="150" value="100" data-bus="bass" style="width:100%"></div>
-<div><label>🎹 Chords <span data-fv="chords">100</span>%</label><input type="range" min="0" max="150" value="100" data-bus="chords" style="width:100%"></div>
-<div><label>🎺 Melody <span data-fv="lead">100</span>%</label><input type="range" min="0" max="150" value="100" data-bus="lead" style="width:100%"></div>
-<div><label>🎤 Vocal <span data-fv="vocal">100</span>%</label><input type="range" min="0" max="150" value="100" data-bus="vocal" style="width:100%"></div>
-</div></div>
-</div>
-</section>
-
-<section class="sec" id="studio">
-<h2>🎛️ Sound Library</h2>
-<p>Every sound possible — drums, bass, keys, strings, brass, pads, leads, world instruments, FX — plus instruments, sound sets, and sound packs. All synthesized live. <details class="statdrawer inline"><summary>📊</summary><span class="counter" id="libcount"><!-- LIBCOUNT-STAMP-START -->(9,450 / 1,000,000)<!-- LIBCOUNT-STAMP-END --></span></details></p>
-<div class="row"><div><label>Family</label><select id="libfam"><option value="">All families</option></select></div>
-<div><label>Type</label><select id="libtype"><option value="">All</option><option value="sound">Sounds</option><option value="instrument">Instruments</option><option value="set">Sound sets</option><option value="pack">Sound packs</option></select></div>
-<div><label>Search</label><input type="text" id="libq" placeholder="Search the library…"></div></div>
-<div class="az" id="libaz"></div>
-<div class="grid" id="libgrid"><div class="card" role="status">Loading the archive…</div></div>
-</section>
-
-<section class="sec" id="equipment">
-<h2>🎚️ Studio Equipment</h2>
-<p>All the studio-making equipment — instruments, microphones, preamps, interfaces, monitors, patch bays — every item with <b>real instrument and mic patch lists</b>: exactly how to route it.</p>
-<div class="row"><div><label>Category</label><select id="gearcat"><option value="">All</option><option value="instrument">Instruments</option><option value="mic">Microphones</option><option value="preamp">Preamps</option><option value="interface">Interfaces</option><option value="monitor">Monitors</option><option value="patch">Patching</option><option value="processor">Processors</option></select></div>
-<div><label>Search</label><input type="text" id="gearq" placeholder="Search equipment…"></div></div>
-<div class="grid" id="geargird"><div class="card" role="status">Loading the archive…</div></div>
-</section>
-
-<section class="sec" id="beatmaker">
-<h2>🥁 AI Beat Maker</h2>
-<p>Describe the beat you want — the AI arranges it from a deterministic seed. Same request, same beat, every time.</p>
-<div class="row">
-<div><label>Describe your beat</label><input type="text" id="beatprompt" placeholder="e.g. dark trap banger, dusty boom-bap, smooth lofi groove…"></div>
-<div><label>Genre</label><select id="beatgenre"></select></div>
-<div><label>Tempo (BPM)</label><input type="number" id="beatbpm" value="92" min="60" max="180"></div>
-<div><label>Bars</label><input type="number" id="beatbars" value="4" min="1" max="16"></div>
-</div>
-<p><button class="btn" id="beatmake">🤖 AI: Make my beat</button>
-<button class="btn ghost" id="beatplay">▶ Play</button>
-<button class="btn ghost" id="beatstop">⏹ Stop</button>
-<button class="btn teal" id="beatwav">⬇ Download .wav</button>
-<button class="btn ghost" id="beatjson">⬇ Pattern JSON</button></p>
-<canvas class="wave" id="beatwave" width="900" height="90"></canvas>
-<div id="patterngrid" style="margin-top:10px"></div>
-<p class="seqlab">Track lanes — click any step to toggle it. The beat re-renders with your edit (still deterministic from the seed + your tweaks).</p>
-<p class="seqlab" id="beatinfo"></p>
-<p class="seqlab" id="beatdesc"></p>
-</section>
-
-<section class="sec" id="songwriter">
-<h2>✍️ Auto Song Writer</h2>
-<p>The AI writes a full song <b>to spec</b> — stamped <span class="id">JAH-SONG-0000001…</span> with title, lyrics, chord chart, structure, tempo, and key — or renders it <b>to song sound</b>: a playable demo mix.</p>
-<div class="row">
-<div><label>Theme / idea</label><input type="text" id="songtheme" placeholder="e.g. a highway at dawn, neon city love…"></div>
-<div><label>Genre</label><select id="songgenre"></select></div>
-<div><label>Mood</label><select id="songmood"></select></div>
-</div>
-<p><button class="btn" id="songwrite">🤖 AI: Write my song</button>
-<button class="btn ghost" id="songself">🎸 I'll write it (template)</button></p>
-<div id="songout"></div>
-</section>
-
-<section class="sec" id="vocalstudio">
-<h2>🎤 Vocal Studio</h2>
-<p>Enter lyrics, pick a voice — a <b>created voice</b> or <b>your own voice</b>. The vocal synth sings it. Plainly: these are synthesized voices, not human singers.</p>
-<div class="honest">Created voices (Nova, Ember, Drift, Stone) are formant-synthesis voices built on this page. "Your own voice" records or uploads your sample and pitch-maps it onto the melody — a resynthesis of your recording.</div>
-<div><label>Lyrics (one line per phrase)</label><textarea id="vlyrics" placeholder="Type or paste lyrics, one phrase per line…"></textarea></div>
-<div class="row">
-<div><label>Voice</label><select id="vvoice"><option value="nova">Nova — bright airy (synth)</option><option value="ember">Ember — warm alto (synth)</option><option value="drift">Drift — soft breathy (synth)</option><option value="stone">Stone — deep resonant (synth)</option><option value="own">My own voice (record/upload)</option></select></div>
-<div><label>Genre (shapes the melody)</label><select id="vgenre"><option value="">Any — surprise me</option></select></div>
-<div><label>Backup singers</label><select id="vbackup" multiple size="3"><option value="soprano">Soprano section</option><option value="alto">Alto section</option><option value="tenor">Tenor section</option><option value="bass">Bass section</option><option value="choir">Choir stack</option><option value="adlibs">Ad-libs</option></select></div>
-</div>
-<p><label style="display:block;margin:.4rem 0"><input type="checkbox" id="vconsent" style="width:auto;display:inline-block"> I understand my voice sample stays <b>in this browser only</b> — never uploaded, never shared — and I can delete it anytime.</label><button class="btn" id="vrec">🔴 Record my voice</button>
-<button class="btn ghost" id="vupload">⬆ Upload sample</button><input type="file" id="vfile" accept="audio/*" style="display:none">
-<button class="btn violet" id="vsing">🎤 Sing it</button>
-<button class="btn ghost" id="vplay">▶ Play</button>
-<button class="btn teal" id="vwav">⬇ Download .wav</button>
-<button class="btn ghost" id="vdel">🗑 Delete my voice sample</button></p>
-<div class="honest" id="voiceprivacy"><b>🔒 Your voice, your device.</b> Recording and uploads are accepted as wav, mp3, webm or ogg (whatever your browser can decode), up to <b>10&nbsp;MB</b>. Your sample is decoded <b>in this browser's memory only — it is never uploaded anywhere and never leaves your device</b>. It is replaced when you record or upload a new sample, and it is gone when you reload or close the page.</div>
-<p class="seqlab" id="vinfo"></p>
-</section>
-
-<section class="sec" id="backups">
-<h2>🎶 Backup Singers</h2>
-<p>All types, selectable <b>to spec</b> — they join the song's spec record and its mix. Every backup singer is a <b>synthesized voice</b>, never a human singer.</p>
-<div class="grid" id="backupgrid"><div class="card" role="status">Loading the archive…</div></div>
-</section>
-
-<section class="sec" id="cleanup">
-<h2>✨ Vocal Cleanup</h2>
-<p>Upload your vocals — the AI cleans them up: de-rumble, de-hiss, compression, leveling. <b>Re-sing clean</b> detects your melody and has the vocal synth sing it back alike, cleaned up — the re-sung voice is <b>synthesized</b>, not a human singer.</p>
-<div class="honest">Honest limits: cleanup cannot fix hard clipping or heavy distortion. Record with peaks near −12&nbsp;dB for best results.</div>
-<p><button class="btn ghost" id="cup">⬆ Upload vocals</button><input type="file" id="cufile" accept="audio/*" style="display:none">
-<button class="btn" id="cuclean">✨ AI: Clean it up</button>
-<button class="btn violet" id="curesing">🎤 AI: Re-sing it clean</button>
-<button class="btn ghost" id="cuplay">▶ Play result</button>
-<button class="btn teal" id="cuwav">⬇ Download .wav</button></p>
-<p class="seqlab" id="cuinfo"></p>
-</section>
-
-<section class="sec" id="cdmaker">
-<h2>💿 Make a CD</h2>
-<p>Pick songs from the archive — the site renders each to CD-quality audio, builds a cue sheet, and packages a <b>disc image download</b> with step-by-step burning instructions.</p>
-<div class="honest">Browsers cannot drive a CD burner directly, so this page prepares the disc image; you burn it with your own burner software using the included guide. First: does your system have a CD burner? <select id="burnerq" style="width:auto;display:inline-block"><option value="">— choose —</option><option value="yes">Yes, it has a burner</option><option value="no">No burner</option><option value="dk">I don't know</option></select></div>
-<div><label>Add songs by ID (one per line, e.g. JAH-SONG-0000001)</label><textarea id="cdlist" placeholder="JAH-SONG-0000001&#10;JAH-SONG-0000042"></textarea></div>
-<p><button class="btn teal" id="cdaddlatest">➕ Add my latest AI song</button> <span class="seqlab">Made a song above? One tap puts it on the track list.</span></p>
-<p><button class="btn" id="cdrender">💿 Render my CD</button> <span class="seqlab">⚠️ Browsers can't burn a disc directly — this builds a <b>disc image</b> (.zip + cue sheet) for your own burner software.</span> <span class="seqlab" id="cdinfo"></span></p>
-<div id="cdout"></div>
-</section>
-
-<div class="teacher" id="teacher">
-<h2 style="color:var(--teal);margin-top:0">🎓 Music Teacher AI</h2>
-<div class="aicard" aria-label="AI identity card">🤖 <b>Music Teacher AI</b> — the AI that talks here.<br>
-<b>Duties:</b> teaches music theory, instruments, and production from the studio's own data — and says plainly when something isn't covered.
-<b>Engine:</b> grounded on-page Q&amp;A engine over the studio knowledge base. It claims no canon JAH-AI ID.</div>
-<p>Ask about music theory, instruments, production, or anything on this site. The teacher answers only from the studio's own data — and says plainly when something isn't covered.</p>
-<div class="row"><div><input type="text" id="teachq" placeholder="e.g. What is a chord progression? How do I patch a condenser mic?"></div><div style="flex:0"><label>&nbsp;</label><button class="btn teal" id="teachgo">Ask</button></div></div>
-<div class="ans" id="teachans" style="display:none"></div>
-</div>
-
-<section class="sec" id="songs">
-<h2>📀 Song Archive</h2>
-<p>Every song fully made — lyrics, chords, structure, tempo, key — and <b>ready to play</b>: one click renders the demo mix. Marching to one million.</p>
-<p><button class="btn violet" data-walkopen>🎧 Step-by-step: make a song like these</button> <span class="seqlab">Opens the walkthrough in a popup — one easy question per screen.</span></p>
-<div class="filterbar"><div class="row"><div><label>Search songs</label><input type="text" id="songq" placeholder="Search songs…" aria-label="Search songs"></div><div><label>Genre</label><select id="songgenref" aria-label="Filter songs by genre"><option value="">All genres</option></select></div><div><label>Order</label><select id="songorder" aria-label="Sort songs"><option value="new">Newest first</option><option value="old">Oldest first</option></select></div></div></div>
-<div class="az" id="songaz"></div>
-<div class="grid" id="songgrid"><div class="card" role="status">Loading the archive…</div></div>
-</section>
-
-<section class="sec" id="beats">
-<h2>🥁 Beat Archive</h2>
-<p>A vast selection of beats — <b>every genre</b>, plus <b>vintage-era classics</b>. All beats are <b>original Signature compositions</b>: era records are original beats <i>in the style of</i> classic eras — never copies of any real song, lyrics, or melody.</p>
-<p><button class="btn violet" data-walkopen>🎧 Step-by-step: make a beat like these</button> <span class="seqlab">Opens the walkthrough in a popup — one easy question per screen.</span></p>
-<div class="filterbar"><div class="row"><div><label>Style</label><select id="beatstyle"><option value="">All styles</option></select></div>
-<div><label>Search</label><input type="text" id="beatq" placeholder="Search beats…"></div></div></div>
-<div class="grid" id="beatgrid"><div class="card" role="status">Loading the archive…</div></div>
-</section>
-
-<section class="sec" id="session">
-<details class="dropbox" id="sessiondrop">
-<summary class="dropbox-sum"><h2 style="display:inline">🎛️ Studio Session — make a song step by step</h2> <span class="seqlab">optional — tap to open the step-by-step guide</span></summary>
-<p class="projbar"><button class="btn ghost" id="projundo">↩ Undo</button> <button class="btn ghost" id="projredo">↪ Redo</button> <button class="btn ghost" id="projsnap">📸 Snapshot</button> <button class="btn ghost" id="projlog">🧾 What did the AI change?</button> <span class="seqlab" id="projsaved">💾 Project autosaves locally</span></p>
-<p><b>Anything a studio does, as a process.</b> Walk the stages in order — or let the <b>AI pal</b> guide you or finish the whole project for you. Every stage opens what you need as a popup.</p>
-<div class="aipal" id="walklaunch" style="margin-bottom:14px">
-<h3>🎧 Song Walkthrough — the easy way</h3>
-<div class="say" id="walksay">New here? I'll walk you through your song one easy step at a time — genre, beat, vocals, ending — in plain words. Or tap one button and the AI finishes the whole song for you, 5 minutes with four chorus breaks.</div>
-<p><button class="btn" id="walkstart">🎧 Start the walkthrough</button>
-<button class="btn violet" id="walkai">🤖 AI: just finish a song for me</button></p>
-</div>
-<div class="aipal" id="aipal">
-<h3>🤖 AI Pal</h3>
-<div class="aicard" aria-label="AI identity card">🤖 <b>AI Pal</b> — your studio companion here.<br>
-<b>Duties:</b> guides you stage by stage through the song-making process, answers plain-language questions about any stage, and can auto-complete your whole project from your seed.
-<b>Engine:</b> on-page studio engine — every word it says about your project is computed in your browser. It claims no canon JAH-AI ID.</div>
-<div class="say" id="palsay">Hey! I'm your studio pal. We'll go stage by stage — sounds, beat, lyrics, singing, mix, filters, CD. Tap a stage, or tell me to take over.</div>
-<div class="row">
-<div><label>Talk to your pal</label><input type="text" id="palq" placeholder='e.g. "take over", "make me a dark trap song", "what is stage 3?"'></div>
-<div style="flex:0"><label>&nbsp;</label><button class="btn violet" id="palgo">Send</button></div>
-</div>
-<p><button class="btn" id="palauto">🤖 AI: auto-complete my whole project</button>
-<button class="btn ghost" id="paldaw">🎛️ Open the DAW (Cakewalk-type studio popup)</button></p>
-</div>
-<div class="stages" id="stagebtns">
-<button data-stage="1" class="on">1 · Sounds</button>
-<button data-stage="2">2 · Beat</button>
-<button data-stage="3">3 · Lyrics</button>
-<button data-stage="4">4 · Singing</button>
-<button data-stage="5">5 · Mix/Master</button>
-<button data-stage="6">6 · Filters</button>
-<button data-stage="7">7 · Burn CD</button>
-</div>
-<div class="stagepane" id="stagepane"></div>
-<h3 style="color:var(--gold)">💾 My Library — your showpiece shelf</h3>
-<p><button class="btn ghost" id="libexport">⬇ Export library</button> <button class="btn ghost" id="libimport">⬆ Import library</button><input type="file" id="libfile" accept="application/json" style="display:none"> <span class="seqlab">Versioned JSON — your shelf, portable.</span></p>
-<p class="seqlab">Every sound you save lives here, ready to use in any session. Stored on your device.</p>
-<div class="mylib-grid" id="mylibgrid"></div>
-</details>
-</section>
-
-<section class="sec" id="addons">
-<h2>🤖 AI Addons — your studio band</h2>
-<p>Six specialist AIs that do the musician work with you — arrangement, groove, melody, vocal coaching, mastering, finishing. Each one is real, runs in your browser, and is free.</p>
-<div class="grid" id="addongrid"></div>
-</section>
 <section class="sec" id="staticcat">
 <h2>📚 Catalog index</h2>
 <p class="seqlab">A bot-friendly snapshot of the archive — the full feed is at <a href="data/music-catalog.json">data/music-catalog.json</a>.</p>
 <!-- STATIC-CAT-START -->
-<table class="statictable"><thead><tr><th>ID</th><th>Title</th><th>Status</th><th>Open</th></tr></thead><tbody>
-<tr><td><span class="id">JAH-SONG-0000001</span></td><td>Amber Harbor</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000001">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000002</span></td><td>Silver Highway</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000002">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000003</span></td><td>Midnight Garden</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000003">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000004</span></td><td>Crimson Horizon</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000004">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000005</span></td><td>Restless Orbit</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000005">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000006</span></td><td>Golden Drift</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000006">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000007</span></td><td>Slow Lantern</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000007">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000008</span></td><td>Electric Meadow</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000008">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000009</span></td><td>Amber Tide</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000009">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000010</span></td><td>Bright River</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000010">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000011</span></td><td>Electric Garden</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000011">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000012</span></td><td>Quiet Signal</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000012">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000013</span></td><td>Hollow Horizon</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000013">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000014</span></td><td>Copper Garden</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000014">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000015</span></td><td>Static River</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000015">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000016</span></td><td>Midnight Wire</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000016">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000017</span></td><td>Paper Summit</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000017">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000018</span></td><td>Restless River</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000018">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000019</span></td><td>Wild Flame</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000019">Open →</a></td></tr>
-<tr><td><span class="id">JAH-SONG-0000020</span></td><td>Copper Tide</td><td>GENERATED</td><td><a href="?song=JAH-SONG-0000020">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000001</span></td><td>Signature Copper trap Beat II</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000001">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000002</span></td><td>Signature Paper 80s synthpop Beat V</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000002">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000003</span></td><td>Signature Patient rock Beat IV</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000003">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000004</span></td><td>Signature Amber 70s funk Beat IV</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000004">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000005</span></td><td>Signature Crimson techno Beat I</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000005">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000006</span></td><td>Signature Slow lofi Beat I</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000006">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000007</span></td><td>Signature Silver jazz Beat II</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000007">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000008</span></td><td>Signature Velvet 70s funk Beat II</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000008">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000009</span></td><td>Signature Bold 80s synthpop Beat IV</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000009">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000010</span></td><td>Signature Crimson pop Beat III</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000010">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000011</span></td><td>Signature Patient funk Beat V</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000011">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000012</span></td><td>Signature Hollow reggae Beat I</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000012">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000013</span></td><td>Signature Silver trap Beat V</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000013">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000014</span></td><td>Signature Distant funk Beat I</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000014">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000015</span></td><td>Signature Amber trap Beat II</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000015">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000016</span></td><td>Signature Neon 70s funk Beat III</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000016">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000017</span></td><td>Signature Golden 80s synthpop Beat I</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000017">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000018</span></td><td>Signature Distant 70s funk Beat II</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000018">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000019</span></td><td>Signature Bold 90s boombap Beat II</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000019">Open →</a></td></tr>
-<tr><td><span class="id">JAH-BEAT-0000020</span></td><td>Signature Static 00s crunk Beat I</td><td>GENERATED</td><td><a href="?beat=JAH-BEAT-0000020">Open →</a></td></tr>
-</tbody></table>
-<p class="seqlab">Showing the first 40 archive records. Full machine-readable feed: <a href="data/music-catalog.json">data/music-catalog.json</a>.</p>
 <!-- STATIC-CAT-END -->
-
 </section>
 </div>
 
@@ -339,53 +73,17 @@
 <div class="pbbtns"><button id="pbpause" aria-label="Pause" title="Pause">⏸</button><button id="pbplay" aria-label="Play" title="Play">▶</button><button id="pbstop" aria-label="Stop" title="Stop">⏹</button></div>
 </div>
 
-<div id="readbar"><span id="readlabel">Reading…</span>
-<button class="btn ghost" id="readplay">▶</button><button class="btn ghost" id="readstop">⏹</button><button class="btn ghost" id="readclose">✕</button></div>
-
-<script src="assets/synth.js"></script>
-<script src="assets/engine.js"></script>
-<script src="assets/lyrics.js"></script>
-<script src="assets/lame.min.js"></script>
 <script src="assets/studio-core.js"></script>
-<script src="assets/app.js"></script>
-<script src="assets/app2.js"></script>
-<script src="assets/app3.js"></script>
-<script src="assets/app4.js"></script>
-<script src="assets/app5.js"></script>
-<script src="assets/app6.js"></script>
-<script src="assets/app6b.js"></script>
-<script src="assets/app7.js"></script>
-<script src="assets/app8.js"></script>
-<script src="assets/app9.js"></script>
-<script src="assets/tour.js"></script>
-<style>
-#jah-theme-toggle{position:fixed;bottom:14px;right:14px;z-index:99999;width:40px;height:40px;border-radius:50%;border:1px solid var(--line,#3a2f55);background:var(--panel,#241d38);color:var(--ink,#f2ecdf);opacity:.6;cursor:pointer;font-size:18px;line-height:1;font-family:inherit}
-#jah-theme-toggle:hover{opacity:1}
-html[data-theme="dark"]{filter:invert(1) hue-rotate(180deg)}
-html[data-theme="dark"] img,html[data-theme="dark"] video,html[data-theme="dark"] canvas,html[data-theme="dark"] svg{filter:invert(1) hue-rotate(180deg)}
-</style>
-<button id="jah-theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">&#127769;</button>
 <script>
-/* dark-mode toggle: opt-in, default look unchanged */
-(function(){var b=document.getElementById("jah-theme-toggle");function paint(){b.innerHTML=document.documentElement.getAttribute("data-theme")==="dark"?"&#9728;&#65039;":"&#127769;"}b.addEventListener("click",function(){var dark=document.documentElement.getAttribute("data-theme")==="dark";try{if(dark){document.documentElement.removeAttribute("data-theme");localStorage.setItem("jah-theme","light")}else{document.documentElement.setAttribute("data-theme","dark");localStorage.setItem("jah-theme","dark")}}catch(e){}paint()});paint()})();
-/* session restore: scroll + last-opened record, localStorage only (page-shell; studio stages untouched) */
-(function(){var KEY="jah-sr:"+location.pathname,PARAMS=["song","beat"];
-function rd(){try{return JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){return{}}}
-function wr(o){try{localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}}
-var S=rd(),q=new URLSearchParams(location.search);
-var deep=PARAMS.some(function(p){return q.has(p)});
-var t;addEventListener("scroll",function(){clearTimeout(t);t=setTimeout(function(){S.y=window.scrollY;wr(S)},300)},{passive:true});
-document.addEventListener("click",function(e){var a=e.target.closest?e.target.closest("a[href]"):null;if(!a)return;
-  for(var i=0;i<PARAMS.length;i++){var m=a.getAttribute("href").match(new RegExp("[?&]"+PARAMS[i]+"=([^&#]*)"));if(m){S.last=PARAMS[i]+":"+decodeURIComponent(m[1]);wr(S);break}}});
-function findRec(s){if(!s)return null;var p=s.split(":"),v=p.slice(1).join(":");
-  var a=document.querySelector('a[href*="?'+p[0]+'='+v+'"]')||document.querySelector('a[href*="&'+p[0]+'='+v+'"]');
-  return a||document.getElementById(v)}
-addEventListener("load",function(){setTimeout(function(){
-  if(deep){PARAMS.forEach(function(p){if(q.get(p)){S.last=p+":"+q.get(p);wr(S)}});return}
-  if(!location.hash){
-    if(typeof S.y==="number"&&S.y>0){window.scrollTo(0,S.y)}
-    else if(S.last){var el=findRec(S.last);if(el)el.scrollIntoView({block:"center"})}}
-},400)})})();
+(function () {
+  try {
+    var el = document.getElementById("studionav");
+    if (el && window.SigStudio) el.innerHTML = SigStudio.nav("index.html");
+  } catch (e) {}
+  try {
+    if (window.SigStudio) { SigStudio.jahNav("jahnet"); SigStudio.jahNav("jahnet2"); }
+  } catch (e2) {}
+})();
 </script>
 </body>
 </html>

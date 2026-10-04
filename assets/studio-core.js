@@ -22,31 +22,30 @@
 
   /* ---------- the studio page order ---------- */
   var PAGES = [
-    { file: "index.html", emoji: "\uD83C\uDFE0", label: "Studio Front Door", blurb: "Start here \u2014 pick how you want to make music." },
-    { file: "maker1.html", emoji: "\uD83C\uDFB5", label: "Song Maker Option 1", blurb: "The AI host makes you a beat right now \u2014 a couple of taps." },
-    { file: "maker2.html", emoji: "\uD83C\uDFA4", label: "Song Maker Option 2", blurb: "Guided step by step \u2014 build a full song together." },
-    { file: "maker3.html", emoji: "\uD83C\uDFA7", label: "Song Maker Option 3", blurb: "The full workstation \u2014 tracks, mixer, library." },
-    { file: "addon-sfx.html", emoji: "\u2728", label: "Add-on: Sound Effects", blurb: "Echo, reverb and more on your song." },
-    { file: "addon-backup.html", emoji: "\uD83C\uDF99\uFE0F", label: "Add-on: Backup Singers", blurb: "Add backup singers to your song." },
-    { file: "addon-chorus.html", emoji: "\uD83C\uDFB5", label: "Add-on: Chorus", blurb: "Build a big chorus." },
-    { file: "studio-setup.html", emoji: "\uD83D\uDD0C", label: "Full Studio Setup", blurb: "The complete studio: gear, wiring, presets." },
+    { file: "index.html", emoji: "\uD83C\uDFE0", label: "Front Door", blurb: "Start here \u2014 pick how you want to make music." },
+    { file: "maker1.html", emoji: "\uD83C\uDFB5", label: "Quick Song", blurb: "Song Maker Option 1 \u2014 the AI host makes you a beat right now \u2014 a couple of taps." },
+    { file: "maker2.html", emoji: "\uD83C\uDFA4", label: "Guided Builder", blurb: "Song Maker Option 2 \u2014 guided step by step \u2014 build a full song together." },
+    { file: "maker3.html", emoji: "\uD83C\uDFA7", label: "Full Studio", blurb: "Song Maker Option 3 \u2014 the full workstation \u2014 tracks, mixer, library." },
+    { file: "addon-sfx.html", emoji: "\u2728", label: "Sound Effects", blurb: "Echo, reverb and more on your song." },
+    { file: "addon-backup.html", emoji: "\uD83C\uDF99\uFE0F", label: "Backup Singers", blurb: "Add backup singers to your song." },
+    { file: "addon-chorus.html", emoji: "\uD83C\uDFB5", label: "Chorus", blurb: "Build a big chorus." },
+    { file: "studio-setup.html", emoji: "\uD83D\uDD0C", label: "Studio Setup", blurb: "The complete studio: gear, wiring, presets." },
     { file: "songs.html", emoji: "\uD83D\uDC80", label: "Song Archive", blurb: "Every finished song \u2014 search and play." },
-    { file: "beats.html", emoji: "\uD83E\uDD41", label: "Beat Archive", blurb: "Every beat \u2014 search and play." },
+    { file: "beats.html", emoji: "\uD83E\uDD41", label: "Beats", blurb: "Every beat \u2014 search and play." },
     { file: "library.html", emoji: "\uD83C\uDF9B\uFE0F", label: "Sound Library", blurb: "Every sound, instrument, set and pack." }
   ];
 
   function nav(currentFile) {
-    var h = '<nav class="studionav" aria-label="Studio page order"><b>STUDIO PATH</b> ';
+    var h = '<nav class="studionav" aria-label="Studio tabs"><div class="tabbar" role="tablist">';
     for (var i = 0; i < PAGES.length; i++) {
       var p = PAGES[i];
       if (p.file === currentFile) {
-        h += '<span class="here">' + p.emoji + " " + esc(p.label) + "</span>";
+        h += '<span class="tab here" role="tab" aria-selected="true">' + p.emoji + " " + esc(p.label) + "</span>";
       } else {
-        h += '<a href="' + p.file + '" title="' + esc(p.blurb) + '">' + p.emoji + " " + esc(p.label) + "</a>";
+        h += '<a class="tab" role="tab" aria-selected="false" href="' + p.file + '" title="' + esc(p.blurb) + '">' + p.emoji + " " + esc(p.label) + "</a>";
       }
-      if (i < PAGES.length - 1) h += ' <span class="sep">\u203a</span> ';
     }
-    return h + "</nav>";
+    return h + "</div></nav>";
   }
 
   /* ---------- 27-site JAH network nav (canon, same as front door) ---------- */

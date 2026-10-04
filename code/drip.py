@@ -85,13 +85,36 @@ def main():
                 raise SystemExit("BUILD GATE FAILED: %s not in %s" % (rid, cname))
     print("build gate: %d new rows, all chunk pointers verified" % len(last_chunks))
     idx_path = os.path.join(IDXDIR, "index.json.gz")
-    with gzip.open(idx_path, "at", encoding="utf-8") as fh:
-        for r in songs:
-            fh.write(json.dumps([r["id"], r["title"], "song", last_chunks[r["id"]]], ensure_ascii=False) + "\n")
-        for r in lib:
-            fh.write(json.dumps([r["id"], r["name"], "sound", last_chunks[r["id"]]], ensure_ascii=False) + "\n")
-        for r in beats:
-            fh.write(json.dumps([r["id"], r["name"], "beat", last_chunks[r["id"]]], ensure_ascii=False) + "\n")
+    # FIX 2026-10-04: NEVER append ("at") to a gzip file — each append writes a
+    # new gzip member, and browsers' DecompressionStream rejects multi-member
+    # files ("Trailing junk..."), which broke the Song Archive on phones.
+    # Always rewrite the whole index as ONE gzip member.
+    old_rows = []
+    if os.path.exists(idx_path):
+        with gzip.open(idx_path, "rt", encoding="utf-8") as fh:
+            for line in fh:
+                line = line.strip()
+                if line:
+                    old_rows.append(line)
+    seen = set()
+    fresh = []
+    for line in old_rows:
+        try:
+            rid = json.loads(line)[0]
+        except Exception:
+            continue
+        if rid not in seen:
+            seen.add(rid)
+            fresh.append(line)
+    for r in songs:
+        fresh.append(json.dumps([r["id"], r["title"], "song", last_chunks[r["id"]]], ensure_ascii=False))
+    for r in lib:
+        fresh.append(json.dumps([r["id"], r["name"], "sound", last_chunks[r["id"]]], ensure_ascii=False))
+    for r in beats:
+        fresh.append(json.dumps([r["id"], r["name"], "beat", last_chunks[r["id"]]], ensure_ascii=False))
+    with gzip.open(idx_path, "wt", encoding="utf-8") as fh:
+        for line in fresh:
+            fh.write(line + "\n")
     state["song"] += N
     state["sound"] += N
     state["beat"] = state.get("beat", 1) + NB
