@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>try{if(localStorage.getItem("jah-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Song Archive — Signature Music Studio</title>
+<meta name="description" content="The Signature Music Studio Song Archive: every finished original song — searchable, filterable by genre, playable in your browser. Marching to one million songs.">
+<link rel="canonical" href="https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/songs.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Song Archive — Signature Music Studio">
+<meta property="og:description" content="Every finished original Signature song — search, filter by genre, play the demo mix. Marching to one million songs.">
+<meta property="og:url" content="https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/songs.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Song Archive — Signature Music Studio">
+<meta name="twitter:description" content="Every finished original Signature song — search, filter by genre, play the demo mix.">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/studio-theme.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+{"@type":"WebPage","name":"Song Archive — Signature Music Studio","url":"https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/songs.html","description":"Searchable, playable archive of every finished original Signature song.","author":{"@type":"Person","name":"Justin Addam Higgins"},"isPartOf":{"@type":"WebSite","name":"Signature Music Studio","url":"https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/"}},
+{"@type":"Dataset","name":"Signature Song Archive","description":"Deterministic archive of original Signature songs — marching to one million.","creator":{"@type":"Person","name":"Justin Addam Higgins"},"url":"https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/data/music-catalog.json"}
+]}
+</script>
+</head>
+<body>
+<nav class="jahnet" aria-label="JAH Network Global Ecosystem"><div class="wrap" id="jahnet"></div></nav>
+
+<header class="hero"><div class="wrap">
+<div class="kick">SITE 23 OF 27 · THE JAH NETWORK</div>
+<h1>📀 SONG ARCHIVE</h1>
+<div><span class="official">OFFICIAL SIGNATURE SITE — within the Signature/JAH system</span></div>
+<p class="sub">Every song fully made — lyrics, chords, structure, tempo, key — and <b>ready to play</b>: one click renders the demo mix. Marching to one million.</p>
+<p class="counter" id="songcount" data-stamp="2026-10-04"><!-- SONGARCHIVE-STAMP-START -->📀 <b>9,200</b> / 1,000,000 songs<!-- SONGARCHIVE-STAMP-END --> <span class="seqlab">last published count — loading live…</span></p>
+<p><a class="btn ghost" href="./" style="text-decoration:none">← Back to the Studio</a></p>
+<div class="honest">Every sound on this site is synthesized live in your browser with the Web Audio API — no samples, no downloads needed to play. All voices are synthesized; there are no human singers here. All songs are original Signature compositions.</div>
+</div></header>
+
+<div class="wrap" id="main">
+<section class="sec" id="browser" aria-label="Song browser">
+<div class="filterbar"><div class="row">
+<div><label>Search songs</label><input type="text" id="aq" placeholder="Search title or ID…" aria-label="Search songs"></div>
+<div><label>Genre</label><select id="agenre" aria-label="Filter songs by genre"><option value="">All genres</option></select></div>
+<div><label>Order</label><select id="aorder" aria-label="Sort songs"><option value="new">Newest first</option><option value="old">Oldest first</option></select></div>
+<div style="flex:0"><label>&nbsp;</label><button class="btn violet" id="arandom" type="button">🎲 Random song</button></div>
+</div></div>
+<div class="az" id="aaz" aria-label="Browse by first letter"></div>
+<p class="seqlab" id="acount" role="status"></p>
+<div class="grid" id="agrid"><div class="card" role="status">Loading the archive…</div></div>
+<div class="row" id="apages" style="margin-top:10px"></div>
+</section>
+
+<section class="sec" id="detail" style="display:none" aria-label="Song detail"></section>
+</div>
+
+<div id="readbar" style="display:none"><span id="readlabel">Reading…</span>
+<button class="btn ghost" id="readplay">▶</button><button class="btn ghost" id="readstop">⏹</button><button class="btn ghost" id="readclose">✕</button></div>
+
+<script src="assets/synth.js"></script>
+<script src="assets/engine.js"></script>
+<script>
+(function () {
+  "use strict";
+  var BASE = "https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/";
+  var S = window.SigSynth || window.S, D = window.SigData;
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+
+  /* ---------- JAH network nav (same canon as the studio front door) ---------- */
+  var NAV = [
+    ["Signature Math", "signature-math"], ["Signature Universal Paradox Immune Calculator", "jah-calculator"], ["The Signature Dictionary", "jah-dictionary"],
+    ["JAH Wiki", "jah-wiki"], ["JAH-N Wiki", "jah-n-wiki-leaks"], ["Signature Llama: The Fully Cyber Utilizable AI", "signature-llama"],
+    ["The Signature AI Phone Book", "jah-ai-models"], ["Globally Rejustered Patent Catalog", "cyber-patent-catalog"], ["Signature Spec Catalog Pending Patents", "signature-one-archive/specs.html"],
+    ["The Signature PC System Depository", "jah-computer-systems"], ["The Signature Book Depository", "signature-books"], ["The Signature Comic Store", "signature-comics"],
+    ["The Signature Global Newspaper Archive", "signature-newspapers"], ["The Signature AI Mad Scientist Creation Lab", "signature-backend"], ["The Signature Boundless Generator Archive", "signature-boundless-generators"],
+    ["The Signature AI Mix Lab", "signature-ai-mixlab"], ["AI Olypics", "signature-ai-olypics"], ["The Signature Computer Chip Maker and Archive", "signature-chip-maker"],
+    ["The Signature App Archive", "signature-app-archive"], ["The Signature AI Robot Matcher", "signature-ai-robot-matcher"], ["The Signature Experiment Solver", "signature-experiment-solver"],
+    ["Signature AI Pixel", "signature-ai-image-video-maker"], ["The Signature Mr Fix-It", "signature-fixit"], ["The Signature University", "signature-university"],
+    ["The Signature Cyber Mega-Mall", "signature-cyber-mega-mall"], ["The Signature 3D Print Depository", "signature-3d-print"]
+  ];
+  (function buildNav() {
+    var h = "<b>THE JAH NETWORK</b> ", i;
+    for (i = 0; i < NAV.length; i++) h += '<a href="https://justinahiggins614-cmyk.github.io/' + NAV[i][1] + '/">' + (i + 1) + " " + esc(NAV[i][0]) + "</a>";
+    h += '<span class="here">23 Signature Music Studio · Song Archive — YOU ARE HERE</span>';
+    $("jahnet").innerHTML = h;
+  })();
+
+  /* ---------- tiered read-aloud (site pattern: speechSynthesis -> Google TTS audio) ---------- */
+  var readText = "";
+  function speakTier(text, done) {
+    try {
+      if ("speechSynthesis" in window && window.speechSynthesis) {
+        var u = new SpeechSynthesisUtterance(text); u.rate = 1; u.onend = done; u.onerror = done;
+        speechSynthesis.cancel(); speechSynthesis.speak(u); return;
+      }
+    } catch (e) {}
+    googleChunks(text, done);
+  }
+  function googleChunks(text, done) {
+    // Google TTS caps a request — split into sentence-safe chunks, play in order
+    var parts = [], t = String(text);
+    while (t.length > 170) {
+      var cut = t.lastIndexOf(". ", 170); if (cut < 60) cut = t.lastIndexOf(" ", 170); if (cut < 60) cut = 170;
+      parts.push(t.slice(0, cut + 1)); t = t.slice(cut + 1);
+    }
+    if (t) parts.push(t);
+    var i = 0;
+    (function next() {
+      if (i >= parts.length) { done(); return; }
+      try {
+        var a = new Audio("https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=" + encodeURIComponent(parts[i++]));
+        a.onended = next; a.onerror = next; a.play().catch(next);
+      } catch (e) { next(); }
+    })();
+  }
+  function readAloud(text, label) {
+    readText = text; $("readlabel").textContent = "Reading: " + (label || "selection"); $("readbar").style.display = "block";
+    speakTier(text, function () { $("readbar").style.display = "none"; });
+  }
+  function stopReading() { try { speechSynthesis.cancel(); } catch (e) {} readText = ""; $("readbar").style.display = "none"; }
+  $("readstop").onclick = stopReading; $("readclose").onclick = stopReading;
+  $("readplay").onclick = function () { if (readText) readAloud(readText); };
+
+  /* ---------- data: compact index, chunk fetch on demand ---------- */
+  var SONGS = [], IDX_OK = false;
+  function fetchT(url, ms) {
+    return new Promise(function (res, rej) {
+      var done = false;
+      var to = setTimeout(function () { if (!done) { done = true; rej(new Error("timeout")); } }, ms || 25000);
+      fetch(url).then(function (r) {
+        if (done) return; done = true; clearTimeout(to);
+        if (!r.ok) rej(new Error("HTTP " + r.status)); else res(r);
+      }, function (e) { if (!done) { done = true; clearTimeout(to); rej(e); } });
+    });
+  }
+  function gunzip(url) {
+    return fetchT(url).then(function (r) { return r.arrayBuffer(); })
+      .then(function (ab) { return new Response(new Blob([ab]).stream().pipeThrough(new DecompressionStream("gzip"))).text(); });
+  }
+  function loadIndex() {
+    return gunzip("data/index/index.json.gz").then(function (t) {
+      var rows = t.split("\n").filter(Boolean).map(JSON.parse);
+      SONGS = rows.filter(function (r) { return r[2] === "song"; })
+        .map(function (r) { return { id: r[0], title: r[1], chunk: r[3], n: parseInt(r[0].slice(-7), 10) || 0 }; });
+      IDX_OK = true;
+      paintCount();
+      try { localStorage.setItem("sigstudio_songidx_v1", JSON.stringify({ at: new Date().toISOString(), rows: rows })); } catch (e) {}
+    }).catch(function () {
+      try {
+        var c = JSON.parse(localStorage.getItem("sigstudio_songidx_v1") || "null");
+        if (c && c.rows && c.rows.length) {
+          SONGS = c.rows.filter(function (r) { return r[2] === "song"; })
+            .map(function (r) { return { id: r[0], title: r[1], chunk: r[3], n: parseInt(r[0].slice(-7), 10) || 0 }; });
+          IDX_OK = true; paintCount();
+          $("acount").textContent = "Showing the last saved copy — check your connection, then reload.";
+          return;
+        }
+      } catch (e) {}
+      throw new Error("index failed");
+    });
+  }
+  function paintCount() {
+    var c = $("songcount");
+    c.innerHTML = '📀 <b>' + SONGS.length.toLocaleString() + '</b> / 1,000,000 songs <span class="seqlab">· live</span>';
+  }
+  function findSong(id) {
+    var s = null, i;
+    for (i = 0; i < SONGS.length; i++) if (SONGS[i].id === id) s = SONGS[i];
+    if (!s) return Promise.reject(new Error("not in archive"));
+    return gunzip("data/records/" + s.chunk).then(function (t) {
+      var lines = t.split("\n"), j;
+      for (j = 0; j < lines.length; j++) { if (!lines[j]) continue; var r = JSON.parse(lines[j]); if (r.id === id) return r; }
+      throw new Error("not in chunk");
+    });
+  }
+
+  /* ---------- genre (deterministic from the engine — same as the studio) ---------- */
+  var genreCache = null;
+  function genreOf(s) {
+    if (!genreCache) {
+      genreCache = {};
+      for (var i = 0; i < SONGS.length; i++) { try { genreCache[SONGS[i].id] = D.genSong(SONGS[i].n).genre; } catch (e) { genreCache[SONGS[i].id] = ""; } }
+    }
+    return genreCache[s.id] || "";
+  }
+
+  /* ---------- browser grid ---------- */
+  var PER = 60, page = 0, letter = "";
+  function filtered() {
+    var q = ($("aq").value || "").toLowerCase(), gf = $("agenre").value, order = $("aorder").value, list = [], i, s;
+    for (i = 0; i < SONGS.length; i++) {
+      s = SONGS[i];
+      if (letter && (s.title[0] || "#").toUpperCase() !== letter) continue;
+      if (gf && genreOf(s) !== gf) continue;
+      if (q && (s.title + " " + s.id).toLowerCase().indexOf(q) === -1) continue;
+      list.push(s);
+    }
+    list.sort(function (a, b) { return order === "old" ? a.n - b.n : b.n - a.n; });
+    return list;
+  }
+  function draw() {
+    var list = filtered(), pages = Math.max(1, Math.ceil(list.length / PER));
+    if (page >= pages) page = pages - 1;
+    var slice = list.slice(page * PER, page * PER + PER), h = "", i, s;
+    for (i = 0; i < slice.length; i++) {
+      s = slice[i];
+      h += '<div class="card"><h4>' + esc(s.title) + '</h4><div class="id">' + esc(s.id) + '</div>' +
+        '<p><button class="fplay" data-splay="' + esc(s.id) + '">▶ Play</button> ' +
+        '<button class="btn ghost" data-sopen="' + esc(s.id) + '">Open →</button></p></div>';
+    }
+    $("agrid").innerHTML = h || '<div class="card">No songs match — try clearing filters.</div>';
+    $("acount").textContent = list.length.toLocaleString() + " song" + (list.length === 1 ? "" : "s") + " · page " + (page + 1) + " of " + pages;
+    var ph = "";
+    if (pages > 1) {
+      ph = '<button class="btn ghost" id="pprev"' + (page === 0 ? " disabled" : "") + '>← Prev</button> ' +
+        '<span class="seqlab">page ' + (page + 1) + " / " + pages + '</span> ' +
+        '<button class="btn ghost" id="pnext"' + (page >= pages - 1 ? " disabled" : "") + '>Next →</button>';
+    }
+    $("apages").innerHTML = ph;
+    var pv = $("pprev"), nx = $("pnext");
+    if (pv) pv.onclick = function () { if (page > 0) { page--; draw(); window.scrollTo(0, 0); } };
+    if (nx) nx.onclick = function () { if (page < pages - 1) { page++; draw(); window.scrollTo(0, 0); } };
+  }
+  function refilter() { page = 0; draw(); }
+
+  function initBrowser() {
+    var az = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+    $("aaz").innerHTML = az.map(function (l) { return '<button data-az="' + l + '">' + l + "</button>"; }).join("");
+    try {
+      var gs = (S && S.GENRES) || ["hip-hop", "house", "trap", "pop", "rock", "lofi", "techno", "jazz", "ambient", "drum-and-bass", "reggae", "funk"];
+      gs.forEach(function (g) { var o = document.createElement("option"); o.value = g; o.textContent = g.replace(/-/g, " "); $("agenre").appendChild(o); });
+    } catch (e) {}
+    $("aq").addEventListener("input", refilter);
+    $("agenre").addEventListener("change", refilter);
+    $("aorder").addEventListener("change", refilter);
+    $("aaz").addEventListener("click", function (e) {
+      var b = e.target.closest ? e.target.closest("[data-az]") : null; if (!b) return;
+      Array.prototype.forEach.call($("aaz").querySelectorAll("button"), function (x) { x.classList.remove("on"); });
+      var l = b.getAttribute("data-az");
+      if (letter === l) { letter = ""; } else { letter = l; b.classList.add("on"); }
+      refilter();
+    });
+    $("arandom").onclick = function () {
+      if (!SONGS.length) return;
+      var s = SONGS[Math.floor(Math.random() * SONGS.length)];
+      location.href = "songs.html?song=" + s.id;
+    };
+    $("agrid").addEventListener("click", function (e) {
+      var o = e.target.closest ? e.target.closest("[data-sopen]") : null;
+      if (o) { location.href = "songs.html?song=" + o.getAttribute("data-sopen"); return; }
+      var p = e.target.closest ? e.target.closest("[data-splay]") : null;
+      if (!p) return;
+      var id = p.getAttribute("data-splay");
+      p.textContent = "Rendering…"; p.disabled = true;
+      try { S.unlockAudio(); } catch (e2) {}
+      findSong(id).then(function (rec) {
+        try { S.setPlayerLabel(rec.title || rec.id); S.setBusy("Rendering song…"); } catch (e3) {}
+        return S.renderSong(rec, 150, null);
+      }).then(function (buf) {
+        S.playBuffer(buf, "songcard"); p.textContent = "▶ Play"; p.disabled = false;
+      }).catch(function () { p.textContent = "▶ Play"; p.disabled = false; });
+    });
+  }
+
+  /* ---------- detail view ---------- */
+  function songText(rec) {
+    return rec.title + ". " + rec.genre + ", " + rec.mood + ", " + rec.tempo + " BPM, " + rec.key + ". " +
+      (rec.desc || "") + " Chords: " + (rec.chords || "") + ". Structure: " + (rec.structure || "") + ". Lyrics: " + (rec.lyrics || "");
+  }
+  function download(name, text, type) {
+    var b = new Blob([text], { type: type || "text/plain" });
+    var a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = name;
+    document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+  }
+  function copyText(t, btn) {
+    function done() { var o = btn.textContent; btn.textContent = "Copied!"; setTimeout(function () { btn.textContent = o; }, 1500); }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(t).then(done, done); return; }
+    } catch (e) {}
+    var ta = document.createElement("textarea"); ta.value = t; document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); } catch (e) {}
+    document.body.removeChild(ta); done();
+  }
+  function showDetail(rec) {
+    $("browser").style.display = "none";
+    var d = $("detail"); d.style.display = "block";
+    var seedLine = (rec.n != null) ? '<p class="seqlab">🔑 Permanent ID <b>' + esc(rec.id) + '</b> · reproducible seed <b>' + esc(rec.n) + '</b> — the same ID always makes this exact song.</p>' : "";
+    d.innerHTML = '<p><a class="btn ghost" href="songs.html" style="text-decoration:none">← Back to the Song Archive</a></p>' +
+      '<div class="rec"><h2>' + esc(rec.title) + ' <span class="id">' + esc(rec.id) + '</span></h2>' +
+      '<p class="meta">' + esc(rec.genre) + " · " + esc(rec.mood) + " · " + rec.tempo + " BPM · " + esc(rec.key) + '</p>' + seedLine +
+      '<p>' + esc(rec.desc || "") + '</p><h3>Chords</h3><p class="chords">' + esc(rec.chords || "") + '</p>' +
+      '<h3>Structure</h3><p>' + esc(rec.structure || "") + '</p><h3>Lyrics</h3><pre class="lyrics">' + esc(rec.lyrics || "") + "</pre>" +
+      '<p><button class="btn" id="dplay">▶ Play demo mix</button> ' +
+      '<button class="btn ghost" id="dread">🔊 Read aloud</button> ' +
+      '<button class="btn ghost" id="dtxt">Copy .txt</button> ' +
+      '<button class="btn ghost" id="djson">Copy .json</button> ' +
+      '<button class="btn teal" id="ddl">⬇ Download .txt</button></p></div>' +
+      '<div class="honest">Original Signature composition — written by the Signature song engine. No melodies or lyrics reproduced from any real song.</div>';
+    document.title = rec.title + " (" + rec.id + ") — Song Archive · Signature Music Studio";
+    var ld = { "@context": "https://schema.org", "@type": "MusicRecording", "name": rec.title, "identifier": rec.id,
+      "byArtist": { "@type": "Person", "name": "Justin Addam Higgins" }, "description": rec.desc || "",
+      "genre": rec.genre, "url": BASE + "songs.html?song=" + rec.id,
+      "recordingOf": { "@type": "MusicComposition", "name": rec.title, "identifier": rec.id } };
+    var s = document.createElement("script"); s.type = "application/ld+json"; s.textContent = JSON.stringify(ld);
+    d.appendChild(s);
+    $("dplay").onclick = function () {
+      var b = this; b.textContent = "Rendering…"; b.disabled = true;
+      try { S.unlockAudio(); } catch (e) {}
+      try { S.setPlayerLabel(rec.title || rec.id); S.setBusy("Rendering song…"); } catch (e2) {}
+      S.renderFullSong(rec, null, null).then(function (buf) { S.playBuffer(buf, "song"); b.textContent = "▶ Play demo mix"; b.disabled = false; })
+        .catch(function () { b.textContent = "▶ Play demo mix"; b.disabled = false; });
+    };
+    $("dread").onclick = function () { readAloud(songText(rec), rec.title); };
+    $("dtxt").onclick = function () { copyText(songText(rec), this); };
+    $("djson").onclick = function () { copyText(JSON.stringify(rec, null, 2), this); };
+    $("ddl").onclick = function () { download(rec.id + ".txt", songText(rec), "text/plain"); };
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------- boot ---------- */
+  function bootError() {
+    $("agrid").innerHTML = '<div class="card" role="alert"><h4>⚠️ Song Archive unavailable</h4>' +
+      '<p class="seqlab">The archive index did not load — check your connection, then retry.</p>' +
+      '<p><button class="btn" onclick="location.reload()">↻ Retry</button></p></div>';
+  }
+  loadIndex().then(function () {
+    initBrowser(); draw();
+    var q = new URLSearchParams(location.search), id = q.get("song");
+    if (id) {
+      $("agrid").innerHTML = '<div class="card" role="status">Loading ' + esc(id) + '…</div>';
+      findSong(id).then(showDetail, function () {
+        $("browser").style.display = "none";
+        var d = $("detail"); d.style.display = "block";
+        d.innerHTML = '<p><a class="btn ghost" href="songs.html" style="text-decoration:none">← Back to the Song Archive</a></p>' +
+          '<div class="card" role="alert"><h4>Song not found</h4><p class="seqlab">No archive record for ' + esc(id) + '.</p></div>';
+      });
+    }
+  }, bootError);
+})();
+</script>
+</body>
+</html>

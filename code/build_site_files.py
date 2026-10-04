@@ -114,7 +114,7 @@ def main():
     for r in rows:
         counts[r[2]] = counts.get(r[2], 0) + 1
 
-    core = [BASE, BASE + "#studio", BASE + "#beatmaker", BASE + "#songwriter",
+    core = [BASE, BASE + "songs.html", BASE + "#studio", BASE + "#beatmaker", BASE + "#songwriter",
             BASE + "#vocalstudio", BASE + "#backups", BASE + "#cleanup",
             BASE + "#cdmaker", BASE + "#teacher"]
     per = {"songs": [], "library": [], "beats": [], "gear": []}
@@ -240,6 +240,20 @@ def stamp_counts(counts):
     h = _re.sub(r'data-stamp="\d{4}-\d{2}-\d{2}"', 'data-stamp="%s"' % TODAY, h, count=1)
     open(p, "w").write(h)
     print("counts re-stamped: songs=%d library=%d beats=%d gear=%d" % (songs, lib, beats, gear))
+    # Song Archive page (songs.html) gets its own stamp so it never boots stale —
+    # same markers pattern as index.html; the drip runs this after the index flush.
+    sp = os.path.join(HERE, "songs.html")
+    if os.path.exists(sp):
+        sh = open(sp).read()
+        sbody = "📀 <b>%s</b> / 1,000,000 songs" % format(songs, ",")
+        a0, a1 = "<!-- SONGARCHIVE-STAMP-START -->", "<!-- SONGARCHIVE-STAMP-END -->"
+        if a0 in sh and a1 in sh:
+            sh = sh.split(a0)[0] + a0 + sbody + a1 + a1.join(sh.split(a1)[1:])
+            sh = _re.sub(r'data-stamp="\d{4}-\d{2}-\d{2}"', 'data-stamp="%s"' % TODAY, sh, count=1)
+            open(sp, "w").write(sh)
+            print("song archive re-stamped: songs=%d" % songs)
+        else:
+            print("WARNING: SONGARCHIVE-STAMP markers missing — songs.html not re-stamped")
 
 
 if __name__ == "__main__":
