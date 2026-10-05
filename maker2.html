@@ -216,13 +216,45 @@ function installShim() {
   X.jahNav = function (id) {
     var el = typeof id === "string" ? $(id) : id; if (!el) return;
     var h = "<b>THE JAH NETWORK</b> ", i;
-    for (i = 0; i < NAV.length; i++) h += '<a href="https://justinahiggins614-cmyk.github.io/' + NAV[i][1] + '/">' + (i + 1) + " " + esc(NAV[i][0]) + "</a>";
-    h += '<span class="here">23 Signature Music Studio — YOU ARE HERE</span>';
-    el.innerHTML = h;
-  };
-  X.nav = function (page) {
-    var el = $("studionav"); if (!el) return;
-    function a(href, label, here) { return '<a href="' + href + '"' + (here ? ' aria-current="page"' : "") + ">" + label + "</a>"; }
+    for (i = 0; i < NAV.length; i++) h += '<a href="https://justinahiggins614-cmyk.github.io/signature-math/">1 Signature Math</a>
+<a href="https://justinahiggins614-cmyk.github.io/jah-calculator/">2 Calculator</a>
+<a href="https://justinahiggins614-cmyk.github.io/jah-dictionary/">3 Dictionary</a>
+<a href="https://justinahiggins614-cmyk.github.io/jah-wiki/">4 JAH Wiki</a>
+<a href="https://justinahiggins614-cmyk.github.io/jah-n-wiki-leaks/">5 JAH-N Wiki</a>
+<a href="https://justinahiggins614-cmyk.github.io/signature-llama/">6 Llama</a>
+<a href="https://justinahiggins614-cmyk.github.io/jah-ai-models/">7 Phone Book</a>
+<a href="https://justinahiggins614-cmyk.github.io/cyber-patent-catalog/">8 Patents</a>
+<a href="https://justinahiggins614-cmyk.github.io/signature-one-archive/specs.html">9 Specs</a>
+<a href="https://justinahiggins614-cmyk.github.io/jah-computer-systems/">10 PCs</a>
+<a href="https://justinahiggins614-cmyk.github.io/signature-books/">11 Books</a>
+<a href="https://justinahiggins614-cmyk.github.io/signature-comics/">12 Comics</a>
+<a href="https://justinahiggins614-cmyk.github.io/signature-newspapers/">13 News</a>
+<a href="https://justinahiggins614-cmyk.github.io/signature-backend/">14 Mix Lab</a>
+<a href="https://justinahiggins614-cmyk.github.io/signature-boundless-generators/">15 Generators</a>
+<a href="https://justinahiggins614-cmyk.github.io/signature-ai-mixlab/">16 AI Mix</a>
+<a href="https://justinahiggins614-cmyk.github.io/signature-ai-olypics/">17 Olympics</a>
+<a href="https://justinahiggins614-cmyk.github.io/signature-chip-maker/">18 Chips</a>
+<a href="https://justinahiggins614-cmyk.github.io/signature-app-archive/">19 Apps</a>
+<a href="https://justinahiggins614-cmyk.github.io/signature-ai-robot-matcher/">20 Robots</a>
+<a href="https://justinahiggins614-cmyk.github.io/signature-experiment-solver/">21 Lab</a>
+<a href="https://justinahiggins614-cmyk.github.io/signature-ai-image-video-maker/">22 Pixel</a>
+<span class="here">23 Signature Music Studio · YOU ARE HERE</span>
+<a href="https://justinahiggins614-cmyk.github.io/signature-fixit/">24 Fix-It</a>
+<a href="https://justinahiggins614-cmyk.github.io/signature-university/">25 University</a>
+<a href="https://justinahiggins614-cmyk.github.io/signature-earth/">26 Earth</a>
+<a href="https://justinahiggins614-cmyk.github.io/signature-flight-school/">27 Flight</a>
+<a href="https://justinahiggins614-cmyk.github.io/signature-game-store/">28 Games</a>
+<a href="https://justinahiggins614-cmyk.github.io/signature-website-creator/">29 Sites</a>
+<a href="https://justinahiggins614-cmyk.github.io/signature-antivirus/">30 Antivirus</a>
+<a href="https://justinahiggins614-cmyk.github.io/signature-os-updater/">31 OS Updater</a>
+<a href="https://justinahiggins614-cmyk.github.io/signature-space-mapping/">32 Space</a>
+<a href="https://justinahiggins614-cmyk.github.io/signature-cookbook/">33 Cookbook</a>
+<a href="https://justinahiggins614-cmyk.github.io/signature-spell-check/">34 Spell Check</a>
+<a href="https://justinahiggins614-cmyk.github.io/signature-image-grid-measure/">35 Grid Measure</a>
+<a href="https://justinahiggins614-cmyk.github.io/signature-cyber-mega-mall/">36 Cyber Mall</a>
+<a href="https://justinahiggins614-cmyk.github.io/signature-3d-print/">37 3D Mall</a>
+<a href="https://justinahiggins614-cmyk.github.io/' + NAV[i][1] + '/">' + (i + 1) + " " + esc(NAV[i][0]) + "</a>
+<a href="' + href + '"' + (here ? ' aria-current="page"' : "") + ">" + label + "</a>"; }
     el.innerHTML = '<nav class="snav" aria-label="Studio"><div class="wrap">' +
       a("index.html", "🏠 Studio home") + a("songs.html", "🎵 Songs") +
       a("maker1.html", "Song Maker 1", page === "maker1.html") +
