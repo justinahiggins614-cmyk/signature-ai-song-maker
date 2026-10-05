@@ -368,7 +368,7 @@ window.__JAHREAD=R;
     var h = "<b>THE JAH NETWORK</b> ", i;
     for (i = 0; i < NAV.length; i++) h += '<a href="https://justinahiggins614-cmyk.github.io/' + NAV[i][1] + '/">' + (i + 1) + " " + esc(NAV[i][0]) + "</a>";
     h += '<span class="here">23 Signature Music Studio · Song Archive — YOU ARE HERE</span>';
-    $("jahnet").innerHTML = h;
+    var _j=$("jahnet");if(_j)_j.innerHTML= h;
   })();
 
   /* ---------- one global audio rule: play() stops everything first ---------- */
@@ -799,6 +799,5 @@ window.__JAHREAD=R;
   }
 })();
 </script>
-<nav class="jahnet" aria-label="JAH Network Global Ecosystem"><div class="wrap" id="jahnet"></div></nav>
 </body>
 </html>
