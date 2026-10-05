@@ -274,6 +274,31 @@ def stamp_counts(counts):
                 print("%s re-stamped" % fname)
             else:
                 print("WARNING: %s markers missing — %s not re-stamped" % (m0, fname))
+    # Best-of-the-Best pinned entry on songs.html: its Implications paragraph +
+    # beststats carry the live totals (never let the pinned narrative go stale).
+    sp2 = os.path.join(HERE, "songs.html")
+    if os.path.exists(sp2):
+        sh = open(sp2).read()
+        best_body = (
+            "<p><b>Implications:</b> <b>%s</b> songs are finished and playable, plus "
+            "<b>%s</b> sounds, <b>%s</b> beats, <b>%s</b> gear records — the archive "
+            "marches toward <b>1,000,000</b> songs.</p>\n"
+            "<div class=\"beststats\"><span class=\"beststat\"><b>%s</b> songs finished</span>"
+            "<span class=\"beststat\">Song <b>#1</b> — the genesis</span>"
+            "<span class=\"beststat\">Playable: <b>in-browser</b></span>"
+            "<span class=\"beststat\">Original: <b>100%%</b></span></div>"
+            % (format(songs, ","), format(lib, ","), format(beats, ","),
+               format(gear, ","), format(songs, ",")))
+        b0, b1 = "<!-- BEST-STATS-START -->", "<!-- BEST-STATS-END -->"
+        if b0 in sh and b1 in sh:
+            sh = sh.split(b0)[0] + b0 + "\n" + best_body + "\n" + b1 + b1.join(sh.split(b1)[1:])
+            # the whybest line names the current song total too — keep it in sync
+            sh = _re.sub(r"song #1 of [\d,]+",
+                         "song #1 of %s" % format(songs, ","), sh, count=1)
+            open(sp2, "w").write(sh)
+            print("best-of-best stats re-stamped: songs=%d" % songs)
+        else:
+            print("WARNING: BEST-STATS markers missing — songs.html best stats not re-stamped")
 
 
 if __name__ == "__main__":
