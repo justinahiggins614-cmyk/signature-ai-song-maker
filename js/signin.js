@@ -60,7 +60,7 @@
      appears in the profile dialog automatically.
      Leave it empty and everything works locally; the Google button stays
      hidden and no Google script is ever loaded. */
-  var GOOGLE_CLIENT_ID = "";
+  var GOOGLE_CLIENT_ID = "967916753695-gudocn7gavc57c2d9udacjlnkuhnq427.apps.googleusercontent.com";
 
   var PROFILES_KEY = 'jah-profiles-v1';       /* localStorage: [{id,name,color,created,picture}] */
   var ACTIVE_KEY = 'jah-profile-active-v1';   /* localStorage: active profile id, or "" = public */
