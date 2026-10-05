@@ -335,9 +335,21 @@ function downloadPreset(id) {
 }
 
 /* ================= AI studio tech ================= */
-function say2(t) { var c = $("aibox").querySelector("#aichat"); if (c) c.innerHTML += '<p class="aimsg"><b>AI host:</b> ' + esc(t) + "</p>"; }
+/* say2 writes into the REAL SigStudio.host log (.hostlog), falling back to the
+   legacy #aichat markup. (The old code only knew #aichat, so answers rendered nowhere.) */
+function say2(t) {
+  var box = $("aibox"); if (!box) return;
+  var log = box.querySelector(".hostlog") || box.querySelector("#aichat");
+  if (!log) return;
+  var d = document.createElement("div");
+  d.className = "hostline ai";
+  d.innerHTML = "<b>🤖 Studio tech:</b> " + esc(t).replace(/\n/g, "<br>");
+  log.appendChild(d);
+  try { log.scrollTop = log.scrollHeight; } catch (e) {}
+}
 function buildAIForm() {
-  SC.host($("aibox"), {
+  var box = $("aibox");
+  SC.host(box, {
     greeting: "Hi! I'm your studio tech. Tell me your budget and your room below — I'll design a setup from the real gear archive and write the wiring for you.",
     onAsk: function (q) {
       q = String(q || "").toLowerCase();
@@ -351,10 +363,12 @@ function buildAIForm() {
       { label: "AI: wire it for me", run: function () { say2(aiWire()); } }
     ]
   });
-  var form = $("aibox").querySelector("#aiform");
-  if (form) {
-    form.innerHTML = '<p><label>Budget: <select id="ai-budget"><option value="starter">Starter — smallest real studio</option><option value="project">Project — serious home studio</option><option value="dream">Dream — the full works</option></select></label> ' +
+  /* Budget/room form: the real host has no #aiform slot, so insert it at the top of the widget. */
+  if (!$("ai-budget")) {
+    var formDiv = document.createElement("div");
+    formDiv.innerHTML = '<p><label>Budget: <select id="ai-budget"><option value="starter">Starter — smallest real studio</option><option value="project">Project — serious home studio</option><option value="dream">Dream — the full works</option></select></label> ' +
       '<label>Room: <select id="ai-room"><option value="bedroom">Bedroom</option><option value="spareroom">Spare room</option><option value="garage">Garage</option></select></label></p>';
+    box.insertBefore(formDiv, box.firstChild);
   }
 }
 var lastDesign = null;

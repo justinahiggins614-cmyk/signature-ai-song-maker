@@ -203,12 +203,15 @@ function pullById(id) {
     if (!r) { $("songstatus").textContent = "Couldn't find " + id + " — check the ID and try again."; return; }
     setSong(r);
     $("songstatus").textContent = songLabel() + " — ready for effects.";
+  }, function (e) {
+    $("songstatus").textContent = "Couldn't reach the song archive (" + (e && e.message || e) + ") — check your connection and try again.";
   });
 }
 $("btn-archive").onclick = function () { SC.unlock(); pullById($("in-archiveid").value); };
 $("btn-mylist").onclick = function () {
   SC.unlock();
-  SC.myProjects.list().then(function (list) {
+  /* myProjects.list() is sync on the real SigStudio shelf — normalize to a promise */
+  Promise.resolve(SC.myProjects.list()).then(function (list) {
     var box = $("mylist");
     if (!list.length) { box.innerHTML = "<p class=\"seqlab\">No saved songs on this device yet.</p>"; return; }
     box.innerHTML = list.map(function (p, i) {
