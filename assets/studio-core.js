@@ -49,7 +49,7 @@
     return h + "</div></nav>";
   }
 
-  /* ---------- 31-site JAH network nav (canon, same as front door) ---------- */
+  /* ---------- 35-site JAH network nav (canon, same as front door) ---------- */
   var JNAV = [
     ["Signature Math", "signature-math"], ["Signature Universal Paradox Immune Calculator", "jah-calculator"], ["The Signature Dictionary", "jah-dictionary"],
     ["JAH Wiki", "jah-wiki"], ["JAH-N Wiki Leaks", "jah-n-wiki-leaks"], ["Signature Llama: The Fully Cyber Utilizable AI", "signature-llama"],
@@ -59,7 +59,7 @@
     ["The Signature AI Mix Lab", "signature-ai-mixlab"], ["AI Olympics", "signature-ai-olypics"], ["The Signature Computer Chip Maker and Archive", "signature-chip-maker"],
     ["The Signature App Archive", "signature-app-archive"], ["The Signature AI Robot Matcher", "signature-ai-robot-matcher"], ["The Signature Experiment Solver", "signature-experiment-solver"],
     ["Signature AI Pixel", "signature-ai-image-video-maker"], ["Signature Music Studio", "signature-ai-song-maker"], ["The Signature Mr Fix-It", "signature-fixit"], ["The Signature University", "signature-university"],
-    ["The Signature Cyber Mega-Mall", "signature-cyber-mega-mall"], ["The Signature 3D Print Mega Mall", "signature-3d-print"], ["Signature Earth", "signature-earth"], ["The Signature Flight School", "signature-flight-school"], ["The Signature Game Store", "signature-game-store"], ["The Signature Website Creator", "signature-website-creator"], ["The Signature Antivirus", "signature-antivirus"], ["The Signature OS Updater", "signature-os-updater"]
+    ["The Signature Cyber Mega-Mall", "signature-cyber-mega-mall"], ["The Signature 3D Print Mega Mall", "signature-3d-print"], ["Signature Earth", "signature-earth"], ["The Signature Flight School", "signature-flight-school"], ["The Signature Game Store", "signature-game-store"], ["The Signature Website Creator", "signature-website-creator"], ["The Signature Antivirus", "signature-antivirus"], ["The Signature OS Updater", "signature-os-updater"], ["Signature Space Mapping", "signature-space-mapping"], ["The Signature Cookbook", "signature-cookbook"]
   ];
   function jahNav(elId, hereLabel) {
     var el = document.getElementById(elId);
