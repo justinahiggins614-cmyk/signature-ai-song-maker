@@ -31,8 +31,8 @@ for (const f of TABS) {
   });
 }
 
-// 2. SigStudio.nav renders 11 tabs, highlights current, links all others
-t("tab bar renders 11 tabs with current highlighted", () => {
+// 2. SigStudio.nav renders 12 tabs, highlights current, links all others
+t("tab bar renders 12 tabs with current highlighted", () => {
   const src = fs.readFileSync(path.join(HERE, "assets/studio-core.js"), "utf8");
   const sandbox = { window: {}, self: undefined };
   sandbox.window = sandbox;
@@ -42,7 +42,7 @@ t("tab bar renders 11 tabs with current highlighted", () => {
   for (const f of TABS) {
     const h = nav(f);
     const tabCount = (h.match(/role="tab"/g) || []).length;
-    assert(tabCount === 11, f + ": got " + tabCount + " tabs");
+    assert(tabCount === 12, f + ": got " + tabCount + " tabs");
     assert(/class="tab here"/.test(h), f + ": no highlighted tab");
     for (const g of TABS) if (g !== f) assert(h.indexOf('href="' + g + '"') >= 0, f + ": missing link to " + g);
   }
