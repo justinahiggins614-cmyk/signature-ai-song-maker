@@ -52,10 +52,13 @@
   /* ================= 1. CONFIG ================= */
   var MASTER_EMAIL = 'justinahiggins614@gmail.com';
 
-  /* Step-2 unlock code: ONLY the SHA-256 hex digest is stored here.
-     The code itself is never written into this file, the repo, logs, or
-     commit messages. Verified: digest matches the code Manon chose. */
-  var UNLOCK_HASH = '7c75aa4401bae90ee4e30ffb1a81ea99d75097d657741a16662407639a2c8acd';
+  /* Step-2 unlock codes: ONLY the SHA-256 hex digests are stored here
+     (primary + backup). The codes themselves are never written into this
+     file, the repo, logs, or commit messages. Either code unlocks. */
+  var UNLOCK_HASHES = [
+    '7c75aa4401bae90ee4e30ffb1a81ea99d75097d657741a16662407639a2c8acd',
+    '1f693a36a6f736c0e984c862e5ec3808db6d43a4a88d929c011f50dd4359d372'
+  ]; /* either code unlocks */
   var MAX_TRIES = 3;
   var LOCK_MS = 60000;
   var LOCK_KEY = 'jah-godmode-lock-v1';   /* plain localStorage: {tries, until} */
@@ -202,7 +205,7 @@
     if (isLocked()) return { ok: false, locked: true };
     var clean = String(code == null ? '' : code).replace(/^\s+|\s+$/g, '');
     var h = sha256Hex(clean);
-    if (h && _cmp(h, UNLOCK_HASH)) {
+    if (h && (_cmp(h, UNLOCK_HASHES[0]) || _cmp(h, UNLOCK_HASHES[1]))) {
       resetLock();
       return { ok: true };
     }
