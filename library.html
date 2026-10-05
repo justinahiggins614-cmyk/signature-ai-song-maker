@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script>try{if(localStorage.getItem("jah-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+<script src="js/signin.js"></script>
+<script>/* JAHProfile-aware storage: public = plain localStorage, signed-in = per-profile namespace */
+var PS=(typeof JAHProfile!=='undefined')?JAHProfile.store:localStorage;</script>
+<script>try{if(PS.get("jah-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Sound Library — Signature Music Studio</title>
@@ -32,7 +35,7 @@
 <h1>🎛️ SOUND LIBRARY</h1>
 <div><span class="official">OFFICIAL SIGNATURE SITE — within the Signature/JAH system</span></div>
 <p class="sub">Every sound, instrument, set and pack — searchable by name and ID, filterable by family and type, with a <b>synth preview</b> and <b>.wav download</b> on every record. Marching to one million.</p>
-<p class="counter" id="libcount" data-stamp="2026-10-05"><!-- LIBRARYARCHIVE-STAMP-START -->🎛️ <b>13,950</b> / 1,000,000 instruments, sets &amp; packs<!-- LIBRARYARCHIVE-STAMP-END --> <span class="seqlab">last published count — loading live…</span></p>
+<p class="counter" id="libcount" data-stamp="2026-10-05"><!-- LIBRARYARCHIVE-STAMP-START -->🎛️ <b>14,450</b> / 1,000,000 instruments, sets &amp; packs<!-- LIBRARYARCHIVE-STAMP-END --> <span class="seqlab">last published count — loading live…</span></p>
 <p><a class="btn ghost" href="./" style="text-decoration:none">← Back to the Studio</a></p>
 <div class="honest">Every preview is synthesized live in your browser with the Web Audio API — no samples. All sounds are original Signature designs.</div>
 </div></header>
@@ -148,10 +151,10 @@ window.__JAHREAD=R;
       SOUNDS = rows.filter(function (r) { return r[2] === "sound"; })
         .map(function (r) { return { id: r[0], name: r[1], chunk: r[3], n: parseInt(String(r[0]).slice(-7), 10) || 0 }; });
       IDX_OK = true; paintCount();
-      try { localStorage.setItem("sigstudio_libidx_v1", JSON.stringify({ at: new Date().toISOString(), rows: SOUNDS })); } catch (e) {}
+      try { PS.set("sigstudio_libidx_v1", JSON.stringify({ at: new Date().toISOString(), rows: SOUNDS })); } catch (e) {}
     }).catch(function () {
       try {
-        var c = JSON.parse(localStorage.getItem("sigstudio_libidx_v1") || "null");
+        var c = JSON.parse(PS.get("sigstudio_libidx_v1") || "null");
         if (c && c.rows && c.rows.length) {
           SOUNDS = c.rows; IDX_OK = true; paintCount();
           $("lcount").textContent = "Showing the last saved copy — check your connection, then reload.";
@@ -172,7 +175,7 @@ window.__JAHREAD=R;
      fills card metadata + the family/category filters in as chunks arrive. */
   var ENRICH = {}, ENRICH_DONE = 0, ENRICH_TOTAL = 0, ENRICH_KEY = "sigstudio_libenrich_v1", ENRICH_CHUNKS = {};
   try {
-    var ec = JSON.parse(localStorage.getItem(ENRICH_KEY) || "null");
+    var ec = JSON.parse(PS.get(ENRICH_KEY) || "null");
     if (ec && ec.map) { ENRICH = ec.map; ENRICH_DONE = ec.done || 0; ENRICH_CHUNKS = ec.chunks || {}; }
   } catch (e) {}
   function meta(id) { return ENRICH[id] || null; }
@@ -188,7 +191,7 @@ window.__JAHREAD=R;
         }
       }
       ENRICH_DONE += n; ENRICH_CHUNKS[chunk] = 1;
-      try { localStorage.setItem(ENRICH_KEY, JSON.stringify({ at: new Date().toISOString(), done: ENRICH_DONE, chunks: ENRICH_CHUNKS, map: ENRICH })); } catch (e) {}
+      try { PS.set(ENRICH_KEY, JSON.stringify({ at: new Date().toISOString(), done: ENRICH_DONE, chunks: ENRICH_CHUNKS, map: ENRICH })); } catch (e) {}
       return n;
     });
   }
@@ -448,6 +451,10 @@ window.__JAHREAD=R;
     }
   }, bootError);
 })();
+</script>
+<script>
+/* JAHProfile sign-in button mount (graceful header fallback) */
+(function(){var m=document.querySelector('header .booksearch')||document.querySelector('nav.jtabbar')||document.querySelector('header nav')||document.querySelector('header')||document.body;if(window.JAHProfile&&JAHProfile.ui)JAHProfile.ui.renderButton(m);})();
 </script>
 </body>
 </html>

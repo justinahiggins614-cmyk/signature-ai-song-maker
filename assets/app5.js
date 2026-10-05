@@ -36,9 +36,9 @@
   /* ---------- My Library (localStorage): the user's showpiece shelf ---------- */
   var LIBKEY = "sigstudio.mylib.v1";
   function myLib() {
-    try { return JSON.parse(localStorage.getItem(LIBKEY) || "[]"); } catch (e) { return []; }
+    try { return JSON.parse(PS.get(LIBKEY) || "[]"); } catch (e) { return []; }
   }
-  function myLibSave(list) { try { localStorage.setItem(LIBKEY, JSON.stringify(list)); } catch (e) {} }
+  function myLibSave(list) { try { PS.set(LIBKEY, JSON.stringify(list)); } catch (e) {} }
   function myLibAdd(kind, id, name) {
     var l = myLib();
     if (!l.some(function (x) { return x.id === id; })) { l.push({ kind: kind, id: id, name: name }); myLibSave(l); }

@@ -219,18 +219,18 @@ window.__JAHREAD=R;
       .then(function (t) { return t.split("\n").filter(Boolean).map(JSON.parse); });
   }
   function cacheIdx(rows) {
-    try { localStorage.setItem("sigstudio_idx_v1", JSON.stringify({ at: new Date().toISOString(), rows: rows })); } catch (e) {}
+    try { PS.set("sigstudio_idx_v1", JSON.stringify({ at: new Date().toISOString(), rows: rows })); } catch (e) {}
   }
   function cachedIdx() {
-    try { var c = JSON.parse(localStorage.getItem("sigstudio_idx_v1") || "null"); return (c && c.rows && c.rows.length) ? c : null; } catch (e) { return null; }
+    try { var c = JSON.parse(PS.get("sigstudio_idx_v1") || "null"); return (c && c.rows && c.rows.length) ? c : null; } catch (e) { return null; }
   }
   function loadData() {
     setBoot("LOADING", "Fetching the archive index…");
     var mmP = fetchT("music-manifest.json", 10000).then(function (r) { return r.json(); }).then(function (m) {
       MM = m; renderCountsFromMM();
-      try { localStorage.setItem("sigstudio_mm_v1", JSON.stringify(m)); } catch (e) {}
+      try { PS.set("sigstudio_mm_v1", JSON.stringify(m)); } catch (e) {}
     }, function () {
-      try { MM = JSON.parse(localStorage.getItem("sigstudio_mm_v1") || "null"); } catch (e) { MM = null; }
+      try { MM = JSON.parse(PS.get("sigstudio_mm_v1") || "null"); } catch (e) { MM = null; }
       if (MM) renderCountsFromMM();
     });
     var manP = fetchT("data/manifest.json", 10000).then(function (r) { return r.json(); }).then(function (m) { MANIFEST = m; }, function () {});

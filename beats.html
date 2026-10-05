@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script>try{if(localStorage.getItem("jah-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+<script src="js/signin.js"></script>
+<script>/* JAHProfile-aware storage: public = plain localStorage, signed-in = per-profile namespace */
+var PS=(typeof JAHProfile!=='undefined')?JAHProfile.store:localStorage;</script>
+<script>try{if(PS.get("jah-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Beat Archive — Signature Music Studio</title>
@@ -32,7 +35,7 @@
 <h1>🥁 BEAT ARCHIVE</h1>
 <div><span class="official">OFFICIAL SIGNATURE SITE — within the Signature/JAH system</span></div>
 <p class="sub">Every beat fully made — style, tempo, drum pattern — and <b>ready to play</b>: one click renders it. Download any beat as <b>.wav</b> or <b>.mp3</b> (industry standard). Marching to one million.</p>
-<p class="counter" id="beatcount" data-stamp="2026-10-05"><!-- BEATARCHIVE-STAMP-START -->🥁 <b>7,000</b> beats<!-- BEATARCHIVE-STAMP-END --> <span class="seqlab">last published count — loading live…</span></p>
+<p class="counter" id="beatcount" data-stamp="2026-10-05"><!-- BEATARCHIVE-STAMP-START -->🥁 <b>7,250</b> beats<!-- BEATARCHIVE-STAMP-END --> <span class="seqlab">last published count — loading live…</span></p>
 <p><a class="btn ghost" href="./" style="text-decoration:none">← Back to the Studio</a></p>
 <div class="honest">Every beat on this site is synthesized live in your browser with the Web Audio API — no samples, no downloads needed to play. All beats are original Signature patterns; not copies of any real song.</div>
 </div></header>
@@ -147,10 +150,10 @@ window.__JAHREAD=R;
       BEATS = rows.filter(function (r) { return r[2] === "beat"; })
         .map(function (r) { return { id: r[0], title: r[1], chunk: r[3], n: parseInt(String(r[0]).slice(-7), 10) || 0 }; });
       IDX_OK = true; paintCount();
-      try { localStorage.setItem("sigstudio_beatidx_v1", JSON.stringify({ at: new Date().toISOString(), rows: BEATS })); } catch (e) {}
+      try { PS.set("sigstudio_beatidx_v1", JSON.stringify({ at: new Date().toISOString(), rows: BEATS })); } catch (e) {}
     }).catch(function () {
       try {
-        var c = JSON.parse(localStorage.getItem("sigstudio_beatidx_v1") || "null");
+        var c = JSON.parse(PS.get("sigstudio_beatidx_v1") || "null");
         if (c && c.rows && c.rows.length) {
           BEATS = c.rows; IDX_OK = true; paintCount();
           $("bcount").textContent = "Showing the last saved copy — check your connection, then reload.";
@@ -376,6 +379,10 @@ window.__JAHREAD=R;
     }
   }, bootError);
 })();
+</script>
+<script>
+/* JAHProfile sign-in button mount (graceful header fallback) */
+(function(){var m=document.querySelector('header .booksearch')||document.querySelector('nav.jtabbar')||document.querySelector('header nav')||document.querySelector('header')||document.body;if(window.JAHProfile&&JAHProfile.ui)JAHProfile.ui.renderButton(m);})();
 </script>
 </body>
 </html>

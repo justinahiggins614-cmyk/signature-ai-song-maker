@@ -19,8 +19,8 @@
              genre: "", bpm: 92, stage: 1, micBuf: null };
   }
   var PROJ = freshProject();
-  try { var saved = JSON.parse(localStorage.getItem(PKEY) || "null"); if (saved && saved.stage) PROJ = saved; } catch (e) {}
-  function saveProj() { try { localStorage.setItem(PKEY, JSON.stringify(PROJ, function (k, v) { return k === "micBuf" ? null : v; })); } catch (e) {} }
+  try { var saved = JSON.parse(PS.get(PKEY) || "null"); if (saved && saved.stage) PROJ = saved; } catch (e) {}
+  function saveProj() { try { PS.set(PKEY, JSON.stringify(PROJ, function (k, v) { return k === "micBuf" ? null : v; })); } catch (e) {} }
   window.__proj = function () { return PROJ; };
 
   /* ---------- per-genre beat-making guides (original content) ---------- */

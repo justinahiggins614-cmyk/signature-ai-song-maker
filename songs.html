@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script>try{if(localStorage.getItem("jah-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+<script src="js/signin.js"></script>
+<script>/* JAHProfile-aware storage: public = plain localStorage, signed-in = per-profile namespace */
+var PS=(typeof JAHProfile!=='undefined')?JAHProfile.store:localStorage;</script>
+<script>try{if(PS.get("jah-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Song Archive — Signature Music Studio</title>
@@ -62,7 +65,7 @@
 <h1>📀 SONG ARCHIVE</h1>
 <div><span class="official">OFFICIAL SIGNATURE SITE — within the Signature/JAH system</span></div>
 <p class="sub">Every song fully made — lyrics, chords, structure, tempo, key — and <b>ready to play</b>: tap a song to open it, or hit ▶ to play it right from the list. Marching to one million.</p>
-<p class="counter" id="songcount" data-stamp="2026-10-05"><!-- SONGARCHIVE-STAMP-START -->📀 <b>14,200</b> / 1,000,000 songs<!-- SONGARCHIVE-STAMP-END --> <span class="seqlab">last published count — loading live…</span></p>
+<p class="counter" id="songcount" data-stamp="2026-10-05"><!-- SONGARCHIVE-STAMP-START -->📀 <b>14,700</b> / 1,000,000 songs<!-- SONGARCHIVE-STAMP-END --> <span class="seqlab">last published count — loading live…</span></p>
 <p><a class="btn ghost" href="./" style="text-decoration:none">← Back to the Studio</a></p>
 <div class="honest">Every sound on this site is synthesized live in your browser with the Web Audio API — no samples, no downloads needed to play. All voices are synthesized; there are no human singers here. All songs are original Signature compositions.</div>
 </div></header>
@@ -531,7 +534,7 @@ window.__JAHREAD=R;
       });
     }).catch(function () {
       try {
-        var c = JSON.parse(localStorage.getItem("sigstudio_songidx_v1") || "null");
+        var c = JSON.parse(PS.get("sigstudio_songidx_v1") || "null");
         if (c && c.rows && c.rows.length) {
           SONGS = c.rows.filter(function (r) { return r[2] === "song"; })
             .map(function (r) { return { id: r[0], title: r[1], chunk: r[3], n: parseInt(r[0].slice(-7), 10) || 0 }; });
@@ -721,12 +724,16 @@ window.__JAHREAD=R;
     initAz();
     loadSearchIndex().then(function () {
       initSearch();
-      try { localStorage.setItem("sigstudio_songidx_v1", JSON.stringify({ at: new Date().toISOString(), rows: SONGS.map(function (s) { return [s.id, s.title, "song", s.chunk]; }) })); } catch (e) {}
+      try { PS.set("sigstudio_songidx_v1", JSON.stringify({ at: new Date().toISOString(), rows: SONGS.map(function (s) { return [s.id, s.title, "song", s.chunk]; }) })); } catch (e) {}
     }, function () {
       $("acount").textContent = "Search index failed to load — the A–Z list above still works.";
     });
   }
 })();
+</script>
+<script>
+/* JAHProfile sign-in button mount (graceful header fallback) */
+(function(){var m=document.querySelector('header .booksearch')||document.querySelector('nav.jtabbar')||document.querySelector('header nav')||document.querySelector('header')||document.body;if(window.JAHProfile&&JAHProfile.ui)JAHProfile.ui.renderButton(m);})();
 </script>
 </body>
 </html>

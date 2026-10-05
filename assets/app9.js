@@ -63,10 +63,10 @@
   /* ---------- My Projects: save + return (localStorage) ---------- */
   var LSKEY = "sigstudio.projects", MAXP = 12;
   function loadProjects() {
-    try { var p = JSON.parse(localStorage.getItem(LSKEY) || "[]"); return Array.isArray(p) ? p : []; } catch (e) { return []; }
+    try { var p = JSON.parse(PS.get(LSKEY) || "[]"); return Array.isArray(p) ? p : []; } catch (e) { return []; }
   }
   function storeProjects(list) {
-    try { localStorage.setItem(LSKEY, JSON.stringify(list.slice(0, MAXP))); } catch (e) {}
+    try { PS.set(LSKEY, JSON.stringify(list.slice(0, MAXP))); } catch (e) {}
   }
   function saveProject(rec) {
     if (!rec || !rec.id) return;

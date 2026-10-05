@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="js/signin.js"></script>
+<script>/* JAHProfile-aware storage: public = plain localStorage, signed-in = per-profile namespace */
+var PS=(typeof JAHProfile!=='undefined')?JAHProfile.store:localStorage;</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Song Maker — Option 3: Full Workstation | Signature Music Studio</title>
@@ -423,9 +426,9 @@ var StudioShim = {
   myProjects: {
     KEY: "jah-m3-projects",
     _read: function () {
-      try { return JSON.parse(W.localStorage.getItem(this.KEY) || "[]"); } catch (e) { return []; }
+      try { return JSON.parse(PS.get(this.KEY) || "[]"); } catch (e) { return []; }
     },
-    _write: function (list) { W.localStorage.setItem(this.KEY, JSON.stringify(list)); },
+    _write: function (list) { PS.set(this.KEY, JSON.stringify(list)); },
     push: function (name, arr) {
       var list = this._read();
       list = list.filter(function (p) { return p.name !== name; });
@@ -492,8 +495,8 @@ if (!W.SigStudio) W.SigStudio = Studio;
     var PKEY = "jah-m3-projects";
     Studio.myProjects = {
       KEY: PKEY,
-      _read: function () { try { return JSON.parse(W.localStorage.getItem(PKEY) || "[]"); } catch (e) { return []; } },
-      _write: function (list) { W.localStorage.setItem(PKEY, JSON.stringify(list)); },
+      _read: function () { try { return JSON.parse(PS.get(PKEY) || "[]"); } catch (e) { return []; } },
+      _write: function (list) { PS.set(PKEY, JSON.stringify(list)); },
       push: function (name, arr) {
         var list = this._read().filter(function (p) { return p.name !== name; });
         list.unshift({ name: name, saved: new Date().toISOString(), arr: arr });
@@ -2639,6 +2642,10 @@ if (DOC.readyState === "complete" || DOC.readyState === "interactive") labBoot()
 else on(DOC, "DOMContentLoaded", labBoot);
 })(typeof window !== "undefined" ? window : this);
 
+</script>
+<script>
+/* JAHProfile sign-in button mount (graceful header fallback) */
+(function(){var m=document.querySelector('header .booksearch')||document.querySelector('nav.jtabbar')||document.querySelector('header nav')||document.querySelector('header')||document.body;if(window.JAHProfile&&JAHProfile.ui)JAHProfile.ui.renderButton(m);})();
 </script>
 </body>
 </html>

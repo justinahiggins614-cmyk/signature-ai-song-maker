@@ -258,7 +258,7 @@
     }
   }
 
-  function saveProjSafe() { try { localStorage.setItem(PKEY, JSON.stringify(PROJ, function (k, v) { return k === "micBuf" ? null : v; })); } catch (e) {} }
+  function saveProjSafe() { try { PS.set(PKEY, JSON.stringify(PROJ, function (k, v) { return k === "micBuf" ? null : v; })); } catch (e) {} }
   /* 2026-10-03: project snapshots + undo/redo + "Saved locally" label (P1).
      Every save pushes the pre-save state onto the undo stack (cap 30). */
   var UNDO = [], REDO = [];
@@ -293,8 +293,8 @@
   };
   /* snapshots: named, timestamped, restorable */
   var SKEY = "sigstudio.snaps.v1";
-  function snaps() { try { return JSON.parse(localStorage.getItem(SKEY) || "[]"); } catch (e) { return []; } }
-  function snapsSave(l) { try { localStorage.setItem(SKEY, JSON.stringify(l)); } catch (e) {} }
+  function snaps() { try { return JSON.parse(PS.get(SKEY) || "[]"); } catch (e) { return []; } }
+  function snapsSave(l) { try { PS.set(SKEY, JSON.stringify(l)); } catch (e) {} }
   window.__projSnapshot = function (name) {
     var l = snaps();
     l.push({ name: name || ("Snapshot " + (l.length + 1)), at: new Date().toISOString(), data: projJSON() });

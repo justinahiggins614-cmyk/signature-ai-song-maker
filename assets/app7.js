@@ -441,7 +441,7 @@
         body.querySelector("#wcd").onclick = function () {
           var id = saveWalkSong(ws);
           PROJ.cd.tracks.push(id);
-          try { localStorage.setItem("sigstudio.project.v1", JSON.stringify(PROJ)); } catch (e) {}
+          try { PS.set("sigstudio.project.v1", JSON.stringify(PROJ)); } catch (e) {}
           msg("Added to your CD list — open stage 7 to burn it. 💿");
           if (window.__palSay) window.__palSay("Your walkthrough song is on the CD list. Stage 7 burns it with everything else.");
         };
@@ -542,7 +542,7 @@
   /* ================= walk-song storage + CD/DB hooks ================= */
   var WKEY = "sigstudio.walksongs.v1";
   function walkStore() {
-    try { return JSON.parse(localStorage.getItem(WKEY) || "{}"); } catch (e) { return {}; }
+    try { return JSON.parse(PS.get(WKEY) || "{}"); } catch (e) { return {}; }
   }
   function saveWalkSong(ws) {
     var store = walkStore();
@@ -550,7 +550,7 @@
     var spec = specFromWalk(ws);
     spec.ownSample = null; /* samples live for the session only */
     store[id] = { spec: spec, title: spec.title, savedAt: Date.now() };
-    try { localStorage.setItem(WKEY, JSON.stringify(store)); } catch (e) {}
+    try { PS.set(WKEY, JSON.stringify(store)); } catch (e) {}
     return id;
   }
   window.__resolveTrack = function (id) {

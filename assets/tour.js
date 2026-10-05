@@ -115,7 +115,7 @@
     if (tip && tip.parentNode) tip.parentNode.removeChild(tip);
     ring = tip = null;
     document.removeEventListener("keydown", onKey);
-    try { localStorage.setItem(SEEN, "1"); } catch (e) {}
+    try { PS.set(SEEN, "1"); } catch (e) {}
   }
   function onKey(e) {
     if (!open) return;
@@ -210,11 +210,11 @@
   function boot() {
     injectGuideBtn();
     var seen = false, deeplink = false;
-    try { seen = !!localStorage.getItem(SEEN); } catch (e) {}
+    try { seen = !!PS.get(SEEN); } catch (e) {}
     try { deeplink = /[?&](song|sound|gear|beat)=/.test(location.search); } catch (e2) {}
     if (!seen && !deeplink) {
       setTimeout(function () {
-        try { if (!localStorage.getItem(SEEN)) startTour(); } catch (e3) {}
+        try { if (!PS.get(SEEN)) startTour(); } catch (e3) {}
       }, 1200);
     }
   }

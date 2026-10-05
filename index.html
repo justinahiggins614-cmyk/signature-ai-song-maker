@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script>try{if(localStorage.getItem("jah-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+<script src="js/signin.js"></script>
+<script>/* JAHProfile-aware storage: public = plain localStorage, signed-in = per-profile namespace */
+var PS=(typeof JAHProfile!=='undefined')?JAHProfile.store:localStorage;</script>
+<script>try{if(PS.get("jah-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Signature Music Studio — Make Music On Your Own, Via AI, or Together</title>
@@ -34,7 +37,7 @@
 <p class="sub">The full music-making studio. Every sound, every instrument, all the studio equipment — make your music <b>on your own</b>, <b>via AI</b>, or <b>in collaboration with AI</b>.</p>
 <div id="studionav"></div>
 <p style="margin:.6rem 0"><a class="btn big gold" href="songs.html" style="text-decoration:none">📀 Open the Song Archive</a> <span class="seqlab">Every finished song — search, filter, one-tap play.</span></p>
-<details class="statdrawer"><summary>📊 Archive counts</summary><p class="counter" id="counters" data-stamp="2026-10-05"><!-- COUNT-STAMP-START -->📀 <b>14,200</b> / 1,000,000 songs &nbsp;·&nbsp; 🎛️ <b>13,950</b> / 1,000,000 instruments, sets &amp; packs &nbsp;·&nbsp; 🥁 <b>7,000</b> beats &nbsp;·&nbsp; 🎚️ <b>350</b> equipment records<!-- COUNT-STAMP-END --> <span class="seqlab">last published count — loading live…</span></p></details>
+<details class="statdrawer"><summary>📊 Archive counts</summary><p class="counter" id="counters" data-stamp="2026-10-05"><!-- COUNT-STAMP-START -->📀 <b>14,700</b> / 1,000,000 songs &nbsp;·&nbsp; 🎛️ <b>14,450</b> / 1,000,000 instruments, sets &amp; packs &nbsp;·&nbsp; 🥁 <b>7,250</b> beats &nbsp;·&nbsp; 🎚️ <b>350</b> equipment records<!-- COUNT-STAMP-END --> <span class="seqlab">last published count — loading live…</span></p></details>
 <div class="honest">Every sound on this site is synthesized live in your browser with the Web Audio API — no samples, no downloads needed to play. All voices are synthesized; there are no human singers here. What the AI makes, it makes from a deterministic seed: the same request always makes the same music.</div>
 </div></header>
 
@@ -125,6 +128,10 @@
     if (window.SigStudio) { SigStudio.jahNav("jahnet"); SigStudio.jahNav("jahnet2"); }
   } catch (e2) {}
 })();
+</script>
+<script>
+/* JAHProfile sign-in button mount (graceful header fallback) */
+(function(){var m=document.querySelector('header .booksearch')||document.querySelector('nav.jtabbar')||document.querySelector('header nav')||document.querySelector('header')||document.body;if(window.JAHProfile&&JAHProfile.ui)JAHProfile.ui.renderButton(m);})();
 </script>
 </body>
 </html>

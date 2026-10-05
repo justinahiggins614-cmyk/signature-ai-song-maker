@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script>try{if(localStorage.getItem("jah-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+<script src="js/signin.js"></script>
+<script>/* JAHProfile-aware storage: public = plain localStorage, signed-in = per-profile namespace */
+var PS=(typeof JAHProfile!=='undefined')?JAHProfile.store:localStorage;</script>
+<script>try{if(PS.get("jah-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Album Maker — Signature Music Studio</title>
@@ -100,15 +103,15 @@
 
   /* ---------- album store (this device) ---------- */
   var ALBUM_KEY = "jah-albums-v1", CUR_KEY = "jah-albums-current";
-  function loadAlbums() { try { var a = JSON.parse(localStorage.getItem(ALBUM_KEY) || "[]"); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
-  function saveAlbums(a) { try { localStorage.setItem(ALBUM_KEY, JSON.stringify(a)); } catch (e) {} }
+  function loadAlbums() { try { var a = JSON.parse(PS.get(ALBUM_KEY) || "[]"); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
+  function saveAlbums(a) { try { PS.set(ALBUM_KEY, JSON.stringify(a)); } catch (e) {} }
   function curIx() {
     var a = loadAlbums(); if (!a.length) return -1;
     var ix = 0;
-    try { ix = parseInt(localStorage.getItem(CUR_KEY) || "0", 10) || 0; } catch (e) {}
+    try { ix = parseInt(PS.get(CUR_KEY) || "0", 10) || 0; } catch (e) {}
     return Math.max(0, Math.min(a.length - 1, ix));
   }
-  function setCurIx(ix) { try { localStorage.setItem(CUR_KEY, String(ix)); } catch (e) {} }
+  function setCurIx(ix) { try { PS.set(CUR_KEY, String(ix)); } catch (e) {} }
 
   /* ---------- playable shelf items ---------- */
   function shelfTracks() {
@@ -359,6 +362,10 @@
   drawAlbums(); drawTracks(); drawShelf();
   status("Ready — pick an album, add tracks, press ▶ Play album.");
 })();
+</script>
+<script>
+/* JAHProfile sign-in button mount (graceful header fallback) */
+(function(){var m=document.querySelector('header .booksearch')||document.querySelector('nav.jtabbar')||document.querySelector('header nav')||document.querySelector('header')||document.body;if(window.JAHProfile&&JAHProfile.ui)JAHProfile.ui.renderButton(m);})();
 </script>
 </body>
 </html>

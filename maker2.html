@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="js/signin.js"></script>
+<script>/* JAHProfile-aware storage: public = plain localStorage, signed-in = per-profile namespace */
+var PS=(typeof JAHProfile!=='undefined')?JAHProfile.store:localStorage;</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Song Maker — Option 2: Walk Me Through It | Signature Music Studio</title>
@@ -274,9 +277,9 @@ function installShim() {
     catch (e) { return Promise.resolve(null); }
   };
   function projKey() { return "jah-maker2-projects"; }
-  function projRead() { try { return JSON.parse(localStorage.getItem(projKey()) || "[]"); } catch (e) { return []; } }
+  function projRead() { try { return JSON.parse(PS.get(projKey()) || "[]"); } catch (e) { return []; } }
   X.myProjects = {
-    push: function (rec) { var l = projRead(); l.push(rec); try { localStorage.setItem(projKey(), JSON.stringify(l)); } catch (e) {} return l.length; },
+    push: function (rec) { var l = projRead(); l.push(rec); try { PS.set(projKey(), JSON.stringify(l)); } catch (e) {} return l.length; },
     list: function () { return projRead(); }
   };
   X.host = function (el, opt) {
@@ -688,7 +691,7 @@ function previewMix() {
 
 /* ---------------- stage 6 : finish ---------------- */
 function stampKey() { return "jah-maker2-stamp"; }
-function nextStamp() { var n = 1; try { n = parseInt(localStorage.getItem(stampKey()) || "1", 10) || 1; } catch (e) {} return n; }
+function nextStamp() { var n = 1; try { n = parseInt(PS.get(stampKey()) || "1", 10) || 1; } catch (e) {} return n; }
 function renderFinishStamp() {
   var el = $("f_stamp");
   if (M2.song.id) el.innerHTML = "Stamped: <b>" + esc(M2.song.id) + "</b> — made on this device.";
@@ -698,7 +701,7 @@ function stampSong() {
   M2.song.title = ($("f_title").value || "").trim() || "My Song";
   var n = nextStamp();
   M2.song.id = "JAH-MYSONG-" + pad6(n);
-  try { localStorage.setItem(stampKey(), String(n + 1)); } catch (e) {}
+  try { PS.set(stampKey(), String(n + 1)); } catch (e) {}
   renderFinishStamp();
   $("f_info").textContent = "Stamped! “" + M2.song.title + "” is now " + M2.song.id + " — made on this device.";
   return M2.song.id;
@@ -896,6 +899,10 @@ window.__m2 = {
 if (document.readyState === "complete" || document.readyState === "interactive") boot();
 else document.addEventListener("DOMContentLoaded", boot);
 })();
+</script>
+<script>
+/* JAHProfile sign-in button mount (graceful header fallback) */
+(function(){var m=document.querySelector('header .booksearch')||document.querySelector('nav.jtabbar')||document.querySelector('header nav')||document.querySelector('header')||document.body;if(window.JAHProfile&&JAHProfile.ui)JAHProfile.ui.renderButton(m);})();
 </script>
 </body>
 </html>

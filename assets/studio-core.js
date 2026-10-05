@@ -243,17 +243,17 @@
   /* ---------- My Songs shelf (this device) ---------- */
   var SHELF_KEY = "jah-my-songs-v1";
   var mySongs = {
-    list: function () { try { return JSON.parse(localStorage.getItem(SHELF_KEY) || "[]"); } catch (e) { return []; } },
+    list: function () { try { return JSON.parse(PS.get(SHELF_KEY) || "[]"); } catch (e) { return []; } },
     push: function (item) {
       var l = mySongs.list();
       item.savedAt = new Date().toISOString();
       l.unshift(item);
-      try { localStorage.setItem(SHELF_KEY, JSON.stringify(l.slice(0, 200))); } catch (e) {}
+      try { PS.set(SHELF_KEY, JSON.stringify(l.slice(0, 200))); } catch (e) {}
       return l;
     },
     remove: function (ix) {
       var l = mySongs.list(); l.splice(ix, 1);
-      try { localStorage.setItem(SHELF_KEY, JSON.stringify(l)); } catch (e) {}
+      try { PS.set(SHELF_KEY, JSON.stringify(l)); } catch (e) {}
     }
   };
 
