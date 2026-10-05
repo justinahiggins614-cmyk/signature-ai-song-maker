@@ -27,7 +27,6 @@ var PS=(typeof JAHProfile!=='undefined')?JAHProfile.store:localStorage;</script>
 </script>
 </head>
 <body>
-<nav class="jahnet" aria-label="JAH Network Global Ecosystem"><div class="wrap" id="jahnet"></div></nav>
 <div id="studionav"></div>
 
 <header class="hero"><div class="wrap">
@@ -368,5 +367,6 @@ var PS=(typeof JAHProfile!=='undefined')?JAHProfile.store:localStorage;</script>
 /* JAHProfile sign-in button mount (graceful header fallback) */
 (function(){var m=document.querySelector('header .booksearch')||document.querySelector('nav.jtabbar')||document.querySelector('header nav')||document.querySelector('header')||document.body;if(window.JAHProfile&&JAHProfile.ui)JAHProfile.ui.renderButton(m);})();
 </script>
+<nav class="jahnet" aria-label="JAH Network Global Ecosystem"><div class="wrap" id="jahnet"></div></nav>
 </body>
 </html>

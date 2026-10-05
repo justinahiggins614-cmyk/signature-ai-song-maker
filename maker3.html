@@ -90,7 +90,6 @@ input.txt,select.txt{background:#14121b;color:#e8dcc0;border:1px solid #3a3350;b
 </style>
 </head>
 <body>
-<nav class="jahnet" aria-label="JAH Network Global Ecosystem"><div class="wrap" id="jahnet"></div></nav>
 <div id="studionav"><div class="wrap" id="studionavinner"></div></div>
 <header class="hero"><div class="wrap">
   <h1>SONG MAKER &mdash; OPTION 3</h1>
@@ -1315,7 +1314,7 @@ function boot() {
     status("The studio engines didn't load (assets/synth.js / assets/engine.js). Check your connection and reload.");
     return;
   }
-  Studio.jahNav("jahnet"); Studio.jahNav("jahnet2"); paintStudioNav();
+  Studio.jahNav("jahnet2"); paintStudioNav();
   var desc = "my first workstation song";
   try {
     var m = /[?&]arrange=([^&]+)/.exec(W.location.search || "");

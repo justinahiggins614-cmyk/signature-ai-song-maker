@@ -45,7 +45,6 @@ textarea{min-height:150px;font-family:inherit}
 </style>
 </head>
 <body>
-<nav class="jahnet" aria-label="JAH Network Global Ecosystem"><div class="wrap" id="jahnet"></div></nav>
 <div id="studionav"></div>
 
 <header class="hero"><div class="wrap">
@@ -868,7 +867,6 @@ function boot() {
     $("hostbox").innerHTML = '<p class="honest">The studio engine could not load. Check your connection and reload the page.</p>';
     return;
   }
-  try { St.jahNav("jahnet"); } catch (e) {}
   try { St.jahNav("jahnet2"); } catch (e) {}
   try { St.nav("maker2.html"); } catch (e) {}
   M2.seed = (S.hashSeed("maker2:" + Date.now()) % 1000000) + 1;
