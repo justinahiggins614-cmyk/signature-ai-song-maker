@@ -50,15 +50,31 @@ t("tab bar renders 11 tabs with current highlighted", () => {
   assert(/Quick Song/.test(h0) && /Guided Builder/.test(h0) && /Full Studio/.test(h0), "kid-simple labels missing");
 });
 
-// 3. front door: hero + tab bar + start-here cards linking every tab
-t("front door clean: tab bar + cards, no piled sections", () => {
+// 3. front door: hero + tab bar + start-here cards, NO record tables (Manon 2026-10-05 rule)
+t("front door clean: tab bar + cards, no record tables", () => {
   const s = fs.readFileSync(path.join(HERE, "index.html"), "utf8");
   assert(/id="studionav"/.test(s), "no tab bar");
   assert(/id="startdoor"/.test(s), "no start-here cards");
   for (const g of TABS) if (g !== "index.html") assert(s.indexOf('href="' + g + '"') >= 0, "front door missing link " + g);
-  for (const old of ['id="makestudio"', 'id="beatmaker"', 'id="songwriter"', 'id="vocalstudio"', 'id="cdmaker"', 'id="songgrid"', 'id="beatgrid"'])
-    assert(s.indexOf(old) < 0, "piled section still present: " + old);
-  assert(/STATIC-CAT-START/.test(s) && /STATIC-CAT-END/.test(s), "static catalog markers missing");
+  for (const old of ['id="makestudio"', 'id="beatmaker"', 'id="songwriter"', 'id="vocalstudio"', 'id="cdmaker"', 'id="songgrid"', 'id="beatgrid"', 'id="staticcat"', 'STATIC-CAT-START', 'STATIC-CAT-END'])
+    assert(s.indexOf(old) < 0, "record table/piled section still present on front door: " + old);
+});
+
+// 3b. archive tab page (songs.html) owns the static catalog: collapsed lazy groups
+t("archive page owns static catalog: collapsed lazy groups", () => {
+  const s = fs.readFileSync(path.join(HERE, "songs.html"), "utf8");
+  assert(/STATIC-CAT-START/.test(s) && /STATIC-CAT-END/.test(s), "static catalog markers missing from songs.html");
+  assert(/id="staticcat"/.test(s), "no #staticcat section on songs.html");
+  for (const k of ["songs", "beats"]) {
+    assert(new RegExp('<details class="catgroup" id="cat-' + k + '">').test(s), "catgroup details missing: " + k);
+    const blob = s.match(new RegExp('<script type="application\\/json" id="catdata-' + k + '">([\\s\\S]*?)<\\/script>'));
+    assert(blob && blob[1], "JSON blob missing: " + k);
+    const rows = JSON.parse(blob[1]);
+    assert(rows.length === 20, k + ": expected 20 rows, got " + rows.length);
+    assert(!new RegExp('<details[^>]*open[^>]*id="cat-' + k + '"').test(s), "catgroup not collapsed by default: " + k);
+  }
+  assert(/<noscript>.*<table class="statictable"/s.test(s), "no-JS fallback table missing");
+  assert(/details\.catgroup/.test(s) && /addEventListener\("toggle"/.test(s), "lazy toggle script missing");
 });
 
 // 4. index.json.gz is a SINGLE gzip member, all rows parse, chunks exist

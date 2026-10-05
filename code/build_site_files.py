@@ -189,31 +189,65 @@ def main():
     print("site files built: %d urls, counts %s" % (len(core) + len(rows), json.dumps(counts)))
 
 def build_static_catalog(rows):
-    """Static HTML fallback table (bot-ingestible, no-JS) injected into
-    index.html between the STATIC-CAT markers: first 20 songs + 20 beats."""
+    """Static catalog snapshot (bot-ingestible) injected into songs.html (the
+    archive tab page) between the STATIC-CAT markers: first 20 songs + 20 beats.
+
+    2026-10-05 Manon rule: large record tables NEVER live on a main page tab,
+    and any relocated catalog must land COLLAPSIBLE + LAZY — per-group collapsed
+    by default, only the opened group's records enter the DOM (no full dumps).
+    So the snapshot ships as two <details class="catgroup"> groups (Songs /
+    Beats), collapsed by default; each group's rows live in a JSON blob and are
+    injected on first toggle-open. A <noscript> static table preserves the
+    no-JS bot snapshot."""
     songs = [r for r in rows if r[2] == "song"][:20]
     beats = [r for r in rows if r[2] == "beat"][:20]
-    # 2026-10-04 front-door redo: the static table lives on the front door but
-    # deep-links to the tab pages that own each record type (songs.html / beats.html).
     page = {"song": "songs.html", "beat": "beats.html"}
-    parts = ['<table class="statictable"><thead><tr><th>ID</th><th>Title</th><th>Status</th><th>Open</th></tr></thead><tbody>']
-    for r in songs + beats:
-        url = "%s?%s=%s" % (page[r[2]], PARAM[r[2]], r[0])
-        parts.append('<tr><td><span class="id">%s</span></td><td>%s</td><td>GENERATED</td>'
-                     '<td><a href="%s">Open →</a></td></tr>' % (escape(r[0]), escape(r[1]), escape(url)))
-    parts.append('</tbody></table>')
+    def recs(rs):
+        out = []
+        for r in rs:
+            url = "%s?%s=%s" % (page[r[2]], PARAM[r[2]], r[0])
+            out.append([r[0], r[1], url])
+        return out
+    groups = [("songs", "🎵", "Songs", recs(songs)),
+              ("beats", "🥁", "Beats", recs(beats))]
+    parts = []
+    for key, icon, label, data in groups:
+        blob = json.dumps(data, separators=(",", ":"))
+        parts.append(
+            '<script type="application/json" id="catdata-%s">%s</script>'
+            % (key, blob))
+        parts.append(
+            '<details class="catgroup" id="cat-%s">'
+            '<summary>%s %s <span class="seqlab">(%d records — tap to open)</span></summary>'
+            '<div class="catbody"><p class="seqlab">Opening…</p></div>'
+            '</details>' % (key, icon, label, len(data)))
+    # no-JS bot fallback: static rows only exist in the DOM when JS is off
+    nos = ['<noscript><table class="statictable"><thead><tr><th>ID</th><th>Title</th><th>Status</th><th>Open</th></tr></thead><tbody>']
+    for key, icon, label, data in groups:
+        for rid, title, url in data:
+            nos.append('<tr><td><span class="id">%s</span></td><td>%s</td><td>GENERATED</td>'
+                       '<td><a href="%s">Open →</a></td></tr>' % (escape(rid), escape(title), escape(url)))
+    nos.append('</tbody></table></noscript>')
+    parts.append("".join(nos))
     parts.append('<p class="seqlab">Showing the first 40 archive records. Full machine-readable feed: '
                  '<a href="data/music-catalog.json">data/music-catalog.json</a>.</p>')
+    parts.append('''<script>(function(){function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function render(d){var b=d.querySelector(".catbody");if(!b||b.dataset.done)return;b.dataset.done="1";
+var el=document.getElementById("catdata-"+d.id.replace("cat-",""));var rows=[];try{rows=JSON.parse(el.textContent)}catch(e){}
+var h='<table class="statictable"><thead><tr><th>ID</th><th>Title</th><th>Status</th><th>Open</th></tr></thead><tbody>';
+for(var i=0;i<rows.length;i++){var r=rows[i];h+='<tr><td><span class="id">'+esc(r[0])+'</span></td><td>'+esc(r[1])+'</td><td>GENERATED</td><td><a href="'+esc(r[2])+'">Open \\u2192</a></td></tr>'}
+b.innerHTML=h+"</tbody></table>"}
+document.querySelectorAll("details.catgroup").forEach(function(d){d.addEventListener("toggle",function(){if(d.open)render(d)})})})();</script>''')
     body = "\n".join(parts)
-    p = os.path.join(HERE, "index.html")
+    p = os.path.join(HERE, "songs.html")
     h = open(p).read()
     start, end = "<!-- STATIC-CAT-START -->", "<!-- STATIC-CAT-END -->"
     if start not in h or end not in h:
-        print("WARNING: static-catalog markers missing from index.html — table not injected")
+        print("WARNING: static-catalog markers missing from songs.html — table not injected")
         return
     h = h.split(start)[0] + start + "\n" + body + "\n" + end + end.join(h.split(end)[1:])
     open(p, "w").write(h)
-    print("static catalog table injected (%d songs, %d beats)" % (len(songs), len(beats)))
+    print("static catalog injected into songs.html (%d songs, %d beats) — collapsed lazy groups" % (len(songs), len(beats)))
 
 def stamp_counts(counts):
     """Re-stamp the last-known counts into index.html's raw HTML chips
