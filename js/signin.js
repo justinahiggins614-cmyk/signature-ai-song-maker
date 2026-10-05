@@ -400,12 +400,15 @@
     if (!payload) return null;
     var name = String(payload.name || payload.email || 'Google user').replace(/^\s+|\s+$/g, '');
     var pic = payload.picture ? String(payload.picture) : '';
+    var email = String(payload.email || '').toLowerCase().replace(/^\s+|\s+$/g, '');
     var all = list(), i, existing = null;
     for (i = 0; i < all.length; i++) {
       if (String(all[i].name).toLowerCase() === name.toLowerCase()) { existing = all[i]; break; }
     }
     var p = existing || createProfile(name);
     if (pic && p.picture !== pic) { p.picture = pic; _saveProfile(p); }
+    /* God Mode gate: keep the Google-verified email on the profile so the owner-only editor can check it. Local profiles never have an email. */
+    if (email && p.email !== email) { p.email = email; _saveProfile(p); }
     if (!existing) { /* createProfile already switched */ }
     else switchProfile(p.id);
     _reloadPage();
