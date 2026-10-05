@@ -375,7 +375,11 @@ function onMp3() {
 function onSave() {
   Studio.unlock();
   if (!Shelf) { infoLine("Saving isn't available — the song shelf didn't load."); return; }
-  Shelf.push({ type: "beat", title: cur.like.name, id: cur.like.id, createdAt: new Date().toISOString() });
+  /* Save the full render recipe so the track can be re-rendered exactly
+     (Album Maker, addon pages) — same words/seed = same beat, every time. */
+  Shelf.push({ type: "beat", title: cur.like.name, id: cur.like.id,
+    style: cur.like.style, bpm: cur.like.bpm, bars: cur.bars,
+    desc: cur.like.desc, seed: cur.like.seed, createdAt: new Date().toISOString() });
   infoLine("Saved to My Songs — find it under My Songs on the Song Archive page.");
   sayHost("Saved! Your beat is in My Songs now.");
 }

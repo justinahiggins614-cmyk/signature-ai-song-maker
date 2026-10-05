@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>try{if(localStorage.getItem("jah-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Album Maker — Signature Music Studio</title>
+<meta name="description" content="The Signature Music Studio Album Maker: name an album, add your saved songs and beats, press play — your album plays track after track, right in your browser.">
+<link rel="canonical" href="https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/album.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Album Maker — Signature Music Studio">
+<meta property="og:description" content="Name an album, add your saved songs and beats, press play. Your album plays track after track.">
+<meta property="og:url" content="https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/album.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Album Maker — Signature Music Studio">
+<meta name="twitter:description" content="Name an album, add your saved songs and beats, press play.">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/studio-theme.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+{"@type":"WebPage","name":"Album Maker — Signature Music Studio","url":"https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/album.html","description":"Name an album, add saved songs and beats, and play the album track after track in the browser.","author":{"@type":"Person","name":"Justin Addam Higgins"},"isPartOf":{"@type":"WebSite","name":"Signature Music Studio","url":"https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/"}}
+]}
+</script>
+</head>
+<body>
+<nav class="jahnet" aria-label="JAH Network Global Ecosystem"><div class="wrap" id="jahnet"></div></nav>
+<div id="studionav"></div>
+
+<header class="hero"><div class="wrap">
+<div class="kick">SITE 23 OF 31 · THE JAH NETWORK</div>
+<h1>💿 ALBUM MAKER</h1>
+<div><span class="official">OFFICIAL SIGNATURE SITE — within the Signature/JAH system</span></div>
+<p class="sub">Name an album, add your saved songs and beats, press <b>▶ Play album</b> — it plays track after track, right here. Your albums live on this device and are here when you come back.</p>
+<p><a class="btn ghost" href="./" style="text-decoration:none">← Back to the Studio</a></p>
+<div class="honest">Every track is synthesized live in your browser with the Web Audio API — no samples. All music here is original Signature work; not copies of any real song.</div>
+</div></header>
+
+<div class="wrap" id="main">
+
+<section class="sec" id="sec-albums" aria-label="Your albums">
+<h2>1 · Your albums</h2>
+<div class="row">
+<div><label for="in-albumname">Album name</label><input type="text" id="in-albumname" placeholder="My first album" aria-label="Album name"></div>
+<div style="flex:0"><label>&nbsp;</label><button class="btn" id="btn-newalbum" type="button">＋ New album</button></div>
+</div>
+<div id="albumlist" role="status"><p class="seqlab">Loading…</p></div>
+</section>
+
+<section class="sec" id="sec-tracks" aria-label="Album tracks">
+<h2>2 · Tracks on <span id="cur-album-name">this album</span></h2>
+<p>
+<button class="btn" id="btn-playalbum" type="button">▶ Play album</button>
+<button class="btn ghost" id="btn-stop" type="button">⏹ Stop</button>
+</p>
+<p class="seqlab" id="playstatus" role="status">Ready.</p>
+<div id="tracklist" role="status"><p class="seqlab">Pick or create an album above.</p></div>
+</section>
+
+<section class="sec" id="sec-add" aria-label="Add tracks">
+<h2>3 · Add tracks from My Songs</h2>
+<p class="seqlab">Songs and beats you saved on this device (Quick Song's 💾 Save to My Songs, Guided Builder's Finish). Tap ＋ to add one to the current album.</p>
+<div id="shelflist" role="status"><p class="seqlab">Loading…</p></div>
+</section>
+
+</div>
+
+<script src="assets/synth.js"></script>
+<script src="assets/engine.js"></script>
+<script src="assets/lame.min.js"></script>
+<script src="assets/studio-core.js"></script>
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var Studio = window.SigStudio, S = window.SigSynth;
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+  function status(t) { var el = $("playstatus"); if (el) el.textContent = t; }
+
+  /* ---------- navs (SigStudio canon) ---------- */
+  try { Studio.jahNav("jahnet", "Album Maker"); } catch (e) {}
+  try { $("studionav").innerHTML = Studio.nav("album.html"); } catch (e) {}
+
+  if (!Studio || !S) {
+    $("albumlist").innerHTML = '<div class="card" role="alert"><h4>⚠️ Album Maker unavailable</h4>' +
+      '<p class="seqlab">The studio engine did not load (assets/studio-core.js, synth.js, engine.js). Check your connection, then retry.</p>' +
+      '<p><button class="btn" onclick="location.reload()">↻ Retry</button></p></div>';
+    return;
+  }
+  if (typeof Studio.renderBeatBuffer !== "function" || typeof Studio.renderSongBuffer !== "function" ||
+      typeof S.playBuffer !== "function" || typeof S.stopLive !== "function") {
+    $("albumlist").innerHTML = '<div class="card" role="alert"><h4>⚠️ Album Maker unavailable</h4>' +
+      '<p class="seqlab">The studio engine is missing its render functions. Reload the page.</p></div>';
+    return;
+  }
+
+  /* ---------- album store (this device) ---------- */
+  var ALBUM_KEY = "jah-albums-v1", CUR_KEY = "jah-albums-current";
+  function loadAlbums() { try { var a = JSON.parse(localStorage.getItem(ALBUM_KEY) || "[]"); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
+  function saveAlbums(a) { try { localStorage.setItem(ALBUM_KEY, JSON.stringify(a)); } catch (e) {} }
+  function curIx() {
+    var a = loadAlbums(); if (!a.length) return -1;
+    var ix = 0;
+    try { ix = parseInt(localStorage.getItem(CUR_KEY) || "0", 10) || 0; } catch (e) {}
+    return Math.max(0, Math.min(a.length - 1, ix));
+  }
+  function setCurIx(ix) { try { localStorage.setItem(CUR_KEY, String(ix)); } catch (e) {} }
+
+  /* ---------- playable shelf items ---------- */
+  function shelfTracks() {
+    var list = [];
+    try { list = Studio.mySongs.list() || []; } catch (e) { list = []; }
+    var out = [], legacy = 0;
+    for (var i = 0; i < list.length; i++) {
+      var r = list[i];
+      if (!r || typeof r !== "object") continue;
+      if (r.type === "beat" && r.style && r.desc) {
+        out.push({ kind: "beat", title: r.title || r.name || "Untitled beat",
+          sub: (r.style || "") + " · " + (r.bpm || "?") + " BPM", rec: r });
+      } else if ((r.kind === "mysong" || r.type === "song") && r.seed && r.genre) {
+        out.push({ kind: "song", title: r.title || "Untitled song",
+          sub: (r.genre || "") + " · " + (r.bpm || "?") + " BPM", rec: r });
+      } else if (r.type === "beat" || r.kind === "mysong" || r.type === "song") { legacy++; }
+    }
+    return { items: out, legacy: legacy };
+  }
+
+  /* ---------- render a track to an AudioBuffer (cached) ---------- */
+  function renderTrack(t) {
+    if (t._buf) return Promise.resolve(t._buf);
+    var p;
+    if (t.kind === "beat") {
+      var r = t.rec;
+      p = Studio.renderBeatBuffer(
+        { id: r.id, name: r.title, style: r.style, bpm: r.bpm, desc: r.desc },
+        r.bars || 4);
+    } else {
+      var g = t.rec;
+      var rng = S.rngFrom("m2song:" + g.seed);
+      var chords = S.chordsFor(48, g.genre, rng);
+      var melody = S.melodyFor(chords, g.bars, rng);
+      var like = { seed: g.seed, title: g.title || "My Song", genre: g.genre,
+        bpm: g.bpm, bars: g.bars, keyRoot: 48,
+        pattern: S.patternFor("m2beat:" + g.seed + ":0:" + g.genre, g.genre, g.bpm),
+        melody: melody, voiceId: g.voiceId, instrumental: g.instrumental,
+        lyrics: g.lyrics || "", seconds: 0 };
+      p = Studio.renderSongBuffer(like, g.mix || {});
+    }
+    return p.then(function (buf) { t._buf = buf; return buf; });
+  }
+
+  /* ---------- player: sequential album playback ---------- */
+  var player = { seq: 0, albumIx: -1, trackIx: -1, playing: false };
+
+  function stopPlay(msg) {
+    player.seq++;
+    player.playing = false; player.trackIx = -1;
+    try { S.stopLive("album"); } catch (e) {}
+    status(msg || "Stopped.");
+    drawTracks();
+  }
+
+  function playTrackAt(ai, ti) {
+    var albums = loadAlbums(), al = albums[ai];
+    if (!al || !al.tracks || !al.tracks.length) { status("This album has no tracks yet — add some in section 3."); return; }
+    ti = Math.max(0, Math.min(al.tracks.length - 1, ti));
+    var mySeq = ++player.seq;
+    player.albumIx = ai; player.trackIx = ti; player.playing = true;
+    var t = al.tracks[ti];
+    status("Rendering “" + t.title + "”…");
+    drawTracks();
+    renderTrack(t).then(function (buf) {
+      if (mySeq !== player.seq) return;
+      Studio.unlock();
+      var src = S.playBuffer(buf, "album");
+      if (!src) { player.playing = false; status("Couldn't start the audio — tap ▶ Play album again."); drawTracks(); return; }
+      status("Now playing: “" + t.title + "” (" + (ti + 1) + " of " + al.tracks.length + ")");
+      drawTracks();
+      var nx = al.tracks[ti + 1];
+      if (nx) renderTrack(nx).catch(function () {});
+      src.onended = function () {
+        if (mySeq !== player.seq) return;
+        if (ti + 1 < al.tracks.length) playTrackAt(ai, ti + 1);
+        else { player.playing = false; player.trackIx = -1; status("Album finished — nice listening."); drawTracks(); }
+      };
+    }).catch(function (e) {
+      if (mySeq !== player.seq) return;
+      player.playing = false;
+      status("Couldn't render “" + t.title + "”: " + ((e && e.message) || e));
+      drawTracks();
+    });
+  }
+
+  /* ---------- album CRUD ---------- */
+  var armDelete = -1;
+  function newAlbum() {
+    var name = ($("in-albumname").value || "").replace(/^\s+|\s+$/g, "");
+    var albums = loadAlbums();
+    if (!name) name = "My Album " + (albums.length + 1);
+    albums.push({ name: name, tracks: [], createdAt: new Date().toISOString() });
+    saveAlbums(albums); setCurIx(albums.length - 1);
+    $("in-albumname").value = "";
+    armDelete = -1;
+    drawAlbums(); drawTracks(); drawShelf();
+    status("Album “" + name + "” created — add tracks below.");
+  }
+  function deleteAlbum(ix) {
+    if (armDelete !== ix) {
+      armDelete = ix; drawAlbums();
+      status("Tap Delete again to remove the album for good.");
+      return;
+    }
+    armDelete = -1;
+    var albums = loadAlbums();
+    var gone = albums[ix] ? albums[ix].name : "";
+    albums.splice(ix, 1); saveAlbums(albums);
+    if (player.playing && player.albumIx === ix) stopPlay("Stopped.");
+    setCurIx(0); drawAlbums(); drawTracks(); drawShelf();
+    status("Album “" + gone + "” deleted.");
+  }
+  function selectAlbum(ix) { setCurIx(ix); armDelete = -1; if (player.playing) stopPlay("Stopped."); drawAlbums(); drawTracks(); }
+
+  function addTrack(shelfIx) {
+    var ai = curIx();
+    if (ai < 0) { status("Create an album first, then add tracks to it."); return; }
+    var sh = shelfTracks().items[shelfIx];
+    if (!sh) return;
+    var albums = loadAlbums();
+    var dupe = false;
+    for (var i = 0; i < albums[ai].tracks.length; i++) {
+      var t = albums[ai].tracks[i];
+      if (t.kind === sh.kind && t.rec && sh.rec && t.rec.id === sh.rec.id) { dupe = true; break; }
+    }
+    if (dupe) { status("“" + sh.title + "” is already on this album."); return; }
+    albums[ai].tracks.push({ kind: sh.kind, title: sh.title, sub: sh.sub, rec: sh.rec });
+    saveAlbums(albums); drawTracks();
+    status("Added “" + sh.title + "” to “" + albums[ai].name + "”.");
+  }
+  function removeTrack(ti) {
+    var ai = curIx(); if (ai < 0) return;
+    var albums = loadAlbums();
+    if (player.playing && player.albumIx === ai && player.trackIx === ti) stopPlay("Stopped.");
+    else if (player.playing && player.albumIx === ai && player.trackIx > ti) player.trackIx--;
+    albums[ai].tracks.splice(ti, 1); saveAlbums(albums); drawTracks();
+    status("Track removed.");
+  }
+  function moveTrack(ti, dir) {
+    var ai = curIx(); if (ai < 0) return;
+    var albums = loadAlbums(), tr = albums[ai].tracks;
+    var ni = ti + dir;
+    if (ni < 0 || ni >= tr.length) return;
+    var tmp = tr[ti]; tr[ti] = tr[ni]; tr[ni] = tmp;
+    if (player.playing && player.albumIx === ai) {
+      if (player.trackIx === ti) player.trackIx = ni;
+      else if (player.trackIx === ni) player.trackIx = ti;
+    }
+    saveAlbums(albums); drawTracks();
+  }
+
+  /* ---------- drawing ---------- */
+  function drawAlbums() {
+    var albums = loadAlbums(), box = $("albumlist"), ci = curIx();
+    if (!albums.length) {
+      box.innerHTML = '<p class="seqlab">No albums yet — name one above and tap ＋ New album.</p>';
+      return;
+    }
+    var h = "";
+    for (var i = 0; i < albums.length; i++) {
+      var a = albums[i], n = (a.tracks || []).length;
+      h += '<p><button class="btn' + (i === ci ? "" : " ghost") + '" data-al="' + i + '">' +
+        (i === ci ? "● " : "○ ") + esc(a.name) + '</button> ' +
+        '<span class="seqlab">' + n + " track" + (n === 1 ? "" : "s") + "</span> " +
+        '<button class="btn ghost" data-del="' + i + '">' +
+        (armDelete === i ? "⚠️ Tap again to confirm" : "Delete") + "</button></p>";
+    }
+    box.innerHTML = h;
+    var btns = box.querySelectorAll("button[data-al]");
+    for (var j = 0; j < btns.length; j++) {
+      btns[j].onclick = (function (ix) { return function () { selectAlbum(ix); }; })(parseInt(btns[j].getAttribute("data-al"), 10));
+    }
+    var dels = box.querySelectorAll("button[data-del]");
+    for (var k = 0; k < dels.length; k++) {
+      dels[k].onclick = (function (ix) { return function () { deleteAlbum(ix); }; })(parseInt(dels[k].getAttribute("data-del"), 10));
+    }
+  }
+
+  function drawTracks() {
+    var ai = curIx(), box = $("tracklist"), albums = loadAlbums();
+    if (ai < 0 || !albums[ai]) { box.innerHTML = '<p class="seqlab">Pick or create an album above.</p>'; $("cur-album-name").textContent = "this album"; return; }
+    var al = albums[ai];
+    $("cur-album-name").textContent = "“" + al.name + "”";
+    if (!al.tracks || !al.tracks.length) {
+      box.innerHTML = '<p class="seqlab">No tracks yet — add some from section 3 below.</p>';
+      return;
+    }
+    var h = "";
+    for (var i = 0; i < al.tracks.length; i++) {
+      var t = al.tracks[i];
+      var now = player.playing && player.albumIx === ai && player.trackIx === i;
+      h += '<p class="' + (now ? "nowplaying" : "") + '">' +
+        (now ? "🔊 " : (i + 1) + ". ") + "<b>" + esc(t.title) + "</b> " +
+        '<span class="seqlab">' + esc(t.kind === "beat" ? "beat" : "song") + (t.sub ? " · " + esc(t.sub) : "") + "</span><br>" +
+        '<button class="btn ghost" data-tp="' + i + '">▶</button> ' +
+        '<button class="btn ghost" data-up="' + i + '" aria-label="Move up">↑</button>' +
+        '<button class="btn ghost" data-dn="' + i + '" aria-label="Move down">↓</button> ' +
+        '<button class="btn ghost" data-rm="' + i + '">✕ Remove</button></p>';
+    }
+    box.innerHTML = h;
+    function wire(sel, fn) {
+      var bs = box.querySelectorAll("button[" + sel + "]"), i;
+      for (i = 0; i < bs.length; i++) {
+        bs[i].onclick = (function (el) { return function () { fn(parseInt(el.getAttribute(sel), 10)); }; })(bs[i]);
+      }
+    }
+    var selfAi = ai;
+    wire("data-tp", function (ti) { playTrackAt(selfAi, ti); });
+    wire("data-up", function (ti) { moveTrack(ti, -1); });
+    wire("data-dn", function (ti) { moveTrack(ti, 1); });
+    wire("data-rm", function (ti) { removeTrack(ti); });
+  }
+
+  function drawShelf() {
+    var sh = shelfTracks(), box = $("shelflist"), h = "";
+    if (!sh.items.length) {
+      h = '<p class="seqlab">Nothing saved yet. Make a beat in <a href="maker1.html">Quick Song</a> and tap 💾 Save to My Songs, or finish a song in the <a href="maker2.html">Guided Builder</a> — then come back and build your album.</p>';
+    } else {
+      for (var i = 0; i < sh.items.length; i++) {
+        var t = sh.items[i];
+        h += '<p><button class="btn ghost" data-add="' + i + '">＋ Add</button> <b>' + esc(t.title) + "</b> " +
+          '<span class="seqlab">' + esc(t.kind === "beat" ? "beat" : "song") + (t.sub ? " · " + esc(t.sub) : "") + "</span></p>";
+      }
+    }
+    if (sh.legacy) {
+      h += '<p class="seqlab">' + sh.legacy + " older saved item" + (sh.legacy === 1 ? "" : "s") +
+        " can't join albums (saved before album support) — re-save from Quick Song to add " +
+        (sh.legacy === 1 ? "it" : "them") + ".</p>";
+    }
+    box.innerHTML = h;
+    var bs = box.querySelectorAll("button[data-add]"), i;
+    for (i = 0; i < bs.length; i++) {
+      bs[i].onclick = (function (el) { return function () { addTrack(parseInt(el.getAttribute("data-add"), 10)); }; })(bs[i]);
+    }
+  }
+
+  /* ---------- wiring ---------- */
+  $("btn-newalbum").onclick = newAlbum;
+  $("in-albumname").onkeydown = function (e) { if (e.key === "Enter") newAlbum(); };
+  $("btn-playalbum").onclick = function () {
+    var ai = curIx();
+    if (ai < 0) { status("Create an album first."); return; }
+    playTrackAt(ai, 0);
+  };
+  $("btn-stop").onclick = function () { stopPlay("Stopped."); };
+
+  drawAlbums(); drawTracks(); drawShelf();
+  status("Ready — pick an album, add tracks, press ▶ Play album.");
+})();
+</script>
+</body>
+</html>

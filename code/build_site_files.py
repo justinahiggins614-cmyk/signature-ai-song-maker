@@ -117,7 +117,7 @@ def main():
     core = [BASE, BASE + "songs.html", BASE + "beats.html", BASE + "library.html",
             BASE + "maker1.html", BASE + "maker2.html", BASE + "maker3.html",
             BASE + "addon-sfx.html", BASE + "addon-backup.html", BASE + "addon-chorus.html",
-            BASE + "studio-setup.html",
+            BASE + "studio-setup.html", BASE + "album.html",
             BASE + "#studio", BASE + "#beatmaker", BASE + "#songwriter",
             BASE + "#vocalstudio", BASE + "#backups", BASE + "#cleanup",
             BASE + "#cdmaker", BASE + "#teacher"]
