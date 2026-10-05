@@ -1,6 +1,6 @@
 /* ============================================================================
    JAHProfile — shared sign-in / device-profile module
-   for the 31-site Signature network.  Version 1.0.0
+   for the 31-site Signature network.  Version 2.0.0
 
    WHAT THIS IS
    -----------
@@ -15,6 +15,24 @@
    - Signed in (profile active): storage keys are namespaced per profile,
      so each person gets a fresh start; chat memory never expires
      ("train once").
+
+   v2.0.0 — ONE ACCOUNT, ALL SITES: jah-profiles-v1 / jah-profile-active-v1
+   are origin-level localStorage keys, so all 31 github.io sites share ONE
+   profile list and ONE active profile — sign in once, signed in everywhere.
+   Site data keys are namespaced per profile AND per site
+   (jah-profile-<id>:<site>:<key>) so sites never clobber each other's data;
+   chat memory is namespaced per profile only (jah-profile-<id>:<base>) so a
+   user's AI training follows them across the whole network.
+   MIRROR TOGGLE: signed-in users get a visible "My view / Signature view"
+   switch in the header on every page — Signature view is the standard site
+   exactly as-is (the default, and all a signed-out visitor ever sees); My
+   view is the personalized version (opt-in "Make it mine": greeted by name,
+   your stuff first, the AI addresses you personally). The toggle is visible
+   in both views and keeps the user's place on the page.
+   ADDITIVE ONLY (Manon's explicit constraint): My view must NEVER hide,
+   remove, or truncate a site's archive/catalog/A-Z — personalization puts
+   the user's own items FIRST; the full archive stays complete and reachable
+   in BOTH views. The mirror is additive, never a replacement.
 
    HONESTY — READ THIS BEFORE SHIPPING
    ------------------------------------
@@ -48,6 +66,51 @@
   var ACTIVE_KEY = 'jah-profile-active-v1';   /* localStorage: active profile id, or "" = public */
   var PROFILE_NS_PREFIX = 'jah-profile-';     /* namespaced storage keys look like jah-profile-<id>:<key> */
   var PUBLIC_CHAT_TTL = 24 * 3600 * 1000;     /* 24h, matches GuideTalk v2.1 default */
+
+  /* Site id for per-site data namespacing (first URL path segment, e.g.
+     "jah-ai-models"). Signed-in storage keys are
+     jah-profile-<id>:<site>:<key> so sites on the shared origin never
+     clobber each other's data under one profile. Public keys stay
+     unprefixed (today's behavior, byte-identical). */
+  var SITE_ID = (function () {
+    try {
+      var segs = String((root.location && root.location.pathname) || '').split('/');
+      for (var i = 0; i < segs.length; i++) {
+        var s = segs[i].replace(/[^a-z0-9-]/gi, '').toLowerCase();
+        if (s) return s.slice(0, 40);
+      }
+    } catch (e) {}
+    return 'site';
+  })();
+
+  /* Scroll restore: the mirror toggle saves scrollY before reloading so the
+     user keeps their place on the page. Runs once at load. */
+  (function () {
+    var y = null;
+    try {
+      if (typeof sessionStorage !== 'undefined' && sessionStorage) {
+        y = sessionStorage.getItem('jah-scroll-restore');
+        if (y != null) sessionStorage.removeItem('jah-scroll-restore');
+      }
+    } catch (e) { y = null; }
+    if (y == null) return;
+    var yy = parseInt(y, 10);
+    if (isNaN(yy)) return;
+    function go() { try { if (root.scrollTo) root.scrollTo(0, yy); } catch (e) {} }
+    try {
+      var d = _doc();
+      if (d && d.readyState === 'complete') go();
+      else if (root.addEventListener) root.addEventListener('load', go);
+      else go();
+    } catch (e) {}
+  })();
+  function _saveScroll() {
+    try {
+      if (typeof sessionStorage !== 'undefined' && sessionStorage && root.scrollY != null) {
+        sessionStorage.setItem('jah-scroll-restore', String(root.scrollY | 0));
+      }
+    } catch (e) {}
+  }
 
   /* Provider registry — "and such". Each provider has the same shape:
        { label, enabled(), renderButton(containerEl), handleCredential(resp) }
@@ -183,10 +246,17 @@
   /* ================= 4. NAMESPACED STORE =================
      Public (signed out): keys pass through UNPREFIXED — byte-for-byte
      the behavior every site has today.
-     Signed in: keys are namespaced as jah-profile-<id>:<key>. */
-  function _ns() {
+     Signed in: keys are namespaced per profile AND per site:
+     jah-profile-<id>:<site>:<key>. The profile is network-wide (one
+     account, all sites); the site segment keeps sites from clobbering
+     each other's data on the shared origin. */
+  function _pns() { /* profile-only prefix: jah-profile-<id>: */
     var c = current();
     return c ? (PROFILE_NS_PREFIX + c.id + ':') : '';
+  }
+  function _ns() { /* full store prefix: jah-profile-<id>:<site>: */
+    var p = _pns();
+    return p ? (p + SITE_ID + ':') : '';
   }
   var store = {
     get: function (k) {
@@ -218,10 +288,61 @@
   /* ================= 5. CHAT-MEMORY HELPERS (GuideTalk) ================= */
   function chatKey(baseKey) {
     baseKey = String(baseKey == null ? '' : baseKey);
-    return _ns() ? (_ns() + baseKey) : baseKey; /* public -> unchanged */
+    /* Deliberately profile-scoped WITHOUT the site segment: chat memory is
+       keyed per AI already, so a profile's training of an AI follows the
+       user across the whole network ("train once", everywhere). */
+    return _pns() ? (_pns() + baseKey) : baseKey; /* public -> unchanged */
   }
   function chatTTL() {
     return current() ? Infinity : PUBLIC_CHAT_TTL; /* signed in -> train once, no expiry */
+  }
+
+  /* ================= 5b. MIRROR VIEW + "MAKE IT MINE" =================
+     - view(): 'signature' | 'mine'. Public (signed out) is ALWAYS
+       'signature' — the standard site exactly as-is, never personalized.
+     - "Make it mine" is opt-in per profile (c.mine). Personalization
+       (greeting, name-addressing, your-stuff-first) is live ONLY when the
+       user opted in AND is in My view.
+     - ADDITIVE ONLY (Manon's explicit constraint): My view must NEVER hide,
+       remove, or truncate the site's archive/catalog/A-Z. It puts the user's
+       own items FIRST; the full archive stays complete and reachable in
+       BOTH views. The mirror is additive, never a replacement. */
+  function view() {
+    var c = current();
+    if (!c) return 'signature';
+    return (c.view === 'mine') ? 'mine' : 'signature';
+  }
+  function setView(v) {
+    var c = current();
+    if (!c) return 'signature';
+    c.view = (v === 'mine') ? 'mine' : 'signature';
+    _saveProfile(c);
+    _fire();
+    return c.view;
+  }
+  function mine() {
+    var c = current();
+    return !!(c && c.mine);
+  }
+  function setMine(on) {
+    var c = current();
+    if (!c) return false;
+    c.mine = !!on;
+    _saveProfile(c);
+    _fire();
+    return c.mine;
+  }
+  function personalized() { /* personalization is live: opted in AND My view */
+    return mine() && view() === 'mine';
+  }
+  function userName() {
+    if (!personalized()) return '';
+    var c = current();
+    return c ? String(c.name || '') : '';
+  }
+  function greeting() {
+    var n = userName();
+    return n ? ('Welcome back, ' + n + '.') : '';
   }
 
   /* ================= 6. GOOGLE SIGN-IN (one-step, inert when unconfigured) ================= */
@@ -384,6 +505,22 @@
             signOut();
             _reloadPage();
           }));
+          /* ---- "Make it mine" opt-in (signed-in only) ---- */
+          var mrow = doc.createElement('label');
+          mrow.setAttribute('style', 'display:flex;align-items:center;gap:8px;padding:7px 8px;cursor:pointer;color:#111;');
+          var mcb = doc.createElement('input');
+          mcb.type = 'checkbox';
+          try { mcb.checked = !!mine(); } catch (e) {}
+          mcb.addEventListener('click', function (ev) { if (ev && ev.stopPropagation) ev.stopPropagation(); });
+          mcb.addEventListener('change', function () {
+            setMine(!!mcb.checked);
+            _reloadPage();
+          });
+          mrow.appendChild(mcb);
+          var mtx = doc.createElement('span');
+          mtx.textContent = 'Make it mine (greet me, my stuff first)';
+          mrow.appendChild(mtx);
+          drop.appendChild(mrow);
         }
         var prov, anyProv = false;
         for (var key in PROVIDERS) {
@@ -405,6 +542,10 @@
         honest.textContent = 'Your profile lives on this device. No account, no cloud sync.';
         honest.setAttribute('style', 'font-size:11px;color:#777;margin:8px 4px 2px;line-height:1.4;');
         drop.appendChild(honest);
+        var legal = doc.createElement('div');
+        legal.textContent = 'Built with Signature \u2014 your creations are yours.';
+        legal.setAttribute('style', 'font-size:11px;color:#777;margin:0 4px 2px;line-height:1.4;');
+        drop.appendChild(legal);
       }
       function profileRow(doc, p) {
         var row = doc.createElement('div');
@@ -459,13 +600,57 @@
       wrap.appendChild(btn);
       wrap.appendChild(drop);
       mount.appendChild(wrap);
+      /* ---- mirror toggle: visible header switch, signed-in only.
+             "My view" = personalized; "Signature view" = the standard site
+             exactly as-is (default; all a signed-out visitor ever sees).
+             Visible in both views; switching keeps the user's place. ---- */
+      if (current()) {
+        var vt = doc.createElement('button');
+        vt.type = 'button';
+        var _isMine = (view() === 'mine');
+        vt.textContent = _isMine ? 'My view \u21C4' : '\u21C4 Signature view';
+        vt.title = _isMine
+          ? 'You are in My view (personalized). Switch to the standard Signature view.'
+          : 'You are in Signature view (standard site). Switch to your personalized My view.';
+        vt.setAttribute('style', 'display:inline-flex;align-items:center;gap:6px;margin-left:8px;' +
+          'border:1px solid #bbb;border-radius:999px;background:' + (_isMine ? '#e8f0fe' : '#fff') + ';' +
+          'color:#111;font:600 12px/1.4 system-ui,sans-serif;padding:5px 12px;cursor:pointer;' +
+          'white-space:nowrap;vertical-align:middle;');
+        vt.addEventListener('click', function (ev) {
+          if (ev && ev.stopPropagation) ev.stopPropagation();
+          setView(view() === 'mine' ? 'signature' : 'mine');
+          _saveScroll();
+          _reloadPage();
+        });
+        mount.appendChild(vt);
+      }
       return wrap;
+    },
+    /* Optional page greeting: renders "Welcome back, <name>." plus the legal
+       line, ONLY when personalization is live (opted in + My view).
+       Theme-neutral; safe to call with any element or null. */
+    renderGreeting: function (mount) {
+      var doc = _doc();
+      var g = greeting();
+      if (!doc || !mount || !mount.appendChild || !g) return null;
+      var box = doc.createElement('div');
+      box.setAttribute('style', 'display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;' +
+        'font:600 15px/1.5 system-ui,sans-serif;margin:6px 0;');
+      var t = doc.createElement('span');
+      t.textContent = g;
+      box.appendChild(t);
+      var l = doc.createElement('span');
+      l.textContent = 'Built with Signature \u2014 your creations are yours.';
+      l.setAttribute('style', 'font-size:12px;font-weight:400;opacity:.75;');
+      box.appendChild(l);
+      mount.appendChild(box);
+      return box;
     }
   };
 
   /* ================= 8. EXPORT ================= */
   var JAHProfile = {
-    version: '1.0.0',
+    version: '2.0.0',
     googleClientId: GOOGLE_CLIENT_ID, /* public by design (OAuth client IDs are public) */
     providers: PROVIDERS,
     googleEnabled: googleEnabled,
@@ -478,6 +663,13 @@
     store: store,
     chatKey: chatKey,
     chatTTL: chatTTL,
+    view: view,
+    setView: setView,
+    mine: mine,
+    setMine: setMine,
+    personalized: personalized,
+    userName: userName,
+    greeting: greeting,
     ui: ui
   };
   root.JAHProfile = JAHProfile;

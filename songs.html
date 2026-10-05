@@ -121,6 +121,35 @@ document.getElementById("best-copy").onclick=function(){copyText(dl,this);};
 document.getElementById("best-dl").onclick=function(){download("JAH-SONG-0000001-best.txt",dl);};
 })();
 </script>
+<div id="mySongsPin"></div>
+<script>
+/* JAHProfile v2 "your-stuff-first": in My view (opted in + personalized),
+   pin the user's own saved songs ABOVE the full A–Z archive. ADDITIVE ONLY —
+   every letter of the archive below stays complete; signed-out visitors see
+   nothing extra. */
+(function(){
+  function eh(x){return String(x==null?"":x).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+  try{
+    var live=(typeof JAHProfile!=="undefined"&&JAHProfile&&typeof JAHProfile.personalized==="function"&&JAHProfile.personalized());
+    var box=document.getElementById("mySongsPin");
+    if(!box||!live)return;
+    var list=[];
+    try{ if(window.SigStudio&&SigStudio.mySongs) list=SigStudio.mySongs.list()||[]; }catch(e){}
+    if(!list.length)return;
+    var h='<div class="card" style="border:1px dashed #a855f7"><h3>&#128190; Your saved songs — first in My view</h3><ul>';
+    for(var i=0;i<list.length&&i<8;i++){
+      var r=list[i]||{};
+      var t=r.title||r.name||"Untitled";
+      var sub=[r.genre,(r.bpm?r.bpm+" BPM":null),r.type||r.kind].filter(Boolean).join(" \u00b7 ");
+      h+='<li><b>'+eh(t)+'</b>'+(sub?' <span class="seqlab">'+eh(sub)+'</span>':'')+'</li>';
+    }
+    h+='</ul>';
+    if(list.length>8)h+='<p class="seqlab">+'+(list.length-8)+' more saved.</p>';
+    h+='<p class="seqlab">Play or edit them in the <a href="album.html">Album Maker</a>. The full song archive A–Z follows below — nothing is hidden.</p></div>';
+    box.innerHTML=h;
+  }catch(e){}
+})();
+</script>
 <h2>📚 Every song, A–Z</h2>
 <p class="seqlab">Tap a letter — that letter's songs load only when you open it, so the page stays fast on your phone.</p>
 <div id="azletters"><p class="azload">Loading the letter list…</p></div>
@@ -736,6 +765,16 @@ window.__JAHREAD=R;
 <script>
 /* JAHProfile sign-in button mount (graceful header fallback) */
 (function(){var m=document.querySelector('header .booksearch')||document.querySelector('nav.jtabbar')||document.querySelector('header nav')||document.querySelector('header')||document.body;if(window.JAHProfile&&JAHProfile.ui)JAHProfile.ui.renderButton(m);})();
+</script>
+<script>
+(function () {
+  /* JAHProfile v2 page greeting — renders ONLY when personalization is live
+     (signed-in + opted in + My view); signed-out visitors see nothing. */
+  if (window.JAHProfile && JAHProfile.ui) {
+    var mount = document.querySelector('header') || document.body;
+    JAHProfile.ui.renderGreeting(mount); /* renders ONLY when personalization is live */
+  }
+})();
 </script>
 </body>
 </html>
