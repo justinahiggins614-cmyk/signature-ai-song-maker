@@ -48,7 +48,7 @@
     return h + "</div></nav>";
   }
 
-  /* ---------- 27-site JAH network nav (canon, same as front door) ---------- */
+  /* ---------- 31-site JAH network nav (canon, same as front door) ---------- */
   var JNAV = [
     ["Signature Math", "signature-math"], ["Signature Universal Paradox Immune Calculator", "jah-calculator"], ["The Signature Dictionary", "jah-dictionary"],
     ["JAH Wiki", "jah-wiki"], ["JAH-N Wiki Leaks", "jah-n-wiki-leaks"], ["Signature Llama: The Fully Cyber Utilizable AI", "signature-llama"],
