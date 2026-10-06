@@ -566,11 +566,26 @@ window.__JAHREAD=R;
       stopAllAudio();
       try { S.unlockAudio(); } catch (e2) {}
       findSong(id).then(function (rec) {
+        if(!rec) throw new Error("song record not found");
         return S.renderSong(rec, 150, null);
       }).then(function (buf) {
+        if(!buf) throw new Error("audio render failed");
         playBuf(buf, "az-" + id);
         p.textContent = "▶"; p.disabled = false;
-      }).catch(function () { p.textContent = "▶"; p.disabled = false; });
+      }).catch(function (err) {
+        p.textContent = "▶"; p.disabled = false;
+        var msg = "Could not play this song";
+        try{ if(err && err.message) msg += ": " + err.message; }catch(e){}
+        msg += ". Try Chrome browser.";
+        try{
+          var d = document.getElementById("__song_err");
+          if(!d){ d = document.createElement("div"); d.id = "__song_err";
+            d.style.cssText = "position:fixed;left:50%;bottom:70px;transform:translateX(-50%);background:#1a1428;color:#f5c542;border:2px solid #f5c542;border-radius:10px;padding:10px 16px;z-index:99999;font-size:14px;max-width:90vw;text-align:center";
+            document.body.appendChild(d); }
+          d.textContent = msg; d.style.display = "block";
+          setTimeout(function(){ d.style.display = "none"; }, 5000);
+        }catch(e2){ alert(msg); }
+      });
     });
   }
 
