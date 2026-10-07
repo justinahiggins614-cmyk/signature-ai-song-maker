@@ -101,21 +101,35 @@ var plain="Best of the Best — Amber Harbor, JAH-SONG-0000001. The first finish
 var dl="SIGNATURE MUSIC STUDIO — BEST OF THE BEST (SONG ARCHIVE)\nAmber Harbor — JAH-SONG-0000001 (song 1 of 12,700)\n\nWHY THIS IS THE BEST\nThe first finished song ever published — the genesis of the Studio's song archive. Every song since follows this format.\n\nWHAT IT DOES\nFully-made original Signature composition, playable in your browser, synthesized live with the Web Audio API — no samples, no downloads needed. All voices synthesized; no human singers.\n\nIMPLICATIONS\n12,700 songs finished + 12,450 sounds + 6,250 beats + 350 gear records, marching toward 1,000,000 songs.\n\nPlay it: https://justinahiggins614-cmyk.github.io/signature-ai-song-maker/songs.html?song=JAH-SONG-0000001";
 function copyText(t,btn){function done(ok){var o=btn.textContent;btn.textContent=ok?"Copied ✓":"Copy failed";setTimeout(function(){btn.textContent=o;},1500);}if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){done(true);},function(){done(false);});}else{var ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");done(true);}catch(e){done(false);}document.body.removeChild(ta);}}
 function download(name,text){try{var url=URL.createObjectURL(new Blob([text],{type:"text/plain"}));var a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a);try{URL.revokeObjectURL(url);}catch(e){}},800);}catch(e){}}
-var speakTimer=null;
-function speakStop(){try{if(window.speechSynthesis)window.speechSynthesis.cancel();}catch(e){}if(speakTimer){clearTimeout(speakTimer);speakTimer=null;}}
+var speakTimer=null,speakAud=null,speakingNow=false;
+var TTS_TIERS=[
+ function(t){return "https://code.responsivevoice.org/getvoice.php?t="+encodeURIComponent(t)+"&tl=en-US&sv=g2&vn=&pitch=0.5&rate=0.95";},
+ function(t){return "https://translate.google.com/translate_tts?ie=UTF-8&q="+encodeURIComponent(t)+"&tl=en&client=tw-ob";},
+ function(t){return "https://translate.googleapis.com/translate_tts?ie=UTF-8&q="+encodeURIComponent(t)+"&tl=en&client=tw-ob"}];
+function chunkText(t){var out=[],s=String(t);while(s.length>200){var i=s.lastIndexOf(". ",200);if(i<0)i=s.lastIndexOf(" ",200);if(i<0)i=200;out.push(s.slice(0,i+1));s=s.slice(i+1);}if(s.trim())out.push(s);return out;}
+function speakStop(){speakingNow=false;try{if(speakAud){speakAud.pause();speakAud=null;}}catch(e){}if(speakTimer){clearTimeout(speakTimer);speakTimer=null;}}
 var speakBtn=document.getElementById("best-speak");
 speakBtn.onclick=function(){
+  /* Audio-only tiered playback: speechSynthesis is NEVER used — it fails
+     silently on Android/Facebook WebView, which made read-aloud silently dead. */
+  var ORIG="🔊 Read aloud";
+  if(speakingNow){speakStop();speakBtn.textContent=ORIG;return;}
   speakStop();
-  try{
-    if(!("speechSynthesis" in window)){speakBtn.textContent="No voice on this device";setTimeout(function(){speakBtn.textContent="🔊 Read aloud";},1800);return;}
-    if(window.speechSynthesis.speaking){speakBtn.textContent="🔊 Read aloud";return;}
-    var u=new SpeechSynthesisUtterance(plain);
-    speakBtn.textContent="⏹ Stop";
-    u.onend=function(){speakBtn.textContent="🔊 Read aloud";};
-    u.onerror=function(){speakBtn.textContent="🔊 Read aloud";};
-    window.speechSynthesis.speak(u);
-    speakTimer=setTimeout(function(){speakBtn.textContent="🔊 Read aloud";},30000);
-  }catch(e){speakBtn.textContent="🔊 Read aloud";}
+  var chunks=chunkText(plain),ci=0,hi=0;
+  speakingNow=true;
+  speakBtn.textContent="⏹ Stop";
+  function done(){ci++;hi=0;if(ci<chunks.length&&speakingNow){play();}else{speakStop();speakBtn.textContent=ORIG;}}
+  function play(){
+    if(!speakingNow)return;
+    if(hi>=TTS_TIERS.length){speakStop();speakBtn.textContent=ORIG;return;}
+    try{if(speakAud){try{speakAud.pause();}catch(e){}}}catch(e){}
+    speakAud=new Audio();
+    speakAud.onended=done;
+    speakAud.onerror=function(){hi++;play();};
+    try{speakAud.src=TTS_TIERS[hi](chunks[ci]);var p=speakAud.play();if(p&&p.catch)p.catch(function(){hi++;play();});}
+    catch(e){hi++;play();}
+  }
+  play();
 };
 document.getElementById("best-copy").onclick=function(){copyText(dl,this);};
 document.getElementById("best-dl").onclick=function(){download("JAH-SONG-0000001-best.txt",dl);};
@@ -381,15 +395,37 @@ window.__JAHREAD=R;
 
   /* ---------- tiered read-aloud (site pattern: speechSynthesis -> Google TTS audio) ---------- */
   var readText = "";
+  /* Audio-only tiered playback: speechSynthesis is NEVER used — it fails silently
+     on Android/Facebook WebView, which made read-aloud silently dead. */
+  var RD_TIERS = [
+    function (t) { return "https://code.responsivevoice.org/getvoice.php?t=" + encodeURIComponent(t) + "&tl=en-US&sv=g2&vn=&pitch=0.5&rate=0.95"; },
+    function (t) { return "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=" + encodeURIComponent(t); },
+    function (t) { return "https://translate.googleapis.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=" + encodeURIComponent(t); }];
   function speakTier(text, done) {
     if(window.__JAHREAD&&!window.__JAHREAD.playGuard("speakTier"))return;
-    try {
-      if ("speechSynthesis" in window && window.speechSynthesis) {
-        var u = new SpeechSynthesisUtterance(text); u.rate = 1; u.onend = done; u.onerror = done;
-        speechSynthesis.cancel(); speechSynthesis.speak(u); return;
-      }
-    } catch (e) {}
-    googleChunks(text, done);
+    audioChunks(text, done);
+  }
+  function audioChunks(text, done) {
+    var parts = [], t = String(text);
+    while (t.length > 170) {
+      var cut = t.lastIndexOf(". ", 170); if (cut < 60) cut = t.lastIndexOf(" ", 170); if (cut < 60) cut = 170;
+      parts.push(t.slice(0, cut + 1)); t = t.slice(cut + 1);
+    }
+    if (t) parts.push(t);
+    var i = 0;
+    (function next() {
+      if (i >= parts.length) { done(); return; }
+      playTier(parts[i++], 0, next);
+    })();
+    function playTier(chunk, tier, next) {
+      if (tier >= RD_TIERS.length) { next(); return; }
+      try {
+        var a = new Audio(RD_TIERS[tier](chunk));
+        a.onended = next;
+        a.onerror = function () { playTier(chunk, tier + 1, next); };
+        var p = a.play(); if (p && p.catch) p.catch(function () { playTier(chunk, tier + 1, next); });
+      } catch (e) { playTier(chunk, tier + 1, next); }
+    }
   }
   function googleChunks(text, done) {
     var parts = [], t = String(text);

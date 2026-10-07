@@ -109,15 +109,37 @@ window.__JAHREAD=R;
 
   /* ---------- tiered read-aloud (site pattern) ---------- */
   var readText = "";
+  /* Audio-only tiered playback: speechSynthesis is NEVER used — it fails silently
+     on Android/Facebook WebView, which made read-aloud silently dead. */
+  var RD_TIERS = [
+    function (t) { return "https://code.responsivevoice.org/getvoice.php?t=" + encodeURIComponent(t) + "&tl=en-US&sv=g2&vn=&pitch=0.5&rate=0.95"; },
+    function (t) { return "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=" + encodeURIComponent(t); },
+    function (t) { return "https://translate.googleapis.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=" + encodeURIComponent(t); }];
   function speakTier(text, done) {
     if(window.__JAHREAD&&!window.__JAHREAD.playGuard("speakTier"))return;
-    try {
-      if ("speechSynthesis" in window && window.speechSynthesis) {
-        var u = new SpeechSynthesisUtterance(text); u.rate = 1; u.onend = done; u.onerror = done;
-        speechSynthesis.cancel(); speechSynthesis.speak(u); return;
-      }
-    } catch (e) {}
-    googleChunks(text, done);
+    audioChunks(text, done);
+  }
+  function audioChunks(text, done) {
+    var parts = [], t = String(text);
+    while (t.length > 170) {
+      var cut = t.lastIndexOf(". ", 170); if (cut < 60) cut = t.lastIndexOf(" ", 170); if (cut < 60) cut = 170;
+      parts.push(t.slice(0, cut + 1)); t = t.slice(cut + 1);
+    }
+    if (t) parts.push(t);
+    var i = 0;
+    (function next() {
+      if (i >= parts.length) { done(); return; }
+      playTier(parts[i++], 0, next);
+    })();
+    function playTier(chunk, tier, next) {
+      if (tier >= RD_TIERS.length) { next(); return; }
+      try {
+        var a = new Audio(RD_TIERS[tier](chunk));
+        a.onended = next;
+        a.onerror = function () { playTier(chunk, tier + 1, next); };
+        var p = a.play(); if (p && p.catch) p.catch(function () { playTier(chunk, tier + 1, next); });
+      } catch (e) { playTier(chunk, tier + 1, next); }
+    }
   }
   function googleChunks(text, done) {
     var parts = [], t = String(text);
@@ -140,7 +162,7 @@ window.__JAHREAD=R;
     readText = text; $("readlabel").textContent = "Reading: " + (label || "selection"); $("readbar").style.display = "block";
     speakTier(text, function () { $("readbar").style.display = "none"; });
   }
-  function stopReading() { try{if(window.__JAHREAD)window.__JAHREAD.stopAll();}catch(e){} try { speechSynthesis.cancel(); } catch (e) {} readText = ""; $("readbar").style.display = "none"; }
+  function stopReading() { try{if(window.__JAHREAD)window.__JAHREAD.stopAll();}catch(e){} readText = ""; $("readbar").style.display = "none"; }
   $("readstop").onclick = stopReading; $("readclose").onclick = stopReading;
   $("readplay").onclick = function () { if(window.__JAHREAD&&!window.__JAHREAD.playGuard("readplay"))return; if (readText) readAloud(readText); };
 
