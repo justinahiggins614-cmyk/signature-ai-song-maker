@@ -127,15 +127,24 @@ window.__JAHREAD=R;
      speechSynthesis -> straight to Google TTS audio, instantly, inside
      the tap gesture. */
   var readQueue = [], reading = false, readText = "";
+  /* Audio-only tiered playback: speechSynthesis is NEVER used — it fails silently
+     on Android/Facebook WebView. ResponsiveVoice audio -> Google TTS hosts. */
+  var APP_TIERS = [
+    function (t) { return "https://code.responsivevoice.org/getvoice.php?t=" + encodeURIComponent(t) + "&tl=en-US&sv=g2&vn=&pitch=0.5&rate=0.95"; },
+    function (t) { return "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=" + encodeURIComponent(t); },
+    function (t) { return "https://translate.googleapis.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=" + encodeURIComponent(t); }];
   function speakTier(text, done) {
     if(window.__JAHREAD&&!window.__JAHREAD.playGuard("speakTier"))return;
+    playTier(String(text).slice(0, 180), 0, done);
+  }
+  function playTier(chunk, tier, done) {
+    if (tier >= APP_TIERS.length) { done(); return; }
     try {
-      if ("speechSynthesis" in window && window.speechSynthesis) {
-        var u = new SpeechSynthesisUtterance(text); u.rate = 1; u.onend = done; u.onerror = done;
-        speechSynthesis.cancel(); speechSynthesis.speak(u); return;
-      }
-    } catch (e) {}
-    tier3(text, done);
+      var a = new Audio(APP_TIERS[tier](chunk));
+      a.onended = done;
+      a.onerror = function () { playTier(chunk, tier + 1, done); };
+      var p = a.play(); if (p && p.catch) p.catch(function () { playTier(chunk, tier + 1, done); });
+    } catch (e) { playTier(chunk, tier + 1, done); }
   }
   function tier2(text, done) {
     try {
@@ -161,7 +170,7 @@ window.__JAHREAD=R;
     reading = true;
   }
   function nextChunk() { reading = false; $("readbar").style.display = "none"; }
-  $("readstop").onclick = function () { try{if(window.__JAHREAD)window.__JAHREAD.stopAll();}catch(e){} try { speechSynthesis.cancel(); } catch (e) {} try { responsiveVoice.cancel(); } catch (e) {} reading = false; $("readbar").style.display = "none"; };
+  $("readstop").onclick = function () { try{if(window.__JAHREAD)window.__JAHREAD.stopAll();}catch(e){} try { responsiveVoice.cancel(); } catch (e) {} reading = false; $("readbar").style.display = "none"; };
   $("readclose").onclick = $("readstop").onclick;
   $("readplay").onclick = function () { if(window.__JAHREAD&&!window.__JAHREAD.playGuard("readplay"))return; if (readText) readAloud(readText); };
 
