@@ -1,3 +1,5 @@
+
+function jahToast(m){var t=document.getElementById('jah-toast');if(!t){t=document.createElement('div');t.id='jah-toast';document.body.appendChild(t)}t.textContent=String(m);t.style.display='block';clearTimeout(t._x);t._x=setTimeout(function(){t.style.display='none'},3000)}
 /* ============================================================
    Signature Music Studio — first-time spotlight tour + permanent
    "? Guide" panel (2026-10-03 usability wave).
@@ -189,7 +191,7 @@
       var rb = document.getElementById("sigguide-tour");
       if (rb) rb.onclick = function () { if (window.__closeModal) window.__closeModal(); setTimeout(startTour, 150); };
     } else {
-      alert("Studio guide: " + GUIDE_SECTIONS.map(function (g) { return g[0] + " — " + g[1]; }).join("\n\n"));
+      jahToast("Studio guide: " + GUIDE_SECTIONS.map(function (g) { return g[0] + " — " + g[1]; }).join("\n\n"));
     }
   }
   window.__openStudioGuide = openGuide;

@@ -1,3 +1,5 @@
+
+function jahToast(m){var t=document.getElementById('jah-toast');if(!t){t=document.createElement('div');t.id='jah-toast';document.body.appendChild(t)}t.textContent=String(m);t.style.display='block';clearTimeout(t._x);t._x=setTimeout(function(){t.style.display='none'},3000)}
 /* ============================================================
    Signature Music Studio (part 9) — 2026-10-02:
    Gemini corrected fixes:
@@ -122,7 +124,7 @@
   /* ---------- Export Project: downloadable .zip package ---------- */
   window.__exportProject = function (rec) {
     try {
-      if (!window.__buildZip) { alert("Project export isn't ready yet — reload the page and try again."); return; }
+      if (!window.__buildZip) { jahToast("Project export isn't ready yet — reload the page and try again."); return; }
       var files = [];
       var pkg = {
         id: rec.id, kind: rec.kind, seed: (rec.n != null ? rec.n : null),
