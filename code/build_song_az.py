@@ -51,13 +51,21 @@ def main():
         rows = buckets[L]
         rows.sort(key=lambda r: (r[1].lower(), r[0]))
         counts[L] = len(rows)
-        # single-member gzip rewrite — never append
-        with gzip.open(os.path.join(AZDIR, L + ".json.gz"), "wt", encoding="utf-8") as fh:
+        # single-member gzip rewrite — never append.
+        # ATOMIC: write to a temp file, then os.replace, so a mid-write kill
+        # can never leave a 0-byte/corrupt live file (2026-10-08: a kill
+        # during the 16:42 UTC drip left data/index/az/C.json.gz at 0 bytes,
+        # breaking letter C on the live site until rebuilt).
+        tmp = os.path.join(AZDIR, L + ".json.gz.tmp")
+        with gzip.open(tmp, "wt", encoding="utf-8") as fh:
             for r in rows:
                 fh.write(json.dumps(r, ensure_ascii=False) + "\n")
+        os.replace(tmp, os.path.join(AZDIR, L + ".json.gz"))
     manifest = {"total": total, "built": date.today().isoformat(), "counts": counts}
-    with open(os.path.join(AZDIR, "manifest.json"), "w", encoding="utf-8") as fh:
+    mtmp = os.path.join(AZDIR, "manifest.json.tmp")
+    with open(mtmp, "w", encoding="utf-8") as fh:
         json.dump(manifest, fh)
+    os.replace(mtmp, os.path.join(AZDIR, "manifest.json"))
     print("song az: %d songs across 27 letters -> data/index/az/" % total)
 
 
