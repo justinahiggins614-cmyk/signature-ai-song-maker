@@ -393,6 +393,40 @@ window.__JAHREAD=R;
     return S.playBuffer(buf, id || "song");
   }
 
+  /* 2026-10-11: archive play wedge fix — OfflineAudioContext.startRendering() can
+     stall forever on some devices (no settle, no reject), which used to wedge the
+     play button on a permanently disabled "…". renderWithTimeout races the render
+     against a 45s timer so the button-restore handlers ALWAYS run; songErrToast
+     is the one shared "Could not play this song" toast used by every play path. */
+  function renderWithTimeout(makePromise, ms) {
+    return new Promise(function (res, rej) {
+      var done = false;
+      var t = setTimeout(function () {
+        if (done) return; done = true;
+        rej(new Error("Audio render timed out (your device may be low on memory) — try again"));
+      }, ms || 45000);
+      var p;
+      try { p = makePromise(); } catch (e) { p = Promise.reject(e); }
+      p.then(function (v) { if (!done) { done = true; clearTimeout(t); res(v); } },
+             function (e) { if (!done) { done = true; clearTimeout(t); rej(e); } });
+    });
+  }
+  function songErrToast(err) {
+    var msg = "Could not play this song";
+    try { if (err && err.message) msg += ": " + err.message; } catch (e) {}
+    msg += ". Try Chrome browser.";
+    try {
+      var d = document.getElementById("__song_err");
+      if (!d) {
+        d = document.createElement("div"); d.id = "__song_err";
+        d.style.cssText = "position:fixed;left:50%;bottom:70px;transform:translateX(-50%);background:#1a1428;color:#f5c542;border:2px solid #f5c542;border-radius:10px;padding:10px 16px;z-index:99999;font-size:14px;max-width:90vw;text-align:center";
+        document.body.appendChild(d);
+      }
+      d.textContent = msg; d.style.display = "block";
+      setTimeout(function () { d.style.display = "none"; }, 5000);
+    } catch (e2) { try { jahToast(msg); } catch (e3) {} }
+  }
+
   /* ---------- tiered read-aloud (site pattern: speechSynthesis -> Google TTS audio) ---------- */
   var readText = "";
   /* Audio-only tiered playback: speechSynthesis is NEVER used — it fails silently
@@ -603,24 +637,14 @@ window.__JAHREAD=R;
       try { S.unlockAudio(); } catch (e2) {}
       findSong(id).then(function (rec) {
         if(!rec) throw new Error("song record not found");
-        return S.renderSong(rec, 150, null);
+        return renderWithTimeout(function () { return S.renderSong(rec, 30, null); }, 45000);
       }).then(function (buf) {
         if(!buf) throw new Error("audio render failed");
         playBuf(buf, "az-" + id);
         p.textContent = "▶"; p.disabled = false;
       }).catch(function (err) {
         p.textContent = "▶"; p.disabled = false;
-        var msg = "Could not play this song";
-        try{ if(err && err.message) msg += ": " + err.message; }catch(e){}
-        msg += ". Try Chrome browser.";
-        try{
-          var d = document.getElementById("__song_err");
-          if(!d){ d = document.createElement("div"); d.id = "__song_err";
-            d.style.cssText = "position:fixed;left:50%;bottom:70px;transform:translateX(-50%);background:#1a1428;color:#f5c542;border:2px solid #f5c542;border-radius:10px;padding:10px 16px;z-index:99999;font-size:14px;max-width:90vw;text-align:center";
-            document.body.appendChild(d); }
-          d.textContent = msg; d.style.display = "block";
-          setTimeout(function(){ d.style.display = "none"; }, 5000);
-        }catch(e2){ jahToast(msg); }
+        songErrToast(err);
       });
     });
   }
@@ -717,11 +741,11 @@ window.__JAHREAD=R;
         for (var j = 0; j < lines.length; j++) { if (!lines[j]) continue; var r = JSON.parse(lines[j]); if (r.id === id) return r; }
         throw new Error("not in chunk");
       }) : Promise.reject(new Error("not in archive"))).then(function (full) {
-        return S.renderSong(full, 150, null);
+        return renderWithTimeout(function () { return S.renderSong(full, 30, null); }, 45000);
       }).then(function (buf) {
         playBuf(buf, "search-" + id);
         p.textContent = "▶ Play"; p.disabled = false;
-      }).catch(function () { p.textContent = "▶ Play"; p.disabled = false; });
+      }).catch(function (err) { p.textContent = "▶ Play"; p.disabled = false; songErrToast(err); });
     });
   }
 
@@ -780,7 +804,16 @@ window.__JAHREAD=R;
     }
     $("dplay").onclick = function () {
       var b = this;
-      detRender(b, "▶ Play demo mix").then(function (buf) { playBuf(buf, "song"); }, function () {});
+      b.textContent = "…"; b.disabled = true;
+      stopAllAudio();
+      try { S.unlockAudio(); } catch (e2) {}
+      renderWithTimeout(function () { return S.renderSong(rec, 30, null); }, 45000).then(function (buf) {
+        b.textContent = "▶ Play demo mix"; b.disabled = false;
+        playBuf(buf, "song");
+      }, function (err) {
+        b.textContent = "▶ Play demo mix"; b.disabled = false;
+        songErrToast(err);
+      });
     };
     $("dwav").onclick = function () {
       var b = this, SS = window.SigStudio;
