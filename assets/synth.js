@@ -654,6 +654,7 @@
     var id;
     for (id in _live) { if (Object.prototype.hasOwnProperty.call(_live, id)) stopLive(id); }
     try { if (root.speechSynthesis) root.speechSynthesis.cancel(); } catch (e) {}
+    try { if (root.SigTTS) root.SigTTS.stop(); } catch (e) {} /* 2026-10-11: kill SigTTS guarded voice + fallback audio */
     try { if (root.responsiveVoice && root.responsiveVoice.cancel) root.responsiveVoice.cancel(); } catch (e) {}
     /* NOTE: never call root.__JAHREAD.stopAll() here — it calls back into
        stopAllLive, which would recurse forever. __JAHREAD already calls us. */
