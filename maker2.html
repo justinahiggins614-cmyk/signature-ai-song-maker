@@ -571,8 +571,8 @@ function songLike(seconds) {
   var chords = S.chordsFor(48, M2.beat.genre, rng);
   var melody = S.melodyFor(chords, M2.beat.bars, rng);
   return {
-    seed: M2.seed, title: M2.song.title || "My Song", genre: M2.beat.genre,
-    bpm: M2.beat.bpm, bars: M2.beat.bars, keyRoot: 48,
+    seed: M2.seed, id: M2.song.id || ("m2song:" + M2.seed), title: M2.song.title || "My Song", genre: M2.beat.genre,
+    bpm: M2.beat.bpm, tempo: M2.beat.bpm, bars: M2.beat.bars, keyRoot: 48,
     pattern: M2.beat.pattern || S.patternFor("m2beat:" + M2.seed + ":0:" + M2.beat.genre, M2.beat.genre, M2.beat.bpm),
     melody: melody, voiceId: M2.vocal.voiceId, backups: M2.vocal.backups,
     instrumental: M2.lyrics.instrumental, leadVoice: $("b_inst") ? $("b_inst").value : "lead",

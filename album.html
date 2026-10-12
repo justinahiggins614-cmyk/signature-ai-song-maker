@@ -146,8 +146,8 @@ var PS=(typeof JAHProfile!=='undefined')?JAHProfile.store:localStorage;</script>
       var rng = S.rngFrom("m2song:" + g.seed);
       var chords = S.chordsFor(48, g.genre, rng);
       var melody = S.melodyFor(chords, g.bars, rng);
-      var like = { seed: g.seed, title: g.title || "My Song", genre: g.genre,
-        bpm: g.bpm, bars: g.bars, keyRoot: 48,
+      var like = { seed: g.seed, id: g.id || ("m2song:" + g.seed), title: g.title || "My Song", genre: g.genre,
+        bpm: g.bpm, tempo: g.bpm, bars: g.bars, keyRoot: 48,
         pattern: S.patternFor("m2beat:" + g.seed + ":0:" + g.genre, g.genre, g.bpm),
         melody: melody, voiceId: g.voiceId, instrumental: g.instrumental,
         lyrics: g.lyrics || "", seconds: 0 };
