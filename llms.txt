@@ -11,8 +11,9 @@ and a deterministic archive marching to 1,000,000 records per catalog.
 ## Feeds (machine-readable, repo root unless noted)
 - music-manifest.json — the source of truth: counts, ID ranges, engine
   version, voices, index hash, deep links, provenance
-- data/music-catalog.json — every record: {id, kind, title, chunk, url}
-  (chunk = the data/records/*.json.gz file holding the full record)
+- data/music-catalog.json — sharded feed index manifest (points at
+  data/catalog/cat-cNNNNN.json.gz shards, 20k rows each: {id, kind, title,
+  chunk, url}; chunk = the data/records/*.json.gz file holding the full record)
 - api.json — site identity, counts, ID schemes, deep links, sitemap list
 - data/index/index.json.gz — compact index rows [id, title, kind, chunk]
   (JSONL, gzipped)

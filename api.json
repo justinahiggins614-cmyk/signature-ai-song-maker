@@ -27,6 +27,7 @@
   },
   "feeds": {
     "music_catalog": "data/music-catalog.json",
+    "music_catalog_shards": "data/catalog/",
     "sitemaps": [
       "sitemap-core.xml",
       "sitemap-songs.xml",

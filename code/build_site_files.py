@@ -17,6 +17,48 @@ PARAM = {"song": "song", "sound": "sound", "gear": "gear", "beat": "beat"}
 def sm_url(u):
     return '  <url><loc>%s</loc><lastmod>%s</lastmod></url>' % (escape(u.split("#")[0]), TODAY)
 
+CATALOG_SHARD_ROWS = 20000
+
+def build_music_catalog(rows, counts):
+    """music-catalog feed for crawlers/agents, SHARDED so no single file ever
+    approaches GitHub's 100MB hard file limit (HOST-LEGIT RULE — shard before
+    guards trip): per-shard gz chunks under data/catalog/ plus a small
+    data/music-catalog.json manifest that keeps the historic feed URL alive and
+    points crawlers at the shards. Called by the drip via build_site_files.py,
+    so every future drip keeps the sharded layout automatically."""
+    catdir = os.path.join(DATA, "catalog")
+    os.makedirs(catdir, exist_ok=True)
+    feed = [{"id": r[0], "kind": r[2], "title": r[1], "chunk": r[3],
+             "url": "%s?%s=%s" % (BASE, PARAM[r[2]], r[0])} for r in rows]
+    shards = [feed[i:i + CATALOG_SHARD_ROWS]
+              for i in range(0, len(feed), CATALOG_SHARD_ROWS)]
+    n = len(shards)
+    wanted = set()
+    shard_meta = []
+    for i, part in enumerate(shards, 1):
+        name = "cat-c%05d.json.gz" % i
+        wanted.add(name)
+        with gzip.open(os.path.join(catdir, name), "wt", encoding="utf-8") as fh:
+            json.dump({"site": "Signature Music Studio", "updated": TODAY,
+                       "counts": counts, "shard": i, "of": n,
+                       "records": part}, fh, ensure_ascii=False)
+        shard_meta.append({"file": "data/catalog/" + name, "records": len(part),
+                           "first_id": part[0]["id"], "last_id": part[-1]["id"]})
+    # drop stale shards from any earlier layout — defensive, keeps the dir exact
+    for f in os.listdir(catdir):
+        if f.startswith("cat-c") and f.endswith(".json.gz") and f not in wanted:
+            os.remove(os.path.join(catdir, f))
+    open(os.path.join(DATA, "music-catalog.json"), "w").write(json.dumps({
+        "site": "Signature Music Studio", "updated": TODAY,
+        "counts": counts, "total_records": len(feed),
+        "format": "sharded-feed-index/1.0",
+        "shards": shard_meta,
+        "note": "Feed records live in the gz shards (GitHub 100MB file limit); "
+                "fetch each data/catalog/*.json.gz for the full record list."},
+        ensure_ascii=False, indent=1))
+    print("music-catalog sharded: %d shards, %d records" % (n, len(feed)))
+    return shard_meta
+
 def write_sm(name, urls):
     body = ['<?xml version="1.0" encoding="UTF-8"?>',
             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'] + \
@@ -147,12 +189,8 @@ def main():
     # sitemap.xml kept as the index (crawlers + robots.txt keep working)
     open(os.path.join(HERE, "sitemap.xml"), "w").write("\n".join(idx) + "\n")
 
-    # music-catalog.json: machine-readable feed for crawlers/agents
-    feed = [{"id": r[0], "kind": r[2], "title": r[1], "chunk": r[3],
-             "url": "%s?%s=%s" % (BASE, PARAM[r[2]], r[0])} for r in rows]
-    open(os.path.join(HERE, "data", "music-catalog.json"), "w").write(json.dumps({
-        "site": "Signature Music Studio", "updated": TODAY,
-        "counts": counts, "records": feed}, ensure_ascii=False))
+    # music-catalog feed: sharded gz chunks + small manifest (never a monolith)
+    build_music_catalog(rows, counts)
 
     api = {
         "name": "Signature Music Studio",
@@ -174,6 +212,7 @@ def main():
         "deep_links": {"song": "?song=JAH-SONG-0000001", "library": "?sound=JAH-SOUND-0000001",
                        "equipment": "?gear=JAH-GEAR-0000001", "beat": "?beat=JAH-BEAT-0000001"},
         "feeds": {"music_catalog": "data/music-catalog.json",
+                  "music_catalog_shards": "data/catalog/",
                   "sitemaps": ["sitemap-core.xml", "sitemap-songs.xml",
                                "sitemap-library.xml", "sitemap-beats.xml", "sitemap-gear.xml"]},
         "audio": "All audio is synthesized client-side with the Web Audio API. Voices are synthesized, never human singers.",
