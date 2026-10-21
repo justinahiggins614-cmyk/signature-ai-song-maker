@@ -3,13 +3,13 @@
   "site": "Signature Music Studio",
   "site_number": 23,
   "network": "THE JAH NETWORK \u2014 27 sites",
-  "generated_at": "2026-10-20T22:41:08.137965+00:00",
+  "generated_at": "2026-10-21T00:41:17.658040+00:00",
   "archive": {
-    "songs": 102200,
-    "library_sounds": 101950,
+    "songs": 102700,
+    "library_sounds": 102450,
     "equipment": 350,
-    "beats": 51000,
-    "total": 255500,
+    "beats": 51250,
+    "total": 256750,
     "goals": {
       "songs": 1000000,
       "library_sounds": 1000000
@@ -17,13 +17,13 @@
     "id_ranges": {
       "song": {
         "first": "JAH-SONG-0000001",
-        "last": "JAH-SONG-0102200",
-        "count": 102200
+        "last": "JAH-SONG-0102700",
+        "count": 102700
       },
       "sound": {
         "first": "JAH-SOUND-0000001",
-        "last": "JAH-SOUND-0101950",
-        "count": 101950
+        "last": "JAH-SOUND-0102450",
+        "count": 102450
       },
       "gear": {
         "first": "JAH-GEAR-0000001",
@@ -32,8 +32,8 @@
       },
       "beat": {
         "first": "JAH-BEAT-0000001",
-        "last": "JAH-BEAT-0051000",
-        "count": 51000
+        "last": "JAH-BEAT-0051250",
+        "count": 51250
       }
     }
   },
@@ -73,8 +73,8 @@
   "voices_note": "All voices are synthesized. There are no human singers on this site \u2014 no exceptions.",
   "index": {
     "file": "data/index/index.json.gz",
-    "records": 255500,
-    "sha256": "fd1a79a8835b27473309dfe971be8d8b35c0e8132a22f64bb34fa3764f4d0efe",
+    "records": 256750,
+    "sha256": "348ce6eceedb0d51c2c07cecfcaacd9d106d1dd75229e3bb0c5a2bb2c5723bab",
     "row_format": [
       "id",
       "title",
