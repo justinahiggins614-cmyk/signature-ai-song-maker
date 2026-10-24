@@ -2,12 +2,12 @@
  "site": "Signature Music Studio",
  "updated": "2026-10-24",
  "counts": {
-  "song": 122700,
-  "sound": 122450,
+  "song": 123200,
+  "sound": 122950,
   "gear": 350,
-  "beat": 61250
+  "beat": 61500
  },
- "total_records": 306750,
+ "total_records": 308000,
  "format": "sharded-feed-index/1.0",
  "shards": [
   {
@@ -102,9 +102,9 @@
   },
   {
    "file": "data/catalog/cat-c00016.json.gz",
-   "records": 6750,
+   "records": 8000,
    "first_id": "JAH-SOUND-0119701",
-   "last_id": "JAH-BEAT-0061250"
+   "last_id": "JAH-BEAT-0061500"
   }
  ],
  "note": "Feed records live in the gz shards (GitHub 100MB file limit); fetch each data/catalog/*.json.gz for the full record list."
