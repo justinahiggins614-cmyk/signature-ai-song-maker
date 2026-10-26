@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""2h drip for The Signature Song Maker AI: +500 new songs per run (JAH-SONG-######).
+"""2h drip for The Signature Song Maker AI: +1000 new songs per run (JAH-SONG-######).
 Silent. 800MB data-dir guard: stages without pushing if tripped (exit 2).
 Usage: python3 code/drip.py
 """
@@ -9,7 +9,7 @@ HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(HERE, "data")
 RECDIR = os.path.join(DATA, "records")
 IDXDIR = os.path.join(DATA, "index")
-CHUNK, N, NB = 100, 500, 250
+CHUNK, N, NB = 100, 1000, 500
 GUARD = 800 * 1024 * 1024
 
 DRIVER = r"""
