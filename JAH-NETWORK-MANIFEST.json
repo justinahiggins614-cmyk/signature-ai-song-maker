@@ -3,8 +3,8 @@
   "official_name": "Signature Music Studio",
   "repo": "signature-ai-song-maker",
   "site_number": 23,
-  "network_total": 27,
-  "site_count": 27,
+  "network_total": 39,
+  "site_count": 39,
   "sites": [
     {
       "n": 1,
@@ -28,7 +28,7 @@
     },
     {
       "n": 5,
-      "name": "JAH-N Wiki",
+      "name": "JAH-N Wiki Leaks",
       "url": "https://justinahiggins614-cmyk.github.io/jah-n-wiki-leaks/"
     },
     {
@@ -49,7 +49,7 @@
     {
       "n": 9,
       "name": "Signature Spec Catalog Pending Patents",
-      "url": "https://justinahiggins614-cmyk.github.io/signature-one-archive/specs.html"
+      "url": "https://justinahiggins614-cmyk.github.io/signature-one-archive/"
     },
     {
       "n": 10,
@@ -73,7 +73,7 @@
     },
     {
       "n": 14,
-      "name": "The Signature AI Mad Scientist Creation Lab",
+      "name": "The Signature AI Mix and Match Generator",
       "url": "https://justinahiggins614-cmyk.github.io/signature-backend/"
     },
     {
@@ -128,18 +128,78 @@
     },
     {
       "n": 25,
-      "name": "The Signature University",
+      "name": "Signature University",
       "url": "https://justinahiggins614-cmyk.github.io/signature-university/"
     },
     {
       "n": 26,
+      "name": "Signature Earth",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-earth/"
+    },
+    {
+      "n": 27,
+      "name": "The Signature Flight School",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-flight-school/"
+    },
+    {
+      "n": 28,
+      "name": "The Signature Game Store",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-game-store/"
+    },
+    {
+      "n": 29,
+      "name": "Signature Website Creator",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-website-creator/"
+    },
+    {
+      "n": 30,
+      "name": "The Signature Antivirus",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-antivirus/"
+    },
+    {
+      "n": 31,
+      "name": "The Signature OS Updater",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-os-updater/"
+    },
+    {
+      "n": 32,
+      "name": "Signature Space Mapping",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-space-mapping/"
+    },
+    {
+      "n": 33,
+      "name": "The Signature Cookbook",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-cookbook/"
+    },
+    {
+      "n": 34,
+      "name": "The Signature Spell Check",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-spell-check/"
+    },
+    {
+      "n": 35,
+      "name": "The Signature Image Grid and Measure",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-image-grid-measure/"
+    },
+    {
+      "n": 36,
       "name": "The Signature Cyber Mega-Mall",
       "url": "https://justinahiggins614-cmyk.github.io/signature-cyber-mega-mall/"
     },
     {
-      "n": 27,
+      "n": 37,
       "name": "The Signature 3D Print Mega Mall",
       "url": "https://justinahiggins614-cmyk.github.io/signature-3d-print/"
+    },
+    {
+      "n": 38,
+      "name": "Signature Llama 2.0",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-llama-2/"
+    },
+    {
+      "n": 39,
+      "name": "The Signature AI",
+      "url": "https://justinahiggins614-cmyk.github.io/signature-the-ai/"
     }
   ]
 }
