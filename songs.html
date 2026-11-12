@@ -65,7 +65,7 @@ var PS=(typeof JAHProfile!=='undefined')?JAHProfile.store:localStorage;</script>
 <h1>📀 SONG ARCHIVE</h1>
 <div><span class="official">OFFICIAL SIGNATURE SITE — within the Signature/JAH system</span></div>
 <p class="sub">Every song fully made — lyrics, chords, structure, tempo, key — and <b>ready to play</b>: tap a song to open it, or hit ▶ to play it right from the list. Marching to one million.</p>
-<p class="counter" id="songcount" data-stamp="2026-11-12"><!-- SONGARCHIVE-STAMP-START -->📀 <b>341,200</b> / 1,000,000 songs<!-- SONGARCHIVE-STAMP-END --> <span class="seqlab">last published count — loading live…</span></p>
+<p class="counter" id="songcount" data-stamp="2026-11-12"><!-- SONGARCHIVE-STAMP-START -->📀 <b>342,200</b> / 1,000,000 songs<!-- SONGARCHIVE-STAMP-END --> <span class="seqlab">last published count — loading live…</span></p>
 <p><a class="btn ghost" href="./" style="text-decoration:none">← Back to the Studio</a></p>
 <div class="honest">Every sound on this site is synthesized live in your browser with the Web Audio API — no samples, no downloads needed to play. All voices are synthesized; there are no human singers here. All songs are original Signature compositions.</div>
 </div></header>
@@ -78,12 +78,12 @@ var PS=(typeof JAHProfile!=='undefined')?JAHProfile.store:localStorage;</script>
 <details class="azsec" open>
 <summary><span class="azletter">★</span><span style="font-weight:700">Amber Harbor</span><span class="azcount">JAH-SONG-0000001 · song #1</span></summary>
 <div class="azbody">
-<p class="whybest"><b>Why this is the best:</b> the first finished song ever published — song #1 of 341,200. The genesis of the Studio's song archive: an original Signature composition, playable in your browser, synthesized live with the Web Audio API. Every song since follows this format.</p>
+<p class="whybest"><b>Why this is the best:</b> the first finished song ever published — song #1 of 342,200. The genesis of the Studio's song archive: an original Signature composition, playable in your browser, synthesized live with the Web Audio API. Every song since follows this format.</p>
 <div class="bestflow" aria-hidden="true"><div class="bnode"><b>A composition</b>original Signature music</div><div class="barrow">→</div><div class="bnode"><b>Synthesized</b>live Web Audio API</div><div class="barrow">→</div><div class="bnode"><b>The record</b>JAH-SONG-0000001</div><div class="barrow">→</div><div class="bnode"><b>You</b>play · listen · download</div></div>
 <p><b>What it does:</b> "Amber Harbor" — the first original Signature song: fully made, ready to play, synthesized live in your browser (no samples, no downloads needed). All songs are original Signature compositions; all voices synthesized.</p>
 <!-- BEST-STATS-START -->
-<p><b>Implications:</b> <b>341,200</b> songs are finished and playable, plus <b>340,950</b> sounds, <b>170,500</b> beats, <b>350</b> gear records — the archive marches toward <b>1,000,000</b> songs.</p>
-<div class="beststats"><span class="beststat"><b>341,200</b> songs finished</span><span class="beststat">Song <b>#1</b> — the genesis</span><span class="beststat">Playable: <b>in-browser</b></span><span class="beststat">Original: <b>100%</b></span></div>
+<p><b>Implications:</b> <b>342,200</b> songs are finished and playable, plus <b>341,950</b> sounds, <b>171,000</b> beats, <b>350</b> gear records — the archive marches toward <b>1,000,000</b> songs.</p>
+<div class="beststats"><span class="beststat"><b>342,200</b> songs finished</span><span class="beststat">Song <b>#1</b> — the genesis</span><span class="beststat">Playable: <b>in-browser</b></span><span class="beststat">Original: <b>100%</b></span></div>
 <!-- BEST-STATS-END -->
 <div class="toolbar">
 <button id="best-speak" type="button">🔊 Read aloud</button>
@@ -378,10 +378,31 @@ window.__JAHREAD=R;
 
   /* ---------- one global audio rule: play() stops everything first ---------- */
   function stopAllAudio() { try { if (window.__JAHREAD) window.__JAHREAD.stopAll(); } catch (e) {} }
+  /* 2026-11-11: first-press play fix — in-app browsers (Facebook etc.) can
+     leave the AudioContext suspended even after the tap-time unlock, so the
+     render finishes before the resume lands and playBuffer returns null
+     (silent first press, plays only on the second tap). If the context is
+     still suspended after the render, resume again and retry for up to ~5s
+     so the FIRST press plays; only then fall back to playBuffer's honest
+     "tap again" toast. */
   function playBuf(buf, id) {
     stopAllAudio();
     try { S.unlockAudio(); } catch (e) {}
-    return S.playBuffer(buf, id || "song");
+    var ctx = null;
+    try { ctx = (S && S.ensureCtx) ? S.ensureCtx() : null; } catch (e2) {}
+    if (ctx && ctx.state === "suspended") {
+      var tries = 0;
+      (function attempt() {
+        try { S.unlockAudio(); } catch (e3) {}
+        var st = null;
+        try { st = S.ensureCtx().state; } catch (e4) {}
+        if (st === "running") { try { S.playBuffer(buf, id || "song"); } catch (e5) {} return; }
+        if (++tries < 20) { setTimeout(attempt, 250); return; }
+        try { S.playBuffer(buf, id || "song"); } catch (e6) {}
+      })();
+      return null;
+    }
+    try { return S.playBuffer(buf, id || "song"); } catch (e7) { return null; }
   }
 
   /* 2026-10-11: archive play wedge fix — OfflineAudioContext.startRendering() can
@@ -806,16 +827,16 @@ S.stop=function(){ S.fbStop(); };
     for (i = 0; i < slice.length; i++) {
       s = slice[i];
       h += '<div class="card"><h4>' + esc(s.title) + '</h4><div class="id">' + esc(s.id) + '</div>' +
-        '<p><button class="fplay" data-splay="' + esc(s.id) + '">▶ Play</button> ' +
+        '<p><button class="fplay" type="button" data-splay="' + esc(s.id) + '">▶ Play</button> ' +
         '<button class="btn ghost" data-sopen="' + esc(s.id) + '">Open →</button></p></div>';
     }
     $("agrid").innerHTML = h || '<div class="card">No songs match — try clearing filters.</div>';
     $("acount").textContent = list.length.toLocaleString() + " song" + (list.length === 1 ? "" : "s") + " · page " + (page + 1) + " of " + pages;
     var ph = "";
     if (pages > 1) {
-      ph = '<button class="btn ghost" id="pprev"' + (page === 0 ? " disabled" : "") + '>← Prev</button> ' +
+      ph = '<button class="btn ghost" type="button" id="pprev"' + (page === 0 ? " disabled" : "") + '>← Prev</button> ' +
         '<span class="seqlab">page ' + (page + 1) + " / " + pages + '</span> ' +
-        '<button class="btn ghost" id="pnext"' + (page >= pages - 1 ? " disabled" : "") + '>Next →</button>';
+        '<button class="btn ghost" type="button" id="pnext"' + (page >= pages - 1 ? " disabled" : "") + '>Next →</button>';
     }
     $("apages").innerHTML = ph;
     var pv = $("pprev"), nx = $("pnext");
@@ -888,13 +909,13 @@ S.stop=function(){ S.fbStop(); };
       '<p class="meta">' + esc(rec.genre) + " · " + esc(rec.mood) + " · " + rec.tempo + " BPM · " + esc(rec.key) + '</p>' + seedLine +
       '<p>' + esc(rec.desc || "") + '</p><h3>Chords</h3><p class="chords">' + esc(rec.chords || "") + '</p>' +
       '<h3>Structure</h3><p>' + esc(rec.structure || "") + '</p><h3>Lyrics</h3><pre class="lyrics">' + esc(rec.lyrics || "") + "</pre>" +
-      '<p><button class="btn" id="dplay">▶ Play demo mix</button> ' +
-      '<button class="btn ghost" id="dread">🔊 Read aloud</button> ' +
-      '<button class="btn ghost" id="dtxt">Copy .txt</button> ' +
-      '<button class="btn ghost" id="djson">Copy .json</button> ' +
-      '<button class="btn teal" id="ddl">⬇ Download .txt</button> ' +
-      '<button class="btn teal" id="dwav">⬇ Download .wav</button> ' +
-      '<button class="btn teal" id="dmp3">⬇ Download .mp3</button></p></div>' +
+      '<p><button class="btn" type="button" id="dplay">▶ Play demo mix</button> ' +
+      '<button class="btn ghost" type="button" id="dread">🔊 Read aloud</button> ' +
+      '<button class="btn ghost" type="button" id="dtxt">Copy .txt</button> ' +
+      '<button class="btn ghost" type="button" id="djson">Copy .json</button> ' +
+      '<button class="btn teal" type="button" id="ddl">⬇ Download .txt</button> ' +
+      '<button class="btn teal" type="button" id="dwav">⬇ Download .wav</button> ' +
+      '<button class="btn teal" type="button" id="dmp3">⬇ Download .mp3</button></p></div>' +
       '<div class="honest">Original Signature composition — written by the Signature song engine. No melodies or lyrics reproduced from any real song.</div>';
     document.title = rec.title + " (" + rec.id + ") — Song Archive · Signature Music Studio";
     var ld = { "@context": "https://schema.org", "@type": "MusicRecording", "name": rec.title, "identifier": rec.id,
